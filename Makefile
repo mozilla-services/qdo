@@ -41,7 +41,7 @@ endif
 INSTALL += $(INSTALLOPTIONS)
 
 SW = sw
-BUILD_DIRS = bin build deps include lib lib64
+BUILD_DIRS = bin build deps include lib lib64 man
 
 
 .PHONY: all build test build_rpms mach
