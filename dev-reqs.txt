@@ -1,0 +1,11 @@
+Paste==1.7.5.1
+PasteDeploy==1.5.0
+PasteScript==1.7.5
+distribute==0.6.21
+nose==1.1.2
+pypi2rpm==0.5.8
+unittest2==0.5.1
+virtualenv==1.6.4
+
+-e git://github.com/mozilla-services/mozservices.git#egg=mozsvc
+-e git://github.com/mozilla-services/cornice.git#egg=cornice
