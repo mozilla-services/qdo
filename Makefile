@@ -50,7 +50,7 @@ all:	build
 
 $(BIN)/python:
 	python2.6 $(SW)/virtualenv.py --no-site-packages --distribute .
-	rm distribute-0.6.19.tar.gz
+	rm distribute-0.6.24.tar.gz
 
 $(BIN)/pip: $(BIN)/python
 
