@@ -39,7 +39,7 @@ version = '0.1'
 
 setup(name='qdo',
       version=version,
-      description="Queuey client library",
+      description="Queuey worker library",
       long_description="",
       classifiers=[],
       keywords='',
