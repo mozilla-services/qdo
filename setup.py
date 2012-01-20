@@ -64,6 +64,6 @@ setup(name='qdo',
       test_suite='nose.collector',
       entry_points="""
       [console_scripts]
-      qdo = qdo.runner:run
+      qdo-worker = qdo.worker:work
       """,
       )
