@@ -33,14 +33,20 @@
 # the terms of any one of the MPL, the GPL or the LGPL.
 #
 # ***** END LICENSE BLOCK *****
+
+import os
 from setuptools import setup, find_packages
 
 version = '0.1'
 
+here = os.path.abspath(os.path.dirname(__file__))
+README = open(os.path.join(here, 'README.rst')).read()
+CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
+
 setup(name='qdo',
       version=version,
       description="Queuey worker library",
-      long_description="",
+      long_description=README + '\n\n' + CHANGES,
       classifiers=[],
       keywords='',
       author='Hanno Schlichting',
