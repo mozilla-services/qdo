@@ -55,7 +55,6 @@ $(BIN)/python:
 $(BIN)/pip: $(BIN)/python
 
 lib: $(BIN)/pip
-	$(INSTALL) MoPyTools
 	$(INSTALL) -r dev-reqs.txt
 
 clean-env:
