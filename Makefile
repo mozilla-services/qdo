@@ -54,7 +54,7 @@ $(BIN)/python:
 
 $(BIN)/pip: $(BIN)/python
 
-$(BIN)/paster: lib $(BIN)/pip
+lib: $(BIN)/pip
 	$(INSTALL) MoPyTools
 	$(INSTALL) -r dev-reqs.txt
 
@@ -63,8 +63,7 @@ clean-env:
 
 clean:	clean-env
 
-build: $(BIN)/paster
-	$(INSTALL) nose
+build: lib
 	$(PYTHON) setup.py develop
 	$(BUILDAPP) -c $(CHANNEL) $(PYPIOPTIONS) $(DEPS)
 
