@@ -10,7 +10,7 @@ Design notes
 
 - worker lifetime loop is a simple Python ``while True:``
 - worker needs to check for `rebalance` request by zookeeper (triggered by
-  callback function from zookeeper)
+  callback function from zookeeper) - rebalance needs a lock
 - zookeeper keeps persistent connection to each worker process, if connection
   goes away, worker needs to stop working / reconnect
 - on worker startup, register with zookeeper, register callbacks for
@@ -25,12 +25,20 @@ Design notes
     - https://github.com/bbangert/retools
     - http://celeryproject.org/
 
+Open questions
+--------------
+
 - handle authentication / access (app token, r/w/rw privileges)
 - priority queues?
 - can one worker run multiple tasks at the same time? internal process pool?
   (flower / pistol)
-- pause mode? without triggering rebalance
-- shared initial worker resources (like db connections?)
+- pause mode? without triggering rebalance (during queuey upgrades?)
+- shared initial worker resources, like db connections? (context manager
+  around a task with access to global state?)
+- how to handle single task failure?
+- max run time / mem usage on single task execution?
+- execute task with lower privileges?
+- guarantees on single task execution? (min 1, max 1, exact 1?)
 
 queue / worker assignments
 --------------------------
@@ -52,4 +60,7 @@ command line tool
 -----------------
 
 - inspect / dump state of running worker
+- pause worker?
 
+- stats on num of queues, num of workers
+- stats on num of messages (are we behind?, do we need more workers?)
