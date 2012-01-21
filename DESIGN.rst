@@ -15,9 +15,10 @@ Design notes
   goes away, worker needs to stop working / reconnect
 - on worker startup, register with zookeeper, register callbacks for
   triggering rebalance (algorithm as in Kafka
-  http://incubator.apache.org/kafka/design.html)
+  http://incubator.apache.org/kafka/design.html), zookeeper ephemeral nodes
+  (with postfix -0001, -0002, ... for sorting)
 - on worker shutdown, unregister with zookeeper
-- fork of each actual work task
+- fork of each actual work task (avoids leaks)
 
 - Look for inspiration in:
 
@@ -29,6 +30,7 @@ Design notes
 - can one worker run multiple tasks at the same time? internal process pool?
   (flower / pistol)
 - pause mode? without triggering rebalance
+- shared initial worker resources (like db connections?)
 
 queue / worker assignments
 --------------------------
