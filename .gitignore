@@ -1,0 +1,15 @@
+bin
+build
+cassandra
+dist
+include
+lib
+man
+nosetests.xml
+src
+.*
+*.pyc
+*.egg-info
+*.egg
+*.swp
+*~
