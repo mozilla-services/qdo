@@ -36,6 +36,16 @@ This will do the following:
 - Create a virtual Python environment
 - Install required Python packages into this environment
 
+Afterwards install Cassandra and Zookeeper::
+
+    make cassandra
+    make zookeeper
+
+Start Cassandra once in foreground mode and install the schema::
+
+    ./bin/cassandra/bin/cassandra -f
+    ./bin/cassandra/bin/cassandra-cli -host localhost --file etc/cassandra/schema.txt
+
 Development
 ===========
 
