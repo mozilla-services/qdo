@@ -49,6 +49,14 @@ Start Cassandra once in foreground mode and install the schema::
 Development
 ===========
 
-Run the tests via::
+Start Cassandra and Zookeeper via supervisor::
+
+    bin/supervisord
+
+To shut them down::
+
+    bin/supervisorctl shutdown
+
+To run the tests start supervisor and then call::
 
     make test
