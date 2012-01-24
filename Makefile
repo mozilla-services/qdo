@@ -41,6 +41,8 @@ endif
 INSTALL += $(INSTALLOPTIONS)
 
 SW = sw
+CASSANDRA = $(BIN)/cassandra/bin/cassandra
+ZOOKEEPER = $(BIN)/zookeeper
 BUILD_DIRS = bin build deps include lib lib64 man
 
 
@@ -57,10 +59,42 @@ $(BIN)/pip: $(BIN)/python
 lib: $(BIN)/pip
 	$(INSTALL) -r dev-reqs.txt
 
+$(ZOOKEEPER):
+	mkdir -p bin
+	cd bin && \
+	curl --silent http://mirrors.ibiblio.org/apache//zookeeper/stable/zookeeper-3.3.4.tar.gz | tar -zvx
+	mv bin/zookeeper-3.3.4 bin/zookeeper
+	cd bin/zookeeper && ant compile
+	cd bin/zookeeper/src/c && \
+	./configure && \
+	make
+	cd bin/zookeeper/src/contrib/zkpython && \
+	mv build.xml old_build.xml && \
+	cat old_build.xml | sed 's|executable="python"|executable="../../../../../bin/python"|g' > build.xml && \
+	ant install
+	cp etc/zoo.cfg bin/zookeeper/conf/
+
+zookeeper: $(ZOOKEEPER)
+
+$(CASSANDRA):
+	mkdir -p bin
+	cd bin && \
+	curl --silent http://archive.apache.org/dist/cassandra/1.0.6/apache-cassandra-1.0.6-bin.tar.gz | tar -zvx
+	mv bin/apache-cassandra-1.0.6 bin/cassandra
+	cp etc/cassandra/cassandra.yaml bin/cassandra/conf/cassandra.yaml
+	cp etc/cassandra/log4j-server.properties bin/cassandra/conf/log4j-server.properties
+	cd bin/cassandra/lib && \
+	curl -O http://java.net/projects/jna/sources/svn/content/trunk/jnalib/dist/jna.jar
+
+cassandra: $(CASSANDRA)
+
 clean-env:
 	rm -rf $(BUILD_DIRS)
 
-clean:	clean-env
+clean-cassandra:
+	rm -rf cassandra bin/cassandra
+
+clean: clean-env
 
 build: lib
 	$(PYTHON) setup.py develop
