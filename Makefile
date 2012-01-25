@@ -107,6 +107,9 @@ build: lib
 	$(PYTHON) setup.py develop
 	$(BUILDAPP) -c $(CHANNEL) $(PYPIOPTIONS) $(DEPS)
 
+html:
+	cd docs && make html
+
 test:
 	$(NOSE) --with-coverage --cover-package=$(APPNAME) --cover-erase \
 	--cover-inclusive $(APPNAME)
