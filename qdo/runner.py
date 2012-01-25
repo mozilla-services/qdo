@@ -12,18 +12,19 @@ from mozsvc.config import load_into_settings, SettingsDict
 
 from qdo import worker
 
+DEFAULT_CONFIGFILE = os.path.join(os.curdir, 'etc', 'qdo-worker.conf')
 
-def parse_args():
-    default_configfile = os.path.join(os.curdir, 'etc', 'qdo-worker.conf')
+
+def parse_args(args):
     version = pkg_resources.get_distribution('qdo').version
     parser = argparse.ArgumentParser(description='qdo worker')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + version)
     parser.add_argument('-c', '--config', action='store',
-                        dest='configfile', default=default_configfile,
+                        dest='configfile', default=DEFAULT_CONFIGFILE,
                         help='specify configuration file, defaults to '
-                             '%s' % default_configfile)
-    return parser.parse_args()
+                             '%s' % DEFAULT_CONFIGFILE)
+    return parser.parse_args(args=args)
 
 
 def parse_config(filename, settings):
@@ -36,7 +37,7 @@ def parse_config(filename, settings):
 
 
 def run():
-    args = parse_args()
+    args = parse_args(sys.argv[1:])
     settings = SettingsDict()
     config = parse_config(args.configfile, settings)
     if config is None:
