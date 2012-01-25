@@ -32,6 +32,6 @@ class Worker(object):
             time.sleep(self.wait_interval)
 
 
-def run(settings):
+def run(settings):  # pragma: no cover
     worker = Worker(settings)
     worker.work()
