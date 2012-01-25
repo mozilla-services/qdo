@@ -4,6 +4,7 @@
 
 import argparse
 import os
+import os.path
 import sys
 
 import pkg_resources
@@ -13,12 +14,15 @@ from qdo import worker
 
 
 def parse_args():
+    default_configfile = os.path.join(os.curdir, 'etc', 'qdo-worker.conf')
     version = pkg_resources.get_distribution('qdo').version
     parser = argparse.ArgumentParser(description='qdo worker')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + version)
-    parser.add_argument('configfile', action='store',
-                        help='specify configuration file')
+    parser.add_argument('-c', '--config', action='store',
+                        dest='configfile', default=default_configfile,
+                        help='specify configuration file, defaults to '
+                             '%s' % default_configfile)
     return parser.parse_args()
 
 
