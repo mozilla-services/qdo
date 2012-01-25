@@ -2,7 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from cStringIO import StringIO
 import os
+import sys
 import unittest
 
 HERE = os.path.dirname(__file__)
@@ -45,4 +47,12 @@ class TestRunner(unittest.TestCase):
 
     def test_run(self):
         from qdo.runner import run
-        self.assertRaises(SystemExit, run, ['-c', NO_CONFIG])
+        # capture stdout
+        old_stdout = sys.stdout
+        try:
+            sys.stdout = mystdout = StringIO()
+            self.assertRaises(SystemExit, run, ['-c', NO_CONFIG])
+            out = mystdout.getvalue()
+            self.assertTrue('Configuration file not found' in out, out)
+        finally:
+            sys.stdout = old_stdout
