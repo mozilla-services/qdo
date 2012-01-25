@@ -16,6 +16,11 @@ on the Mozilla wiki or look at the message queue implementation called
           `Hanno Schlichting <hschlichting@mozilla.com>`_ if you are
           interested.
 
+Documentation
+=============
+
+You can read the documentation at http://qdo.readthedocs.org/
+
 Requirements
 ============
 
