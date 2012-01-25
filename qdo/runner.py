@@ -36,12 +36,12 @@ def parse_config(filename, settings):
     return load_into_settings(filename, settings)
 
 
-def run():
-    args = parse_args(sys.argv[1:])
+def run(args=sys.argv[1:]):
+    arguments = parse_args(args)
     settings = SettingsDict()
-    config = parse_config(args.configfile, settings)
+    config = parse_config(arguments.configfile, settings)
     if config is None:
         print('Configuration file not found or cannot be read.')
         sys.exit(1)
-    worker.run(settings)
-    sys.exit(0)
+    worker.run(settings)  # pragma: no cover
+    sys.exit(0)  # pragma: no cover

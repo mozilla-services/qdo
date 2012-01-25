@@ -7,6 +7,7 @@ import unittest
 
 HERE = os.path.dirname(__file__)
 DATA_DIR = os.path.join(HERE, 'data')
+NO_CONFIG = os.path.join(DATA_DIR, 'none')
 TEST_CONFIG = os.path.join(DATA_DIR, 'test.conf')
 
 
@@ -22,7 +23,7 @@ class TestConfigParser(unittest.TestCase):
     def test_parse_config_nofile(self):
         from qdo.runner import parse_config
         settings = {}
-        config = parse_config(os.path.join(DATA_DIR, 'none'), settings)
+        config = parse_config(NO_CONFIG, settings)
         self.assertTrue(config is None)
         self.assertEqual(settings, {})
 
@@ -38,3 +39,10 @@ class TestArgsParser(unittest.TestCase):
         from qdo.runner import parse_args
         namespace = parse_args(['-c', TEST_CONFIG])
         self.assertEqual(namespace.configfile, TEST_CONFIG)
+
+
+class TestRunner(unittest.TestCase):
+
+    def test_run(self):
+        from qdo.runner import run
+        self.assertRaises(SystemExit, run, ['-c', NO_CONFIG])
