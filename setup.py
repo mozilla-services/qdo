@@ -35,6 +35,7 @@ setup(name='qdo',
       zip_safe=False,
       install_requires=[
           'argparse',
+          'metlog',
           'mozsvc',
           ],
       tests_require=[

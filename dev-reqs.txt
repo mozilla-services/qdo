@@ -24,6 +24,7 @@ ordereddict==1.1
 pypi2rpm==0.5.9
 pyramid==1.3a6
 pyramid-debugtoolbar==0.9.8
+pyzmq==2.1.11
 repoze.lru==0.4
 simplejson==2.3.2
 supervisor==3.0a12
@@ -35,4 +36,5 @@ wsgiref==0.1.2
 zope.deprecation==3.5.0
 zope.interface==3.8.0
 
+-e git://github.com/mozilla-services/metlog-py.git#egg=metlog-dev
 -e git://github.com/mozilla-services/mozservices.git#egg=mozsvc-dev

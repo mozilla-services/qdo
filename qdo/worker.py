@@ -5,6 +5,8 @@
 
 import time
 
+from qdo.utils import metlogger
+
 
 class Worker(object):
     """A Worker works on jobs"""
@@ -33,7 +35,7 @@ class Worker(object):
         while True:
             if self.shutdown:
                 break
-            print('Waiting %d seconds on next job.' % self.wait_interval)
+            metlogger.incr('wait_for_jobs')
             time.sleep(self.wait_interval)
 
 

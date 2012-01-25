@@ -29,6 +29,7 @@ proceeding:
 
 - Make
 - Python 2.6 (with virtualenv installed, available as `virtualenv-2.6`)
+- Zero MQ (zmq)
 
 Installation
 ============
