@@ -1,5 +1,4 @@
 import time
-from pprint import pprint
 
 
 class Worker(object):
@@ -34,6 +33,5 @@ class Worker(object):
 
 
 def run(settings):
-    pprint(settings)
     worker = Worker(settings)
     worker.work()
