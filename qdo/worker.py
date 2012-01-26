@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from collections import deque
 import time
 
 from qdo.utils import metlogger
@@ -20,6 +21,8 @@ class Worker(object):
         self.settings = settings
         self.shutdown = False
         self.configure()
+        self.messages = deque()
+        self.job = None
 
     def configure(self):
         """Configure the worker based on the configuration settings.
@@ -35,8 +38,13 @@ class Worker(object):
         while True:
             if self.shutdown:
                 break
-            metlogger.incr('wait_for_jobs')
-            time.sleep(self.wait_interval)
+            try:
+                message = self.messages.popleft()
+                if self.job:
+                    self.job(message)
+            except IndexError:
+                metlogger.incr('wait_for_jobs')
+                time.sleep(self.wait_interval)
 
 
 def run(settings):  # pragma: no cover
