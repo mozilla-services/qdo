@@ -37,6 +37,7 @@ setup(name='qdo',
           'argparse',
           'metlog',
           'mozsvc',
+          'zktools',
           ],
       tests_require=[
           'nose',

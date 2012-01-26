@@ -13,6 +13,7 @@ WebOb==1.2b2
 WebTest==1.3.3
 argparse==1.2.1
 cef==0.3
+clint==0.3.1
 cornice==0.6
 coverage==3.5.1
 distribute==0.6.24
@@ -33,8 +34,10 @@ unittest2==0.5.1
 venusian==1.0a2
 virtualenv==1.6.4
 wsgiref==0.1.2
+zkpython==0.4
 zope.deprecation==3.5.0
 zope.interface==3.8.0
 
 -e git://github.com/mozilla-services/metlog-py.git#egg=metlog-dev
 -e git://github.com/mozilla-services/mozservices.git#egg=mozsvc-dev
+-e git://github.com/mozilla-services/zktools.git#egg=zktools-dev

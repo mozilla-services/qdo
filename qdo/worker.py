@@ -35,16 +35,26 @@ class Worker(object):
 
         This is the main method of the worker.
         """
-        while True:
-            if self.shutdown:
-                break
-            try:
-                message = self.messages.popleft()
-                if self.job:
-                    self.job(message)
-            except IndexError:
-                metlogger.incr('wait_for_jobs')
-                time.sleep(self.wait_interval)
+        self.register()
+        try:
+            while True:
+                if self.shutdown:
+                    break
+                try:
+                    message = self.messages.popleft()
+                    if self.job:
+                        self.job(message)
+                except IndexError:
+                    metlogger.incr('wait_for_jobs')
+                    time.sleep(self.wait_interval)
+        finally:
+            self.unregister()
+
+    def register(self):
+        """Register this worker with Zookeeper."""
+
+    def unregister(self):
+        """Unregister this worker from Zookeeper."""
 
 
 def run(settings):  # pragma: no cover
