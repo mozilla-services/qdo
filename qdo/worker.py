@@ -33,7 +33,7 @@ class Worker(object):
     def work(self):
         """Work on jobs
 
-        This is the main method of the Worker.
+        This is the main method of the worker.
         """
         while True:
             if self.shutdown:
