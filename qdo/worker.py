@@ -6,6 +6,9 @@
 from collections import deque
 import time
 
+from zookeeper import EPHEMERAL, SEQUENCE
+from zktools.connection import ZkConnection
+
 from qdo.utils import metlogger
 
 
@@ -29,6 +32,8 @@ class Worker(object):
         """
         qdo_section = self.settings.getsection('qdo-worker')
         self.wait_interval = qdo_section.get('wait_interval', 5)
+        zkhost = qdo_section.get('zookeeper_connection', 'localhost:2181')
+        self.zkconn = ZkConnection(host=zkhost)
 
     def work(self):
         """Work on jobs
@@ -52,9 +57,20 @@ class Worker(object):
 
     def register(self):
         """Register this worker with Zookeeper."""
+        self.zkconn.connect()
+        if not self.zkconn.exists('/workers'):
+            self.zkconn.create(
+                "/workers", "",
+                [{"perms": 0x1f, "scheme": "world", "id": "anyone"}],
+                0)
+        self.zkconn.create(
+            "/workers/worker-", "value",
+            [{"perms": 0x1f, "scheme": "world", "id": "anyone"}],
+            EPHEMERAL | SEQUENCE)
 
     def unregister(self):
         """Unregister this worker from Zookeeper."""
+        self.zkconn.close()
 
 
 def run(settings):  # pragma: no cover

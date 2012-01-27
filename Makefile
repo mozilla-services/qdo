@@ -111,5 +111,7 @@ html:
 	cd docs && make html
 
 test:
+	bin/supervisord
 	$(NOSE) --with-coverage --cover-package=$(APPNAME) --cover-erase \
 	--cover-inclusive $(APPNAME)
+	bin/supervisorctl shutdown
