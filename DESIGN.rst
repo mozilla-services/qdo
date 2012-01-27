@@ -73,6 +73,11 @@ Open questions
   - Probably not important, rebalancing should be a fairly cheap operation, will have
     to revisit once we can test.
 
+- how does qdo / zookeeper gets notified about new queues at runtime? for
+  example for notifications, where each user has a queue and we might get
+  dozens or peak-load of hundreds of new queues in short time frames. could
+  this cause excessive rebalancing?
+
 queue main loop
 ---------------
 
