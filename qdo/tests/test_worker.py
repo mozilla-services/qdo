@@ -7,9 +7,10 @@ import json
 import unittest
 
 from mozsvc.config import SettingsDict
+from zktools.connection import ZkConnection
 
 
-class TestWorker(unittest.TestCase):
+class TestWorkerConfig(unittest.TestCase):
 
     def _make_one(self, extra=None):
         from qdo.worker import Worker
@@ -28,6 +29,23 @@ class TestWorker(unittest.TestCase):
         worker.shutdown = True
         worker.work()
         self.assertEqual(worker.shutdown, True)
+
+
+class TestWorker(unittest.TestCase):
+
+    def setUp(self):
+        zkconn = ZkConnection(host='localhost:2181')
+        zkconn.connect()
+        if zkconn.exists('/workers'):
+            zkconn.delete('/workers')
+        zkconn.close()
+
+    def _make_one(self, extra=None):
+        from qdo.worker import Worker
+        settings = SettingsDict()
+        if extra is not None:
+            settings.update(extra)
+        return Worker(settings)
 
     def test_work(self):
         worker = self._make_one()
