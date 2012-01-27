@@ -53,10 +53,10 @@ class TestWorker(unittest.TestCase):
         worker.messages.append(json.dumps({'msgid': 2}))
 
         def stop(message):
-            raise SystemExit
+            raise KeyboardInterrupt
 
         worker.job = stop
-        self.assertRaises(SystemExit, worker.work)
+        self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(len(worker.messages), 1)
 
     def test_work_twice(self):
@@ -69,8 +69,8 @@ class TestWorker(unittest.TestCase):
             if data['msgid'] == 1:
                 # process the first message
                 return
-            raise SystemExit
+            raise KeyboardInterrupt
 
         worker.job = stop
-        self.assertRaises(SystemExit, worker.work)
+        self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(len(worker.messages), 0)
