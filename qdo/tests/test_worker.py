@@ -74,3 +74,13 @@ class TestWorker(unittest.TestCase):
         worker.job = stop
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(len(worker.messages), 0)
+
+    def test_unregister(self):
+        worker = self._make_one()
+        worker.register()
+        self.assertTrue(worker.zkconn.exists('/workers'))
+        self.assertEqual(worker.zkconn.get_children('/workers'),
+            ['worker-0000000000'])
+        worker.unregister()
+        self.assertTrue(worker.zkconn.exists('/workers'))
+        self.assertEqual(worker.zkconn.get_children('/workers'), [])
