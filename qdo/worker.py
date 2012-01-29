@@ -61,11 +61,11 @@ class Worker(object):
     def register(self):
         """Register this worker with Zookeeper."""
         self.zkconn.connect()
-        if not self.zkconn.exists('/workers'):
-            self.zkconn.create(
-                "/workers", "",
-                [ZOO_OPEN_ACL_UNSAFE],
-                0)
+        try:
+            self.zkconn.create("/workers", "",
+                [ZOO_OPEN_ACL_UNSAFE], 0)
+        except zookeeper.NodeExistsException:
+            pass
         self.zkconn.create(
             "/workers/worker-", "value",
             [ZOO_OPEN_ACL_UNSAFE], ZOO_EPHEMERAL_AND_SEQUENCE)
