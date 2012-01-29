@@ -28,17 +28,18 @@ Applications
 qdo supports multiple applications at the same time or at least coordinating
 them in the same Zookeeper instance.
 
-Each application has an unique app key, as described in the API paragraph
-at https://wiki.mozilla.org/Services/Sagrada/Queuey.
+Each application has an unique app name, as defined by
+https://wiki.mozilla.org/Services/Sagrada/TokenServer.
 
-From here on ``<app_key>`` is used as a shorthand for this application key.
+From here on ``<app_name>`` is used as a shorthand for this application name.
+It might for example be `sync`.
 
 Workers
 +++++++
 
 Data about currently active workers is stored at::
 
-    /<qdo-ns>/<app_key>/workers/
+    /<qdo-ns>/<app_name>/workers/
 
 On worker connect an `ephemeral and sequential node
 <http://zookeeper.apache.org/doc/current/api/org/apache/zookeeper/CreateMode.html#EPHEMERAL_SEQUENTIAL>`_
@@ -49,9 +50,9 @@ also likely holes in the sequence.
 
 For example::
 
-    /<qdo-ns>/<app_key>/workers/worker-0000000101
-    /<qdo-ns>/<app_key>/workers/worker-0000000105
-    /<qdo-ns>/<app_key>/workers/worker-0000000106
+    /<qdo-ns>/<app_name>/workers/worker-0000000101
+    /<qdo-ns>/<app_name>/workers/worker-0000000105
+    /<qdo-ns>/<app_name>/workers/worker-0000000106
 
 Each worker node stores a JSON value, specifying which queues it is
 currently handling:
@@ -75,12 +76,12 @@ Queues
 
 Information about existing queues is stored under::
 
-    /<qdo-ns>/<app_key>/queues/
+    /<qdo-ns>/<app_name>/queues/
 
 A persistent node is created for each queue. For example::
 
-    /<qdo-ns>/<app_key>/queues/a4bb2fb6-dcda-4b68-aad7-43a4746d7f58
-    /<qdo-ns>/<app_key>/queues/958f8c06-4348-4f13-b7fb-32f27a4a2a9f
+    /<qdo-ns>/<app_name>/queues/a4bb2fb6-dcda-4b68-aad7-43a4746d7f58
+    /<qdo-ns>/<app_name>/queues/958f8c06-4348-4f13-b7fb-32f27a4a2a9f
 
 Each queue node stores a JSON value, specifying which message has been
 processed last:
