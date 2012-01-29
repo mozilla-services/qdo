@@ -66,8 +66,8 @@ For example:
 .. code-block:: javascript
 
     '{"queues":
-      ["a4bb2fb6-dcda-4b68-aad7-43a4746d7f58",
-       "958f8c06-4348-4f13-b7fb-32f27a4a2a9f"]}'
+      ["a4bb2fb6dcda4b68aad743a4746d7f58",
+       "958f8c0643484f13b7fb32f27a4a2a9f"]}'
 
 TODO: Explain watchers for re-balancing.
 
@@ -80,11 +80,11 @@ Information about existing queues is stored under::
 
 A persistent node is created for each queue. For example::
 
-    /<qdo-ns>/<app_name>/queues/a4bb2fb6-dcda-4b68-aad7-43a4746d7f58
-    /<qdo-ns>/<app_name>/queues/958f8c06-4348-4f13-b7fb-32f27a4a2a9f
+    /<qdo-ns>/<app_name>/queues/a4bb2fb6dcda4b68aad743a4746d7f58
+    /<qdo-ns>/<app_name>/queues/958f8c0643484f13b7fb32f27a4a2a9f
 
-Each queue node stores a JSON value, specifying which message has been
-processed last:
+Each queue node stores a JSON value, specifying until what time messages
+have been processed:
 
 .. code-block:: javascript
 
@@ -96,8 +96,8 @@ For example:
 
 .. code-block:: javascript
 
-    '{"last": "364875c7-4a98-11e1-919e-b88d120c81de"}'
+    '{"last": "135471512647131000L"}'
 
 TODO: Does storing queues in a single node scale? What about notifications
 and potentially millions of queues? Should we implement a tree structure,
-do we know what exactly queue names will be and how those are distributed?
+and do we know how queue ids (`uuid.uuid4().hex`) are distributed?
