@@ -21,3 +21,4 @@ Contents
 
    api
    development
+   internals
