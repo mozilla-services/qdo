@@ -1,3 +1,4 @@
+================================================================
 qdo: Python worker library for Mozilla Services' message queuing
 ================================================================
 
@@ -13,10 +14,10 @@ on the Mozilla wiki or look at the message queue implementation called
 Read more at about `qdo` at https://github.com/mozilla-services/qdo
 
 Contents
---------
+========
 
 .. toctree::
    :maxdepth: 2
 
-   development
    api
+   development

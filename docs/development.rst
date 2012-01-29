@@ -1,3 +1,4 @@
+===========
 Development
 ===========
 
@@ -5,7 +6,7 @@ Here's a list of useful docs and descriptions of some of the parts qdo is
 based on:
 
 Zookeeper
----------
+=========
 
 Links
 +++++
@@ -16,7 +17,7 @@ Links
 - http://svn.apache.org/repos/asf/zookeeper/trunk/src/contrib/zkpython/src/test/
 
 Inspect Zookeeper
-+++++++++++++++++
+-----------------
 
 After starting Zookeeper, use the command line client::
 
@@ -56,7 +57,7 @@ After starting Zookeeper, use the command line client::
 
 
 Apache Kafka
-------------
+============
 
 - http://incubator.apache.org/kafka/design.html
 
