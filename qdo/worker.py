@@ -6,10 +6,13 @@
 from collections import deque
 import time
 
-from zookeeper import EPHEMERAL, SEQUENCE
+import zookeeper
 from zktools.connection import ZkConnection
 
 from qdo.utils import metlogger
+
+ZOO_EPHEMERAL_AND_SEQUENCE = zookeeper.EPHEMERAL | zookeeper.SEQUENCE
+ZOO_OPEN_ACL_UNSAFE = {"perms": 0x1f, "scheme": "world", "id": "anyone"}
 
 
 class Worker(object):
@@ -61,12 +64,11 @@ class Worker(object):
         if not self.zkconn.exists('/workers'):
             self.zkconn.create(
                 "/workers", "",
-                [{"perms": 0x1f, "scheme": "world", "id": "anyone"}],
+                [ZOO_OPEN_ACL_UNSAFE],
                 0)
         self.zkconn.create(
             "/workers/worker-", "value",
-            [{"perms": 0x1f, "scheme": "world", "id": "anyone"}],
-            EPHEMERAL | SEQUENCE)
+            [ZOO_OPEN_ACL_UNSAFE], ZOO_EPHEMERAL_AND_SEQUENCE)
 
     def unregister(self):
         """Unregister this worker from Zookeeper."""
