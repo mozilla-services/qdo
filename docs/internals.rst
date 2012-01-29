@@ -99,4 +99,5 @@ For example:
     '{"last": "364875c7-4a98-11e1-919e-b88d120c81de"}'
 
 TODO: Does storing queues in a single node scale? What about notifications
-and potentially millions of queues?
+and potentially millions of queues? Should we implement a tree structure,
+do we know what exactly queue names will be and how those are distributed?
