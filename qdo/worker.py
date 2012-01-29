@@ -36,7 +36,7 @@ class Worker(object):
         qdo_section = self.settings.getsection('qdo-worker')
         self.wait_interval = qdo_section.get('wait_interval', 5)
         zkhost = qdo_section.get('zookeeper_connection', 'localhost:2181')
-        self.zkconn = ZkConnection(host=zkhost)
+        self.zkconn = ZkConnection(host=zkhost, use_json=True)
 
     def work(self):
         """Work on jobs
