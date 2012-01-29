@@ -9,12 +9,12 @@ Design notes
 - queues are based on timestamps, workers do time range scans
 
 - worker lifetime loop is a simple Python ``while True:``
-- worker needs to check for `rebalance` request by zookeeper (triggered by
-  callback function from zookeeper) - rebalance needs a lock
+- worker needs to check for `re-balance` request by zookeeper (triggered by
+  callback function from zookeeper) - re-balance needs a lock
 - zookeeper keeps persistent connection to each worker process, if connection
   goes away, worker needs to stop working / reconnect
 - on worker startup, register with zookeeper, register callbacks for
-  triggering rebalance (algorithm as in Kafka
+  triggering re-balance (algorithm as in Kafka
   http://incubator.apache.org/kafka/design.html), zookeeper ephemeral nodes
   (with postfix -0001, -0002, ... for sorting)
 - on worker shutdown, unregister with zookeeper
@@ -41,7 +41,7 @@ Open questions
   multiple threads?
 
   - Shouldn't matter to the qdo
-- pause mode? without triggering rebalance (during queuey upgrades?)
+- pause mode? without triggering re-balance (during queuey upgrades?)
 
   - Perhaps, not in initial version. If queuey goes down, worker should stay alive
     and wait for it to come back
@@ -67,16 +67,16 @@ Open questions
   - When logging every successful message process to Zookeeper, this guarantee should be
     implicit.
 - do we need any special handling for startup? like 10 workers coming online
-  in a short period of time? should this trigger 10 rebalance requests?
+  in a short period of time? should this trigger 10 re-balance requests?
   same with shutdown of multiple workers at once
 
-  - Probably not important, rebalancing should be a fairly cheap operation, will have
+  - Probably not important, re-balancing should be a fairly cheap operation, will have
     to revisit once we can test.
 
 - how does qdo / zookeeper gets notified about new queues at runtime? for
   example for notifications, where each user has a queue and we might get
   dozens or peak-load of hundreds of new queues in short time frames. could
-  this cause excessive rebalancing?
+  this cause excessive re-balancing?
 
 queue main loop
 ---------------
@@ -96,14 +96,14 @@ questions
   - Handle one message per queue, in order. This provides priority. If a user
     wants to process more messages from the same queue at once then more
     workers should be spawned.
-- on rebalancing, evict local message cache or try to revalidate / keep
+- on re-balancing, evict local message cache or try to re-validate / keep
   messages for queues still handled by the worker
 
   - Remove local message cache so that the worker can release the queue+parititon
     as soon as possible in case it no longer owns the queue+partition after the
-    rebalance
+    re-balance
 - should there be a batch task mode, where a task can optionally handle
-  multiple messages at once? maybe more effecient to write results out to
+  multiple messages at once? maybe more efficient to write results out to
   target systems. when to record task success / handle failures?
 
   - Not at first, maybe later. the Python requests lib has HTTP 1.1 keep-alive now
@@ -126,10 +126,10 @@ monitoring (metlog)
 - health check (process runs in fg mode, so process presence?)
 
   - Looking at zookeeper should also reveal health, as dead processes will lose their
-    session state in zookeeper, and cause a rebalance, logging the rebalance should
+    session state in zookeeper, and cause a re-balance, logging the re-balance should
     help diagnose issues in health.
 - counter for num of processed tasks (success, failure)
-- counter for zookeeper rebalance triggers
+- counter for zookeeper re-balance triggers
 - timing info on queuey connect, task execution
 
 command line tool
