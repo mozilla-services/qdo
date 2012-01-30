@@ -118,3 +118,28 @@ https://issues.apache.org/jira/browse/ZOOKEEPER-1162
 These seem to suggest a single znode should only have about 1mb of data and a
 single response (like getChildren) should only be 1mb each. In the mail thread
 it's suggested to implement a Trie for dealing with more nodes.
+
+Zookeeper stores a number of different data structures. The main one is the
+DataTree (http://svn.apache.org/viewvc/zookeeper/tags/release-3.4.2/src/java/main/org/apache/zookeeper/server/DataTree.java?revision=1225684&view=markup)
+This keeps a `java.util.concurrent.ConcurrentHashMap
+<http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/ConcurrentHashMap.html>`_
+containing the full path to a node to the actual DataNode itself::
+
+    ConcurrentHashMap<String, DataNode> nodes =
+        new ConcurrentHashMap<String, DataNode>();
+
+Java's string object defines a `hashCode
+<http://docs.oracle.com/javase/6/docs/api/java/lang/String.html#hashCode%28%29>`_
+as::
+
+    s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]
+
+where s[i] is the ith character of the string and n is the length of the string
+
+Each data node stores a pointer to its parent and a list of strings for all
+its children (relative path) as well as the number of children it has.
+
+Almost all data access happens through the hash map, so length of sub-paths is
+not important. The only exception is serialization to disk, which traverses
+the tree starting from the root node, recursively down into all children, but
+gets the data nodes again via the hash map.
