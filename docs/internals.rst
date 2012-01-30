@@ -143,3 +143,44 @@ Almost all data access happens through the hash map, so length of sub-paths is
 not important. The only exception is serialization to disk, which traverses
 the tree starting from the root node, recursively down into all children, but
 gets the data nodes again via the hash map.
+
+Possible solution: Using a single-character based Trie is inefficient, as we
+use almost perfectly distributed uuid4 hashes, so there's no shared prefixes
+and we'd end up with a huge number of intermediate nodes. A simple prototype
+suggest we still have 2.9 million nodes for 100,000 hashes. For fewer hashes
+we have almost 32 times as many nodes. uuid1 hashes are only mildly better at
+2.7 million nodes.
+
+Suggested approach: We use a Trie-like structure, but store 4 hex chars per
+node. That's at most 65536 children per node, which is still in the margin
+acceptable to Zookeeper. With every value only being 4 bytes, a call to
+getChildren should return 4 bytes * 65536 == 256 kB. With some quoting and
+separation between values, that might be 512 kB - well below the 1 MB limit
+of the response value.
+
+As an added value, the Kafka re-balancing algorithm relies on sorting all
+queues. Since the queue ids are evenly distributed, we can instead only sort
+the first level nodes and assign each of those prefixes incl. all children
+to a worker. If we have more workers than nodes in the first level, we can
+use one or multiple levels until we get enough nodes, possibly drilling down
+all the way to the last level.
+
+As an example for the hash `1234567890abcdef1234567890abcdef` we'd create
+the following nodes::
+
+    /1234/5678/90ab/cdef/1234/5678/90ab/cdef
+
+We don't need to care about conflicts, as the inner nodes don't hold data, so
+there might only be two processes trying to create the same node at once - in
+which case either one can win and the other can ignore the conflict. That's
+assuming we ignore pruning orphaned intermediate nodes that might result from
+deletions. Pruning can be done as an extra maintenance script.
+
+This needs a prototype, to see how many nodes it'd save - my guestimate is
+still having an 8 times overhead.
+
+Looking at different Trie data structures offering compression, didn't result
+in anything that looks applicable or is implementable having no transaction
+concept but only single node atomicity.
+
+The other alternative is not using Zookeeper for queue tracking.
