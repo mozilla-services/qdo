@@ -16,6 +16,13 @@ for a future Zookeeper version.
 
 The namespace used for qdo is: ``/mozilla/services/qdo/``
 
+TODO: Use namespace / chroot support as noted in
+http://zookeeper.apache.org/doc/r3.2.2/zookeeperProgrammers.html#ch_zkSessions
+"Added in 3.2.0: An optional "chroot" suffix may also be appended to the
+connection string. This will run the client commands while interpreting all
+paths relative to this root (similar to the unix chroot command)"
+
+
 Data structure
 --------------
 
@@ -101,3 +108,13 @@ For example:
 TODO: Does storing queues in a single node scale? What about notifications
 and potentially millions of queues? Should we implement a tree structure,
 and do we know how queue ids (`uuid.uuid4().hex`) are distributed?
+
+Some discussions in:
+
+http://mail-archives.apache.org/mod_mbox/hadoop-zookeeper-user/200901.mbox/%3CC5922217.169DF%25mahadev@yahoo-inc.com%3E
+https://issues.apache.org/jira/browse/ZOOKEEPER-272
+https://issues.apache.org/jira/browse/ZOOKEEPER-1162
+
+These seem to suggest a single znode should only have about 1mb of data and a
+single response (like getChildren) should only be 1mb each. In the mail thread
+it's suggested to implement a Trie for dealing with more nodes.
