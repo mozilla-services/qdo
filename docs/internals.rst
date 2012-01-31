@@ -70,10 +70,12 @@ Information about existing queues is stored under::
 
     /<qdo-ns>/queues/
 
-A persistent node is created for each queue. For example::
+A persistent node is created for each queue / partition combination. For
+example::
 
-    /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58
-    /<qdo-ns>/queues/958f8c0643484f13b7fb32f27a4a2a9f
+    /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-1
+    /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-2
+    /<qdo-ns>/queues/958f8c0643484f13b7fb32f27a4a2a9f-1
 
 Each queue node stores a JSON value, specifying until what time messages
 have been processed:
