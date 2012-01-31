@@ -34,18 +34,17 @@ Data about currently active workers is stored at::
 
     /<qdo-ns>/workers/
 
-On worker connect an `ephemeral and sequential node
-<http://zookeeper.apache.org/doc/current/api/org/apache/zookeeper/CreateMode.html#EPHEMERAL_SEQUENTIAL>`_
+On worker connect an `ephemeral node
+<http://zookeeper.apache.org/doc/current/api/org/apache/zookeeper/CreateMode.html#EPHEMERAL>`_
 is created for each worker. It is automatically removed on worker disconnect.
-Numbers in the sequence are never reused, so after some time the numbers will
-be getting larger. With worker disconnects happening out of order, there's
-also likely holes in the sequence.
+It's name consists of the fully qualified domain name of the machine running
+the worker and the workers process id.
 
 For example::
 
-    /<qdo-ns>/workers/worker-0000000101
-    /<qdo-ns>/workers/worker-0000000105
-    /<qdo-ns>/workers/worker-0000000106
+    /<qdo-ns>/workers/svc1.mozilla.com-1842
+    /<qdo-ns>/workers/svc1.mozilla.com-1859
+    /<qdo-ns>/workers/svc2.mozilla.com-2012
 
 Each worker node stores a JSON value, specifying which queues it is
 currently handling:

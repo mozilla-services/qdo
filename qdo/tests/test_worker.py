@@ -35,7 +35,7 @@ class TestWorker(unittest.TestCase):
 
     def setUp(self):
         from qdo.worker import ZOO_OPEN_ACL_UNSAFE
-        zkconn = ZkConnection(host='localhost:2181')
+        zkconn = ZkConnection(host='127.0.0.1:2181')
         zkconn.connect()
         if zkconn.exists('/mozilla-qdo/workers'):
             zkconn.delete('/mozilla-qdo/workers')
@@ -83,8 +83,12 @@ class TestWorker(unittest.TestCase):
         worker = self._make_one()
         worker.register()
         self.assertTrue(worker.zkconn.exists('/workers'))
-        self.assertEqual(worker.zkconn.get_children('/workers'),
-            ['worker-0000000000'])
+        children = worker.zkconn.get_children('/workers')
+        self.assertEqual(len(children), 1)
+        self.assertEqual(children[0], worker.name)
         worker.unregister()
+        self.assertFalse(worker.zkconn.connected)
+        worker.zkconn.connect()
         self.assertTrue(worker.zkconn.exists('/workers'))
         self.assertEqual(worker.zkconn.get_children('/workers'), [])
+        worker.zkconn.close()

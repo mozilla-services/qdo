@@ -4,14 +4,15 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from collections import deque
+import os
 import time
+import socket
 
 import zookeeper
 from zktools.connection import ZkConnection
 
 from qdo.utils import metlogger
 
-ZOO_EPHEMERAL_AND_SEQUENCE = zookeeper.EPHEMERAL | zookeeper.SEQUENCE
 ZOO_OPEN_ACL_UNSAFE = {"perms": 0x1f, "scheme": "world", "id": "anyone"}
 
 
@@ -26,6 +27,7 @@ class Worker(object):
         """
         self.settings = settings
         self.shutdown = False
+        self.name = "%s-%s" % (socket.getfqdn(), os.getpid())
         self.configure()
         self.messages = deque()
         self.job = None
@@ -68,8 +70,8 @@ class Worker(object):
         except zookeeper.NodeExistsException:
             pass
         self.zkconn.create(
-            "/workers/worker-", "value",
-            [ZOO_OPEN_ACL_UNSAFE], ZOO_EPHEMERAL_AND_SEQUENCE)
+            "/workers/%s" % self.name, "",
+            [ZOO_OPEN_ACL_UNSAFE], zookeeper.EPHEMERAL)
 
     def unregister(self):
         """Unregister this worker from Zookeeper."""
