@@ -14,20 +14,18 @@ supports `Zookeeper partitioning
 <http://wiki.apache.org/hadoop/ZooKeeper/PartitionedZookeeper>`_ as proposed
 for a future Zookeeper version.
 
-The namespace used for qdo is: ``/mozilla-qdo/``
+If no application specific namespace has been defined, we use:
+``/mozilla-qdo/``
 
-TODO: Use namespace / chroot support as noted in
-http://zookeeper.apache.org/doc/r3.2.2/zookeeperProgrammers.html#ch_zkSessions
-"Added in 3.2.0: An optional "chroot" suffix may also be appended to the
-connection string. This will run the client commands while interpreting all
-paths relative to this root (similar to the unix chroot command)"
-
+The Zookeeper connections use `chroot` support and connect to the specified
+namespace. This ensures that the code itself can use namespace agnostic
+absolute paths.
 
 Data structure
 --------------
 
 In the following definitions ``/<qdo-ns>/`` is used as a shorthand for
-``/mozilla-qdo/``.
+``/mozilla-qdo/`` or an apps specific namespace like `socorro-qdo`.
 
 Workers
 +++++++
