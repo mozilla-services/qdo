@@ -55,9 +55,43 @@ After starting Zookeeper, use the command line client::
 
     [zk:] quit
 
+Zookeeper internals
+-------------------
+
+A single node in Zookeeper should contain at most 1MB of data and a single
+response from Zookeeper is by default restricted to the same amount. There's
+no direct restriction on how many children one node can contain, but reports
+on the mailing lists suggest scaling to 10,000 to 100,000 can work.
+
+Zookeeper stores a number of different data structures. The main one is the
+`DataTree <http://svn.apache.org/viewvc/zookeeper/tags/release-3.4.2/src/java/main/org/apache/zookeeper/server/DataTree.java?revision=1225684&view=markup>`_
+This keeps a `java.util.concurrent.ConcurrentHashMap
+<http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/ConcurrentHashMap.html>`_
+containing the full path to a node to the actual DataNode itself::
+
+    ConcurrentHashMap<String, DataNode> nodes =
+        new ConcurrentHashMap<String, DataNode>();
+
+Java's string object defines a `hashCode
+<http://docs.oracle.com/javase/6/docs/api/java/lang/String.html#hashCode%28%29>`_
+as::
+
+    s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]
+
+where s[i] is the ith character of the string and n is the length of the
+string.
+
+Each data node stores a pointer to its parent and a list of strings for all
+its children (relative path), the number of children it has and a bunch of
+extra metadata like version number and timestamps. One node without any extra
+data consumes between 40 and 80 bytes of runtime memory.
+
+Almost all data access happens through the hash map, so length of sub-paths is
+not important. The only exception is serialization to disk, which traverses
+the tree starting from the root node, recursively down into all children, but
+gets the data nodes again via the hash map.
 
 Apache Kafka
 ============
 
 - http://incubator.apache.org/kafka/design.html
-
