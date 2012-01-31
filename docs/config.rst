@@ -10,8 +10,10 @@ For example::
 
     bin/qdo-worker -c etc/my-qdo.conf
 
-Options
-=======
+Settings
+========
+
+All settings are specified in the `[qdo-worker]` section.
 
 wait_interval
     Interval in seconds for which the worker pauses if it has no messages to
