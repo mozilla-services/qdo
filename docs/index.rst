@@ -19,6 +19,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   config
    api
    development
    internals

@@ -34,10 +34,14 @@ class TestWorkerConfig(unittest.TestCase):
 class TestWorker(unittest.TestCase):
 
     def setUp(self):
+        from qdo.worker import ZOO_OPEN_ACL_UNSAFE
         zkconn = ZkConnection(host='localhost:2181')
         zkconn.connect()
-        if zkconn.exists('/workers'):
-            zkconn.delete('/workers')
+        if zkconn.exists('/mozilla-qdo/workers'):
+            zkconn.delete('/mozilla-qdo/workers')
+        if zkconn.exists('/mozilla-qdo'):
+            zkconn.delete('/mozilla-qdo')
+        zkconn.create("/mozilla-qdo", "", [ZOO_OPEN_ACL_UNSAFE], 0)
         zkconn.close()
 
     def _make_one(self, extra=None):
