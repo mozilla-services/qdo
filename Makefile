@@ -111,7 +111,8 @@ html:
 	cd docs && make html
 
 test:
-	bin/supervisord
+	$(PYTHON) runtests.py
+
+test-python:
 	$(NOSE) --with-coverage --cover-package=$(APPNAME) --cover-erase \
 	--cover-inclusive $(APPNAME)
-	bin/supervisorctl shutdown
