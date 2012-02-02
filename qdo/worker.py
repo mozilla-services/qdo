@@ -9,7 +9,7 @@ import time
 import socket
 
 import zookeeper
-from zktools.connection import ZkConnection
+from zc.zk import ZooKeeper
 
 from qdo.utils import metlogger
 
@@ -39,7 +39,7 @@ class Worker(object):
         self.wait_interval = qdo_section.get('wait_interval', 5)
         zkhost = qdo_section.get('zookeeper_connection', '127.0.0.1:2181')
         zkns = qdo_section.get('zookeeper_namespace', 'mozilla-qdo')
-        self.zkconn = ZkConnection(host=zkhost + '/' + zkns)
+        self.zkconn = ZooKeeper(zkhost + '/' + zkns)
 
     def work(self):
         """Work on jobs
@@ -63,7 +63,6 @@ class Worker(object):
 
     def register(self):
         """Register this worker with Zookeeper."""
-        self.zkconn.connect()
         try:
             self.zkconn.create("/workers", "",
                 [ZOO_OPEN_ACL_UNSAFE], 0)

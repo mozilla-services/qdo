@@ -7,7 +7,7 @@ import json
 import unittest
 
 from mozsvc.config import SettingsDict
-from zktools.connection import ZkConnection
+from zc.zk import ZooKeeper
 
 
 class TestWorkerConfig(unittest.TestCase):
@@ -35,8 +35,7 @@ class TestWorker(unittest.TestCase):
 
     def setUp(self):
         from qdo.worker import ZOO_OPEN_ACL_UNSAFE
-        zkconn = ZkConnection(host='127.0.0.1:2181')
-        zkconn.connect()
+        zkconn = ZooKeeper('127.0.0.1:2181', wait=True)
         if zkconn.exists('/mozilla-qdo/workers'):
             zkconn.delete('/mozilla-qdo/workers')
         if zkconn.exists('/mozilla-qdo'):
@@ -87,8 +86,8 @@ class TestWorker(unittest.TestCase):
         self.assertEqual(len(children), 1)
         self.assertEqual(children[0], worker.name)
         worker.unregister()
-        self.assertFalse(worker.zkconn.connected)
-        worker.zkconn.connect()
-        self.assertTrue(worker.zkconn.exists('/workers'))
-        self.assertEqual(worker.zkconn.get_children('/workers'), [])
-        worker.zkconn.close()
+        self.assertTrue(worker.zkconn.handle is None)
+        zkconn = ZooKeeper('127.0.0.1:2181')
+        self.assertTrue(zkconn.exists('/mozilla-qdo/workers'))
+        self.assertEqual(zkconn.get_children('/mozilla-qdo/workers'), [])
+        zkconn.close()
