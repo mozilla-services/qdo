@@ -13,6 +13,7 @@ from zc.zk import ZooKeeper
 
 from qdo.utils import metlogger
 
+ZOO_DEFAULT_NS = 'mozilla-qdo'
 ZOO_OPEN_ACL_UNSAFE = {"perms": 0x1f, "scheme": "world", "id": "anyone"}
 
 
@@ -38,7 +39,7 @@ class Worker(object):
         qdo_section = self.settings.getsection('qdo-worker')
         self.wait_interval = qdo_section.get('wait_interval', 5)
         zkhost = qdo_section.get('zookeeper_connection', '127.0.0.1:2181')
-        zkns = qdo_section.get('zookeeper_namespace', 'mozilla-qdo')
+        zkns = qdo_section.get('zookeeper_namespace', ZOO_DEFAULT_NS)
         self.zkconn = ZooKeeper(zkhost + '/' + zkns)
 
     def work(self):

@@ -34,13 +34,13 @@ class TestWorkerConfig(unittest.TestCase):
 class TestWorker(unittest.TestCase):
 
     def setUp(self):
-        from qdo.worker import ZOO_OPEN_ACL_UNSAFE
+        from qdo.worker import ZOO_DEFAULT_NS, ZOO_OPEN_ACL_UNSAFE
         zkconn = ZooKeeper('127.0.0.1:2181', wait=True)
-        if zkconn.exists('/mozilla-qdo/workers'):
-            zkconn.delete('/mozilla-qdo/workers')
-        if zkconn.exists('/mozilla-qdo'):
-            zkconn.delete('/mozilla-qdo')
-        zkconn.create("/mozilla-qdo", "", [ZOO_OPEN_ACL_UNSAFE], 0)
+        if zkconn.exists('/%s/workers' % ZOO_DEFAULT_NS):
+            zkconn.delete('/%s/workers' % ZOO_DEFAULT_NS)
+        if zkconn.exists('/' + ZOO_DEFAULT_NS):
+            zkconn.delete('/' + ZOO_DEFAULT_NS)
+        zkconn.create('/' + ZOO_DEFAULT_NS, "", [ZOO_OPEN_ACL_UNSAFE], 0)
         zkconn.close()
 
     def _make_one(self, extra=None):
@@ -79,6 +79,7 @@ class TestWorker(unittest.TestCase):
         self.assertEqual(len(worker.messages), 0)
 
     def test_unregister(self):
+        from qdo.worker import ZOO_DEFAULT_NS
         worker = self._make_one()
         worker.register()
         self.assertTrue(worker.zkconn.exists('/workers'))
@@ -88,6 +89,7 @@ class TestWorker(unittest.TestCase):
         worker.unregister()
         self.assertTrue(worker.zkconn.handle is None)
         zkconn = ZooKeeper('127.0.0.1:2181')
-        self.assertTrue(zkconn.exists('/mozilla-qdo/workers'))
-        self.assertEqual(zkconn.get_children('/mozilla-qdo/workers'), [])
+        self.assertTrue(zkconn.exists('/%s/workers' % ZOO_DEFAULT_NS))
+        self.assertEqual(
+            zkconn.get_children('/%s/workers' % ZOO_DEFAULT_NS), [])
         zkconn.close()
