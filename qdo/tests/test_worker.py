@@ -37,11 +37,9 @@ class TestWorker(unittest.TestCase):
     def setUp(self):
         from qdo.worker import ZOO_DEFAULT_NS
         zkconn = ZooKeeper('127.0.0.1:2181', wait=True)
-        if zkconn.exists('/%s/workers' % ZOO_DEFAULT_NS):
-            zkconn.delete('/%s/workers' % ZOO_DEFAULT_NS)
-        if zkconn.exists('/' + ZOO_DEFAULT_NS):
-            zkconn.delete('/' + ZOO_DEFAULT_NS)
-        ZkNode(zkconn, '/' + ZOO_DEFAULT_NS)
+        root = '/' + ZOO_DEFAULT_NS
+        zkconn.delete_recursive(root)
+        ZkNode(zkconn, root)
         zkconn.close()
 
     def _make_one(self, extra=None):
