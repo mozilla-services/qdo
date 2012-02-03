@@ -10,11 +10,11 @@ import socket
 
 import zookeeper
 from zc.zk import ZooKeeper
+from zktools.node import ZOO_OPEN_ACL_UNSAFE
 
 from qdo.utils import metlogger
 
 ZOO_DEFAULT_NS = 'mozilla-qdo'
-ZOO_OPEN_ACL_UNSAFE = {"perms": 0x1f, "scheme": "world", "id": "anyone"}
 
 
 class Worker(object):
