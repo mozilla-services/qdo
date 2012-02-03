@@ -10,7 +10,7 @@ import socket
 
 import zookeeper
 from zc.zk import ZooKeeper
-from zktools.node import ZOO_OPEN_ACL_UNSAFE
+from zktools.node import ZkNode
 
 from qdo.utils import metlogger
 
@@ -29,6 +29,7 @@ class Worker(object):
         self.settings = settings
         self.shutdown = False
         self.name = "%s-%s" % (socket.getfqdn(), os.getpid())
+        self.zknode = None
         self.configure()
         self.messages = deque()
         self.job = None
@@ -64,14 +65,10 @@ class Worker(object):
 
     def register(self):
         """Register this worker with Zookeeper."""
-        try:
-            self.zkconn.create("/workers", "",
-                [ZOO_OPEN_ACL_UNSAFE], 0)
-        except zookeeper.NodeExistsException:
-            pass
-        self.zkconn.create(
-            "/workers/%s" % self.name, "",
-            [ZOO_OPEN_ACL_UNSAFE], zookeeper.EPHEMERAL)
+        # add workers node to Zookeeper
+        ZkNode(self.zkconn, "/workers")
+        self.zknode = ZkNode(self.zkconn, "/workers/%s" % self.name,
+            create_mode=zookeeper.EPHEMERAL)
 
     def unregister(self):
         """Unregister this worker from Zookeeper."""

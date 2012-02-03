@@ -8,7 +8,7 @@ import unittest
 
 from mozsvc.config import SettingsDict
 from zc.zk import ZooKeeper
-from zktools.node import ZOO_OPEN_ACL_UNSAFE
+from zktools.node import ZkNode
 
 
 class TestWorkerConfig(unittest.TestCase):
@@ -41,7 +41,7 @@ class TestWorker(unittest.TestCase):
             zkconn.delete('/%s/workers' % ZOO_DEFAULT_NS)
         if zkconn.exists('/' + ZOO_DEFAULT_NS):
             zkconn.delete('/' + ZOO_DEFAULT_NS)
-        zkconn.create('/' + ZOO_DEFAULT_NS, "", [ZOO_OPEN_ACL_UNSAFE], 0)
+        ZkNode(zkconn, '/' + ZOO_DEFAULT_NS)
         zkconn.close()
 
     def _make_one(self, extra=None):
