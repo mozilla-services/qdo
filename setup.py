@@ -15,6 +15,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 reqs = [
     'argparse',
     'mozsvc',
+    'zc.zk',
     'zktools',
 ]
 
