@@ -12,6 +12,18 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
+reqs = [
+    'argparse',
+    'mozsvc',
+    'zktools',
+]
+
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if not on_rtd:
+    reqs.extend([
+        'metlog',
+    ])
+
 setup(name='qdo',
       version=version,
       description="Queuey worker library",
@@ -33,12 +45,7 @@ setup(name='qdo',
       packages=find_packages(exclude=['ez_setup']),
       include_package_data=True,
       zip_safe=False,
-      install_requires=[
-          'argparse',
-          'metlog',
-          'mozsvc',
-          'zktools',
-          ],
+      install_requires=reqs,
       tests_require=[
           'nose',
           ],
