@@ -23,3 +23,4 @@ Contents
    api
    development
    internals
+   changelog
