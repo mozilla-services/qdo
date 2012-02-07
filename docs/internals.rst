@@ -61,8 +61,6 @@ For example:
       ["a4bb2fb6dcda4b68aad743a4746d7f58",
        "958f8c0643484f13b7fb32f27a4a2a9f"]}'
 
-TODO: Explain watchers for re-balancing.
-
 Queues
 ++++++
 
@@ -70,8 +68,12 @@ Information about existing queues is stored under::
 
     /<qdo-ns>/queues/
 
-A persistent node is created for each queue / partition combination. For
-example::
+There are two different modes for storing queue information. The simple one
+assumes queue id to partition combinations to be unique. The second mode allows
+for the same queue id and partition to exist on multiple hosts.
+
+In the first simple scheme a persistent node is created for each queue id /
+partition combination. For example::
 
     /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-1
     /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-2
@@ -91,3 +93,40 @@ For example:
 .. code-block:: javascript
 
     '{"last": "135471512647131000L"}'
+
+Using the second scheme the host name of the Queuey instance is added as an
+extra hierarchy. For example::
+
+/<qdo-ns>/queues/queuey1.mozilla.com/a4bb2fb6dcda4b68aad743a4746d7f58-1
+/<qdo-ns>/queues/queuey2.mozilla.com/a4bb2fb6dcda4b68aad743a4746d7f58-1
+/<qdo-ns>/queues/queuey1.mozilla.com/a4bb2fb6dcda4b68aad743a4746d7f58-2
+/<qdo-ns>/queues/queuey1.mozilla.com/958f8c0643484f13b7fb32f27a4a2a9f-1
+/<qdo-ns>/queues/queuey2.mozilla.com/958f8c0643484f13b7fb32f27a4a2a9f-1
+
+The node stores the same time stamp as in the first scheme.
+
+Queue assignment
+++++++++++++++++
+
+The information on what worker is currently handling which queue is stored in
+a third hierarchy::
+
+    /<qdo-ns>/queue-locks/
+
+The structure is the same as used for the queue tracking, supporting both the
+simple and host-specific schemes. For example in the simple scheme::
+
+    /<qdo-ns>/queue-locks/a4bb2fb6dcda4b68aad743a4746d7f58-1
+
+These nodes are ephemeral nodes, constituting a lock as implemented via a
+`zktools.locking.ZkWriteLock <http://zktools.readthedocs.org/en/latest/api/locking.html>`_.
+
+If a rebalancing happens and a queue is assigned to a new worker, the new worker
+will wait until it can acquire a write lock on each queue before processing it.
+This ensures that no message is processed twice, both by the old and a new
+worker.
+
+Worker queue assignment and rebalancing
++++++++++++++++++++++++++++++++++++++++
+
+TODO
