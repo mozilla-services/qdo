@@ -46,7 +46,7 @@ For example::
     /<qdo-ns>/workers/svc1.mozilla.com-1859
     /<qdo-ns>/workers/svc2.mozilla.com-2012
 
-Each worker node stores a JSON value, specifying which queues it is
+Each worker node stores a JSON value, specifying which queue partitions it is
 currently handling:
 
 .. code-block:: javascript
@@ -58,8 +58,8 @@ For example:
 .. code-block:: javascript
 
     '{"queues":
-      ["a4bb2fb6dcda4b68aad743a4746d7f58",
-       "958f8c0643484f13b7fb32f27a4a2a9f"]}'
+      ["a4bb2fb6dcda4b68aad743a4746d7f58-1",
+       "958f8c0643484f13b7fb32f27a4a2a9f-2"]}'
 
 Queues
 ++++++
@@ -68,19 +68,15 @@ Information about existing queues is stored under::
 
     /<qdo-ns>/queues/
 
-There are two different modes for storing queue information. The simple one
-assumes queue id to partition combinations to be unique. The second mode allows
-for the same queue id and partition to exist on multiple hosts.
-
-In the first simple scheme a persistent node is created for each queue id /
-partition combination. For example::
+A persistent node is created for each queue id / partition combination. For
+example::
 
     /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-1
     /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-2
     /<qdo-ns>/queues/958f8c0643484f13b7fb32f27a4a2a9f-1
 
-Each queue node stores a JSON value, specifying until what time messages
-have been processed:
+Each queue node stores a JSON value, specifying until when messages have been
+processed:
 
 .. code-block:: javascript
 
@@ -94,17 +90,6 @@ For example:
 
     '{"last": "135471512647131000L"}'
 
-Using the second scheme the host name of the Queuey instance is added as an
-extra hierarchy. For example::
-
-/<qdo-ns>/queues/queuey1.mozilla.com/a4bb2fb6dcda4b68aad743a4746d7f58-1
-/<qdo-ns>/queues/queuey2.mozilla.com/a4bb2fb6dcda4b68aad743a4746d7f58-1
-/<qdo-ns>/queues/queuey1.mozilla.com/a4bb2fb6dcda4b68aad743a4746d7f58-2
-/<qdo-ns>/queues/queuey1.mozilla.com/958f8c0643484f13b7fb32f27a4a2a9f-1
-/<qdo-ns>/queues/queuey2.mozilla.com/958f8c0643484f13b7fb32f27a4a2a9f-1
-
-The node stores the same time stamp as in the first scheme.
-
 Queue assignment
 ++++++++++++++++
 
@@ -113,8 +98,7 @@ a third hierarchy::
 
     /<qdo-ns>/queue-locks/
 
-The structure is the same as used for the queue tracking, supporting both the
-simple and host-specific schemes. For example in the simple scheme::
+The structure is the same as used for the queue tracking. For example::
 
     /<qdo-ns>/queue-locks/a4bb2fb6dcda4b68aad743a4746d7f58-1
 
