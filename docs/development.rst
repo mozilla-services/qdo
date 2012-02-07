@@ -61,7 +61,12 @@ Zookeeper internals
 A single node in Zookeeper should contain at most 1MB of data and a single
 response from Zookeeper is by default restricted to the same amount. There's
 no direct restriction on how many children one node can contain, but reports
-on the mailing lists suggest scaling to 10,000 to 100,000 can work.
+on the mailing lists suggest scaling to 10,000 to 100,000 can work. The total
+number of nodes in all sub paths is basically unlimited.
+
+Read and write performance should be expected to be in the order of 0.1ms to
+0.2ms per operation for small clusters; reaching up to 1ms per operation for
+larger clusters.
 
 Zookeeper stores a number of different data structures. The main one is the
 `DataTree <http://svn.apache.org/viewvc/zookeeper/tags/release-3.4.2/src/java/main/org/apache/zookeeper/server/DataTree.java?revision=1225684&view=markup>`_
