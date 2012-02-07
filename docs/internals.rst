@@ -114,3 +114,28 @@ Worker queue assignment and rebalancing
 +++++++++++++++++++++++++++++++++++++++
 
 TODO
+
+Email notes from Ben:
+
+As a general outline flow for the worker, I'd imagine at start-up it functions like so:
+
+1. Register host-pid info with ZK /workers
+2. Enter 'rebalancing mode', wait until /workers node children are 'stable'
+3. Obtain (and wait if needed) locks for assigned queue+partition's
+4. Pull message and process it, or wait X seconds and poll again
+   - In the event multiple queuey hosts were supplied, they should be divvied up to reduce how many queuey instances
+     each worker needs to connect to. If there's 6 queuey instances, and 3 workers, each worker will be connected to
+     just 2 queuey instances, etc. When pulling messages from multiple queuey instances, the oldest messages should
+     be processed first.
+5. Record message id that was just processed in ZK
+6. Check to see if workers available has changed, go to step 2 if so
+7. If workers haven't changed, go to step 4
+
+The 'rebalancing' mode should probably hang out for several seconds, so that in
+case multiple workers are being started or kiled at once, each and every
+join/part doesn't cause the re-balancing itself to execute immediately, but
+instead all the workers stop and wait until the children of the
+/<qdo-ns>/workers node has not changed for at least 3 seconds. I.e., the
+available workers has 'leveled' out. This way when someone is starting up a
+bunch of workers, it'll wait 3 seconds until the last one has started up before
+doing the re-balance algorithm and moving to step 3.
