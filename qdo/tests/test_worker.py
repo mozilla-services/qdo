@@ -111,7 +111,6 @@ class TestWorker(unittest.TestCase):
         self.assertEqual(len(children), 1)
 
     def test_unregister(self):
-        from qdo.worker import ZOO_DEFAULT_NS
         worker = self._make_one()
         worker.register()
         self.assertTrue(worker.zkconn.exists('/workers'))
@@ -120,8 +119,5 @@ class TestWorker(unittest.TestCase):
         self.assertEqual(children[0], worker.name)
         worker.unregister()
         self.assertTrue(worker.zkconn.handle is None)
-        zkconn = ZooKeeper('127.0.0.1:2181')
-        self.assertTrue(zkconn.exists('/%s/workers' % ZOO_DEFAULT_NS))
         self.assertEqual(
-            zkconn.get_children('/%s/workers' % ZOO_DEFAULT_NS), [])
-        zkconn.close()
+            self.zkconn.get_children('/workers'), [])
