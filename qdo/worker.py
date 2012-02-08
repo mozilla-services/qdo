@@ -68,6 +68,8 @@ class Worker(object):
     def setup_zookeeper(self):
         """Setup global data structures in Zookeeper."""
         ZkNode(self.zkconn, "/workers")
+        ZkNode(self.zkconn, "/queues")
+        ZkNode(self.zkconn, "/queue-locks")
 
     def register(self):
         """Register this worker with Zookeeper."""

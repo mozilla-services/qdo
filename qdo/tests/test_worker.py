@@ -95,7 +95,10 @@ class TestWorker(unittest.TestCase):
     def test_setup_zookeeper(self):
         worker = self._make_one()
         worker.setup_zookeeper()
-        self.assertTrue(worker.zkconn.exists('/workers'))
+        children = worker.zkconn.get_children('/')
+        self.assertTrue('workers' in children, children)
+        self.assertTrue('queues' in children, children)
+        self.assertTrue('queue-locks' in children, children)
 
     def test_register(self):
         worker = self._make_one()
