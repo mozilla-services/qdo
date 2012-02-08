@@ -41,6 +41,7 @@ class Worker(object):
         self.wait_interval = qdo_section.get('wait_interval', 5)
         zkhost = qdo_section.get('zookeeper_connection', '127.0.0.1:2181')
         zkns = qdo_section.get('zookeeper_namespace', ZOO_DEFAULT_NS)
+        # TODO: handle connection failure
         self.zkconn = ZooKeeper(zkhost + '/' + zkns)
 
     def work(self):
