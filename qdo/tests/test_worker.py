@@ -99,6 +99,17 @@ class TestWorker(unittest.TestCase):
         children = worker.zkconn.get_children('/workers')
         self.assertEqual(len(children), 1)
 
+    def test_register_twice(self):
+        worker = self._make_one()
+        worker.register()
+        self.assertTrue(worker.zkconn.exists('/workers'))
+        children = worker.zkconn.get_children('/workers')
+        self.assertEqual(len(children), 1)
+        # a second call to register neither fails nor adds a duplicate
+        worker.register()
+        children = worker.zkconn.get_children('/workers')
+        self.assertEqual(len(children), 1)
+
     def test_unregister(self):
         from qdo.worker import ZOO_DEFAULT_NS
         worker = self._make_one()
