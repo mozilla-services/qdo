@@ -29,7 +29,7 @@ class Worker(object):
         self.settings = settings
         self.shutdown = False
         self.name = "%s-%s" % (socket.getfqdn(), os.getpid())
-        self.zknode = None
+        self.zk_worker_node = None
         self.configure()
         self.messages = deque()
         self.job = None
@@ -73,7 +73,7 @@ class Worker(object):
 
     def register(self):
         """Register this worker with Zookeeper."""
-        self.zknode = ZkNode(self.zkconn, "/workers/%s" % self.name,
+        self.zk_worker_node = ZkNode(self.zkconn, "/workers/%s" % self.name,
             create_mode=zookeeper.EPHEMERAL)
 
     def unregister(self):
