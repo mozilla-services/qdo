@@ -49,6 +49,7 @@ class Worker(object):
 
         This is the main method of the worker.
         """
+        self.setup_zookeeper()
         self.register()
         try:
             while True:
@@ -64,10 +65,12 @@ class Worker(object):
         finally:
             self.unregister()
 
+    def setup_zookeeper(self):
+        """Setup global data structures in Zookeeper."""
+        ZkNode(self.zkconn, "/workers")
+
     def register(self):
         """Register this worker with Zookeeper."""
-        # add workers node to Zookeeper
-        ZkNode(self.zkconn, "/workers")
         self.zknode = ZkNode(self.zkconn, "/workers/%s" % self.name,
             create_mode=zookeeper.EPHEMERAL)
 

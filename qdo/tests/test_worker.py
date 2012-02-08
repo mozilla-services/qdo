@@ -92,8 +92,14 @@ class TestWorker(unittest.TestCase):
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(len(worker.messages), 0)
 
+    def test_setup_zookeeper(self):
+        worker = self._make_one()
+        worker.setup_zookeeper()
+        self.assertTrue(worker.zkconn.exists('/workers'))
+
     def test_register(self):
         worker = self._make_one()
+        worker.setup_zookeeper()
         worker.register()
         self.assertTrue(worker.zkconn.exists('/workers'))
         children = worker.zkconn.get_children('/workers')
@@ -101,6 +107,7 @@ class TestWorker(unittest.TestCase):
 
     def test_register_twice(self):
         worker = self._make_one()
+        worker.setup_zookeeper()
         worker.register()
         self.assertTrue(worker.zkconn.exists('/workers'))
         children = worker.zkconn.get_children('/workers')
@@ -112,6 +119,7 @@ class TestWorker(unittest.TestCase):
 
     def test_unregister(self):
         worker = self._make_one()
+        worker.setup_zookeeper()
         worker.register()
         self.assertTrue(worker.zkconn.exists('/workers'))
         children = worker.zkconn.get_children('/workers')
