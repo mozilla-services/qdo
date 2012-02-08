@@ -34,20 +34,35 @@ class TestWorkerConfig(unittest.TestCase):
 
 class TestWorker(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         from qdo.worker import ZOO_DEFAULT_NS
-        zkconn = ZooKeeper('127.0.0.1:2181', wait=True)
         root = '/' + ZOO_DEFAULT_NS
-        zkconn.delete_recursive(root)
-        ZkNode(zkconn, root)
-        zkconn.close()
+        cls.zkconn = ZooKeeper('127.0.0.1:2181', wait=True)
+        cls.zkconn.delete_recursive(root)
+        ZkNode(cls.zkconn, root)
+        cls.zkconn.close()
+        cls.zkconn = ZooKeeper('127.0.0.1:2181' + root, wait=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.zkconn.close()
+
+    def setUp(self):
+        for child in self.zkconn.get_children('/'):
+            self.zkconn.delete_recursive('/' + child)
+
+    def tearDown(self):
+        if self.worker and self.worker.zkconn.handle is not None:
+            self.worker.zkconn.close()
 
     def _make_one(self, extra=None):
         from qdo.worker import Worker
         settings = SettingsDict()
         if extra is not None:
             settings.update(extra)
-        return Worker(settings)
+        self.worker = Worker(settings)
+        return self.worker
 
     def test_work(self):
         worker = self._make_one()
@@ -76,6 +91,13 @@ class TestWorker(unittest.TestCase):
         worker.job = stop
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(len(worker.messages), 0)
+
+    def test_register(self):
+        worker = self._make_one()
+        worker.register()
+        self.assertTrue(worker.zkconn.exists('/workers'))
+        children = worker.zkconn.get_children('/workers')
+        self.assertEqual(len(children), 1)
 
     def test_unregister(self):
         from qdo.worker import ZOO_DEFAULT_NS
