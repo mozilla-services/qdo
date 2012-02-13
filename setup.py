@@ -14,6 +14,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
 reqs = [
     'argparse',
+    'metlog-py',
     'mozsvc',
     'zc.zk',
     'zktools',
@@ -22,7 +23,6 @@ reqs = [
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if not on_rtd:
     reqs.extend([
-        'metlog',
     ])
 
 setup(name='qdo',
