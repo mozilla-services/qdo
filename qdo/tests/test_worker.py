@@ -66,20 +66,19 @@ class TestWorker(unittest.TestCase):
 
     def test_work(self):
         worker = self._make_one()
-        worker.messages.append(json.dumps({'msgid': 1}))
-        worker.messages.append(json.dumps({'msgid': 2}))
+        worker.queue._add(json.dumps({'msgid': 1}))
+        worker.queue._add(json.dumps({'msgid': 2}))
 
         def stop(message):
             raise KeyboardInterrupt
 
         worker.job = stop
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual(len(worker.messages), 1)
 
     def test_work_twice(self):
         worker = self._make_one()
-        worker.messages.append(json.dumps({'msgid': 1}))
-        worker.messages.append(json.dumps({'msgid': 2}))
+        worker.queue._add(json.dumps({'msgid': 1}))
+        worker.queue._add(json.dumps({'msgid': 2}))
 
         def stop(message):
             data = json.loads(message)
@@ -90,7 +89,6 @@ class TestWorker(unittest.TestCase):
 
         worker.job = stop
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual(len(worker.messages), 0)
 
     def test_setup_zookeeper(self):
         worker = self._make_one()

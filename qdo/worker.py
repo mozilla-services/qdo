@@ -3,7 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from collections import deque
 import os
 import time
 import socket
@@ -12,6 +11,7 @@ import zookeeper
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
+from qdo.queue import Queue
 from qdo.utils import metlogger
 
 ZOO_DEFAULT_NS = 'mozilla-qdo'
@@ -31,7 +31,7 @@ class Worker(object):
         self.name = "%s-%s" % (socket.getfqdn(), os.getpid())
         self.zk_worker_node = None
         self.configure()
-        self.messages = deque()
+        self.queue = Queue()
         self.job = None
 
     def configure(self):
@@ -56,7 +56,7 @@ class Worker(object):
                 if self.shutdown:
                     break
                 try:
-                    message = self.messages.popleft()
+                    message = self.queue.pop()
                     if self.job:
                         self.job(message)
                 except IndexError:
