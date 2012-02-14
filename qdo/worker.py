@@ -15,8 +15,6 @@ from qdo.queue import Queue
 from qdo.queue import QueueyConnection
 from qdo.utils import metlogger
 
-ZOO_DEFAULT_NS = 'mozilla-qdo'
-
 
 class Worker(object):
     """A Worker works on jobs"""
@@ -38,9 +36,9 @@ class Worker(object):
         """Configure the worker based on the configuration settings.
         """
         qdo_section = self.settings.getsection('qdo-worker')
-        self.wait_interval = qdo_section.get('wait_interval', 5)
-        zkhost = qdo_section.get('zookeeper_connection', '127.0.0.1:2181')
-        zkns = qdo_section.get('zookeeper_namespace', ZOO_DEFAULT_NS)
+        self.wait_interval = qdo_section['wait_interval']
+        zkhost = qdo_section['zookeeper_connection']
+        zkns = qdo_section['zookeeper_namespace']
         # TODO: handle connection failure
         self.zkconn = ZooKeeper(zkhost + '/' + zkns)
         self.queuey_conn = queuey_conn = QueueyConnection()

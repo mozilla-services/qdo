@@ -9,9 +9,10 @@ import os.path
 import sys
 
 import pkg_resources
-from mozsvc.config import load_into_settings, SettingsDict
+from mozsvc.config import load_into_settings
 
 from qdo import worker
+from qdo.config import QdoSettings
 
 DEFAULT_CONFIGFILE = os.path.join(os.curdir, 'etc', 'qdo-worker.conf')
 
@@ -39,7 +40,7 @@ def parse_config(filename, settings):
 
 def run(args=sys.argv[1:]):
     arguments = parse_args(args)
-    settings = SettingsDict()
+    settings = QdoSettings()
     config = parse_config(arguments.configfile, settings)
     if config is None:
         print('Configuration file not found or cannot be read.')

@@ -6,37 +6,17 @@
 import json
 import unittest
 
-from mozsvc.config import SettingsDict
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
-
-class TestWorkerConfig(unittest.TestCase):
-
-    def _make_one(self, extra=None):
-        from qdo.worker import Worker
-        settings = SettingsDict()
-        if extra is not None:
-            settings.update(extra)
-        return Worker(settings)
-
-    def test_configure(self):
-        extra = {'qdo-worker.wait_interval': 30}
-        worker = self._make_one(extra)
-        self.assertEqual(worker.wait_interval, 30)
-
-    def test_work_shutdown(self):
-        worker = self._make_one()
-        worker.shutdown = True
-        worker.work()
-        self.assertEqual(worker.shutdown, True)
+from qdo.config import QdoSettings
+from qdo.config import ZOO_DEFAULT_NS
 
 
 class TestWorker(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        from qdo.worker import ZOO_DEFAULT_NS
         root = '/' + ZOO_DEFAULT_NS
         cls.zkconn = ZooKeeper('127.0.0.1:2181', wait=True)
         cls.zkconn.delete_recursive(root)
@@ -58,7 +38,7 @@ class TestWorker(unittest.TestCase):
 
     def _make_one(self, extra=None):
         from qdo.worker import Worker
-        settings = SettingsDict()
+        settings = QdoSettings()
         if extra is not None:
             settings.update(extra)
         self.worker = Worker(settings)
@@ -89,6 +69,12 @@ class TestWorker(unittest.TestCase):
 
         worker.job = stop
         self.assertRaises(KeyboardInterrupt, worker.work)
+
+    def test_work_shutdown(self):
+        worker = self._make_one()
+        worker.shutdown = True
+        worker.work()
+        self.assertEqual(worker.shutdown, True)
 
     def test_setup_zookeeper(self):
         worker = self._make_one()
