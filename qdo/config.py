@@ -9,12 +9,14 @@ ZOO_DEFAULT_NS = 'mozilla-qdo'
 
 
 class QdoSettings(SettingsDict):
+    """Settings representation including default values"""
 
     def __init__(self):
         super(QdoSettings, self).__init__()
         self.load_defaults()
 
     def load_defaults(self):
+        """Populate settings with default values"""
         self['qdo-worker.wait_interval'] = 5
         self['qdo-worker.zookeeper_connection'] = '127.0.0.1:2181'
         self['qdo-worker.zookeeper_namespace'] = ZOO_DEFAULT_NS
