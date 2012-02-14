@@ -20,7 +20,7 @@ distribute==0.6.24
 docutils==0.8.1
 flake8==1.0
 meld3==0.6.8
-metlog-py==0.8dev
+metlog-py==0.8
 nose==1.1.2
 ordereddict==1.1
 pypi2rpm==0.5.9
