@@ -6,15 +6,32 @@
 from collections import deque
 
 
-class Queue(object):
+class QueueyConnection(object):
 
-    def __init__(self, server_url=''):
-        """Create a queue containing messages
+    def __init__(self, server_url='', application_key=''):
+        """Represents a connection to one Queuey server
 
         :param server_url: Base URL of the Queuey server
         :type server_url: str
+        :param application_key: The applications key
+        :type application_key: str
         """
         self.server_url = server_url
+        self.application_key = application_key
+
+
+class Queue(object):
+
+    def __init__(self, connection, queue_name=''):
+        """Create a queue containing messages
+
+        :param connection: A QueueyConnection object
+        :type server_url: object
+        :param queue_name: The queue name (a uuid4 hash)
+        :type queue_name: str
+        """
+        self.connection = connection
+        self.queue_name = queue_name
         self._messages = deque()
 
     def pop(self):

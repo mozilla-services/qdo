@@ -7,11 +7,23 @@ import json
 import unittest
 
 
+class TestQueueyConnection(unittest.TestCase):
+
+    def _make_one(self):
+        from qdo.queue import QueueyConnection
+        return QueueyConnection()
+
+    def test_init(self):
+        conn = self._make_one()
+        self.assertTrue(conn)
+
+
 class TestQueue(unittest.TestCase):
 
     def _make_one(self):
-        from qdo.queue import Queue
-        return Queue()
+        from qdo.queue import Queue, QueueyConnection
+        conn = QueueyConnection()
+        return Queue(conn)
 
     def test_pop(self):
         queue = self._make_one()

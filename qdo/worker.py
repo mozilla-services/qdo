@@ -12,6 +12,7 @@ from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
 from qdo.queue import Queue
+from qdo.queue import QueueyConnection
 from qdo.utils import metlogger
 
 ZOO_DEFAULT_NS = 'mozilla-qdo'
@@ -31,7 +32,6 @@ class Worker(object):
         self.name = "%s-%s" % (socket.getfqdn(), os.getpid())
         self.zk_worker_node = None
         self.configure()
-        self.queue = Queue()
         self.job = None
 
     def configure(self):
@@ -43,6 +43,8 @@ class Worker(object):
         zkns = qdo_section.get('zookeeper_namespace', ZOO_DEFAULT_NS)
         # TODO: handle connection failure
         self.zkconn = ZooKeeper(zkhost + '/' + zkns)
+        self.queuey_conn = queuey_conn = QueueyConnection()
+        self.queue = Queue(queuey_conn)
 
     def work(self):
         """Work on jobs
