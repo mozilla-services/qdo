@@ -16,6 +16,7 @@ reqs = [
     'argparse',
     'metlog-py',
     'mozsvc',
+    'requests',
     'zc.zk',
     'zktools',
 ]
