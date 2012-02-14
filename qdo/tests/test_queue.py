@@ -25,10 +25,10 @@ class TestQueue(unittest.TestCase):
         conn = QueueyConnection()
         return Queue(conn)
 
-    def test_pop(self):
+    def test_get(self):
         queue = self._make_one()
         test_message = json.dumps({'msgid': 1})
         queue._add(test_message)
-        message = queue.pop()
+        message = queue.get()
         self.assertTrue(message)
         self.assertEqual(message, test_message)

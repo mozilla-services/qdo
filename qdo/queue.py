@@ -34,8 +34,21 @@ class Queue(object):
         self.queue_name = queue_name
         self._messages = deque()
 
-    def pop(self):
-        """Pop one message from the queue."""
+    def get(self, since_timestamp=None, limit=100, order='descending',
+            partition=1):
+        """Returns messages for the queue, by default from newest to oldest.
+
+        :param since_timestamp: All messages newer than this timestamp,
+            should be formatted as seconds since epoch in GMT
+        :type since_timestamp: int
+        :param limit: Only return N number of messages, defaults to 100
+        :type limit: int
+        :param order: 'descending' or 'ascending', defaults to descending
+        :type order: str
+        :param partition: A specific partition number to retrieve messages
+            from. Defaults to retrieving messages from partition 1.
+        :type partition: int
+        """
         message = self._messages.popleft()
         return message
 

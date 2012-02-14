@@ -58,7 +58,7 @@ class Worker(object):
                 if self.shutdown:
                     break
                 try:
-                    message = self.queue.pop()
+                    message = self.queue.get()
                     if self.job:
                         self.job(message)
                 except IndexError:
