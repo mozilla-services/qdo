@@ -37,8 +37,9 @@ class Worker(object):
         """
         qdo_section = self.settings.getsection('qdo-worker')
         self.wait_interval = qdo_section['wait_interval']
-        zkhost = qdo_section['zookeeper_connection']
-        zkns = qdo_section['zookeeper_namespace']
+        zk_section = self.settings.getsection('zookeeper')
+        zkhost = zk_section['connection']
+        zkns = zk_section['namespace']
         # TODO: handle connection failure
         self.zkconn = ZooKeeper(zkhost + '/' + zkns)
         queuey_section = self.settings.getsection('queuey')

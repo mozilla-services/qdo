@@ -18,8 +18,9 @@ class QdoSettings(SettingsDict):
     def load_defaults(self):
         """Populate settings with default values"""
         self['qdo-worker.wait_interval'] = 5
-        self['qdo-worker.zookeeper_connection'] = '127.0.0.1:2181'
-        self['qdo-worker.zookeeper_namespace'] = ZOO_DEFAULT_NS
 
         self['queuey.url'] = 'http://127.0.0.1:5000'
         self['queuey.application_key'] = ''
+
+        self['zookeeper.connection'] = '127.0.0.1:2181'
+        self['zookeeper.namespace'] = ZOO_DEFAULT_NS
