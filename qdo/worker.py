@@ -41,7 +41,9 @@ class Worker(object):
         zkns = qdo_section['zookeeper_namespace']
         # TODO: handle connection failure
         self.zkconn = ZooKeeper(zkhost + '/' + zkns)
-        self.queuey_conn = queuey_conn = QueueyConnection()
+        queuey_section = self.settings.getsection('queuey')
+        self.queuey_conn = queuey_conn = QueueyConnection(
+            queuey_section['url'], queuey_section['application_key'])
         self.queue = Queue(queuey_conn)
 
     def work(self):
