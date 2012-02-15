@@ -55,7 +55,7 @@ class Worker(object):
         self.setup_zookeeper()
         self.register()
         try:
-            while True:
+            while 1:
                 if self.shutdown:
                     break
                 try:
