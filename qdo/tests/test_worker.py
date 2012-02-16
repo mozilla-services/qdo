@@ -33,7 +33,9 @@ class TestWorker(unittest.TestCase):
             self.zkconn.delete_recursive('/' + child)
 
     def tearDown(self):
-        if self.worker and self.worker.zkconn.handle is not None:
+        if (self.worker and self.worker.zkconn and
+            self.worker.zkconn.handle is not None):
+
             self.worker.zkconn.close()
 
     def _make_one(self, extra=None):
@@ -42,6 +44,11 @@ class TestWorker(unittest.TestCase):
         if extra is not None:
             settings.update(extra)
         self.worker = Worker(settings)
+
+        def no_connect():
+            # disable queuey connection
+            pass
+        self.worker.queuey_conn.connect = no_connect
         return self.worker
 
     def test_work(self):

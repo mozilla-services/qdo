@@ -4,11 +4,15 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from collections import deque
+from urlparse import urljoin
+
+import requests
 
 
 class QueueyConnection(object):
 
-    def __init__(self, server_url='', application_key=''):
+    def __init__(self, server_url='http://127.0.0.1:5000',
+                 application_key=''):
         """Represents a connection to one Queuey server
 
         :param server_url: Base URL of the Queuey server
@@ -18,6 +22,12 @@ class QueueyConnection(object):
         """
         self.server_url = server_url
         self.application_key = application_key
+        headers = {'X-Application-Key': application_key}
+        self.session = requests.session(headers=headers, timeout=2.0)
+
+    def connect(self):
+        """Establish connection to Queuey heartbeat url."""
+        self.session.get(urljoin(self.server_url, '__heartbeat__'))
 
 
 class Queue(object):

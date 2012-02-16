@@ -28,6 +28,7 @@ class Worker(object):
         self.settings = settings
         self.shutdown = False
         self.name = "%s-%s" % (socket.getfqdn(), os.getpid())
+        self.zkconn = None
         self.zk_worker_node = None
         self.configure()
         self.job = None
@@ -40,8 +41,7 @@ class Worker(object):
         zk_section = self.settings.getsection('zookeeper')
         zkhost = zk_section['connection']
         zkns = zk_section['namespace']
-        # TODO: handle connection failure
-        self.zkconn = ZooKeeper(zkhost + '/' + zkns)
+        self.zk_root_url = zkhost + '/' + zkns
         queuey_section = self.settings.getsection('queuey')
         self.queuey_conn = queuey_conn = QueueyConnection(
             queuey_section['url'], queuey_section['application_key'])
@@ -52,6 +52,9 @@ class Worker(object):
 
         This is the main method of the worker.
         """
+        # Try Queuey heartbeat connection
+        self.queuey_conn.connect()
+        # Set up Zookeeper
         self.setup_zookeeper()
         self.register()
         try:
@@ -70,6 +73,7 @@ class Worker(object):
 
     def setup_zookeeper(self):
         """Setup global data structures in Zookeeper."""
+        self.zkconn = ZooKeeper(self.zk_root_url)
         ZkNode(self.zkconn, "/workers")
         ZkNode(self.zkconn, "/queues")
         ZkNode(self.zkconn, "/queue-locks")

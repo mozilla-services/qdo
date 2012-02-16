@@ -6,16 +6,22 @@
 import json
 import unittest
 
+import requests
+
 
 class TestQueueyConnection(unittest.TestCase):
 
-    def _make_one(self):
+    def _make_one(self, **kwargs):
         from qdo.queue import QueueyConnection
-        return QueueyConnection()
+        return QueueyConnection(**kwargs)
 
     def test_init(self):
-        conn = self._make_one()
-        self.assertTrue(conn)
+        conn = self._make_one(server_url='http://127.0.0.1:1234')
+        self.assertEqual(conn.server_url, 'http://127.0.0.1:1234')
+
+    def test_connect(self):
+        conn = self._make_one(server_url='http://127.0.0.1:9')
+        self.assertRaises(requests.ConnectionError, conn.connect)
 
 
 class TestQueue(unittest.TestCase):
