@@ -38,8 +38,8 @@ venusian==1.0a2
 virtualenv==1.6.4
 wsgiref==0.1.2
 zkpython==0.4
+zktools==0.2
 zope.deprecation==3.5.0
 zope.interface==3.8.0
 
 -e git://github.com/mozilla-services/mozservices.git#egg=mozsvc-dev
--e git://github.com/mozilla-services/zktools.git#egg=zktools-dev
