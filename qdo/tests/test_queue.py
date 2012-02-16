@@ -6,6 +6,7 @@
 import json
 import unittest
 
+import mock
 import requests
 
 
@@ -29,12 +30,14 @@ class TestQueue(unittest.TestCase):
     def _make_one(self):
         from qdo.queue import Queue, QueueyConnection
         conn = QueueyConnection()
-        return Queue(conn)
+        return Queue(conn, '1234')
 
     def test_get(self):
         queue = self._make_one()
-        test_message = json.dumps({'msgid': 1})
-        queue._add(test_message)
-        message = queue.get()
+        test_message = json.dumps({u'msgid': 1})
+        with mock.patch('qdo.queue.QueueyConnection.get') as get_mock:
+            get_mock.return_value.text = unicode(test_message, 'utf-8')
+            get_mock.return_value.status_code = 200
+            message = queue.get()
         self.assertTrue(message)
         self.assertEqual(message, test_message)

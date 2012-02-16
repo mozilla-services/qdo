@@ -4,6 +4,7 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from collections import deque
+import json
 from urlparse import urljoin
 
 import requests
@@ -29,6 +30,11 @@ class QueueyConnection(object):
         """Establish connection to Queuey heartbeat url."""
         self.session.head(urljoin(self.server_url, '__heartbeat__'))
 
+    def get(self, url, params):
+        """Perform an actual get request against Queuey."""
+        return self.session.get(
+            urljoin(self.server_url, url), params=params, timeout=2.0)
+
 
 class Queue(object):
 
@@ -42,6 +48,7 @@ class Queue(object):
         """
         self.connection = connection
         self.queue_name = queue_name
+        self.queue_get_url = queue_name + '/get_messages'
         self._messages = deque()
 
     def get(self, since_timestamp=None, limit=100, order='descending',
@@ -59,9 +66,16 @@ class Queue(object):
             from. Defaults to retrieving messages from partition 1.
         :type partition: int
         """
-        message = self._messages.popleft()
-        return message
+        params = {
+            'limit': limit,
+            'order': order,
+            'partition': partition,
+        }
+        if since_timestamp is not None:
+            params['since_timestamp'] = since_timestamp
 
-    def _add(self, message):
-        """Internal testing API to directly add messages to the queue."""
-        self._messages.append(message)
+        response = self.connection.get(self.queue_get_url, params=params)
+        if response.status_code == 200:
+            return response.text
+        # TODO
+        return

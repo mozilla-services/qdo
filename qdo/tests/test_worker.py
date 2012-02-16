@@ -6,6 +6,7 @@
 import json
 import unittest
 
+import mock
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
@@ -53,19 +54,19 @@ class TestWorker(unittest.TestCase):
 
     def test_work(self):
         worker = self._make_one()
-        worker.queue._add(json.dumps({'msgid': 1}))
-        worker.queue._add(json.dumps({'msgid': 2}))
 
         def stop(message):
             raise KeyboardInterrupt
 
         worker.job = stop
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        test_messages = json.dumps({u'msgid': 1, u'msgid': 2})
+        with mock.patch('qdo.queue.QueueyConnection.get') as get_mock:
+            get_mock.return_value.text = unicode(test_messages, 'utf-8')
+            get_mock.return_value.status_code = 200
+            self.assertRaises(KeyboardInterrupt, worker.work)
 
     def test_work_twice(self):
         worker = self._make_one()
-        worker.queue._add(json.dumps({'msgid': 1}))
-        worker.queue._add(json.dumps({'msgid': 2}))
 
         def stop(message):
             data = json.loads(message)
@@ -75,7 +76,11 @@ class TestWorker(unittest.TestCase):
             raise KeyboardInterrupt
 
         worker.job = stop
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        test_messages = json.dumps({u'msgid': 1, u'msgid': 2})
+        with mock.patch('qdo.queue.QueueyConnection.get') as get_mock:
+            get_mock.return_value.text = unicode(test_messages, 'utf-8')
+            get_mock.return_value.status_code = 200
+            self.assertRaises(KeyboardInterrupt, worker.work)
 
     def test_work_shutdown(self):
         worker = self._make_one()
