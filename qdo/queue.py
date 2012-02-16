@@ -27,7 +27,7 @@ class QueueyConnection(object):
 
     def connect(self):
         """Establish connection to Queuey heartbeat url."""
-        self.session.get(urljoin(self.server_url, '__heartbeat__'))
+        self.session.head(urljoin(self.server_url, '__heartbeat__'))
 
 
 class Queue(object):
