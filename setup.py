@@ -15,6 +15,7 @@ CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 reqs = [
     'argparse',
     'metlog-py',
+    'mock',
     'mozsvc',
     'requests',
     'zc.zk',
