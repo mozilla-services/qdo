@@ -37,7 +37,7 @@ unittest2==0.5.1
 venusian==1.0a2
 virtualenv==1.6.4
 wsgiref==0.1.2
-zkpython==0.4
+zc-zookeeper-static==3.3.4.0
 zktools==0.2.1
 zope.deprecation==3.5.0
 zope.interface==3.8.0
