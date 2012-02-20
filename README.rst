@@ -47,9 +47,6 @@ Afterwards install Cassandra and Zookeeper::
     make cassandra
     make zookeeper
 
-See and follow additional notes about Zookeeper C extension at
-https://github.com/mozilla-services/queuey
-
 Start Cassandra once in foreground mode and install the schema::
 
     ./bin/cassandra/bin/cassandra -f
