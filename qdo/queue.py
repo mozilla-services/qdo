@@ -12,6 +12,8 @@ import requests
 
 class QueueyConnection(object):
 
+    timeout = 2.0
+
     def __init__(self, server_url='http://127.0.0.1:5000',
                  application_key=''):
         """Represents a connection to one Queuey server
@@ -23,17 +25,24 @@ class QueueyConnection(object):
         """
         self.server_url = server_url
         self.application_key = application_key
-        headers = {'X-Application-Key': application_key}
-        self.session = requests.session(headers=headers, timeout=2.0)
+        self.base_url = self.server_url + '/queuey/'
+        headers = {'Authorization': 'Application %s' % application_key}
+        self.session = requests.session(
+            headers=headers, timeout=self.timeout)
 
     def connect(self):
         """Establish connection to Queuey heartbeat url."""
         return self.session.head(urljoin(self.server_url, '__heartbeat__'))
 
-    def get(self, url, params):
-        """Perform an actual get request against Queuey."""
-        return self.session.get(
-            urljoin(self.server_url, url), params=params, timeout=2.0)
+    def get(self, url='', params=None):
+        """Perform an actual GET request against Queuey."""
+        return self.session.get(urljoin(self.base_url, url),
+            params=params, timeout=self.timeout)
+
+    def post(self, url='', params=None, data=''):
+        """Perform an actual POST request against Queuey."""
+        return self.session.post(urljoin(self.base_url, url),
+            params=params, timeout=self.timeout, data=data)
 
 
 class Queue(object):
@@ -48,33 +57,32 @@ class Queue(object):
         """
         self.connection = connection
         self.queue_name = queue_name
-        self.queue_get_url = queue_name + '/get_messages'
         self._messages = deque()
 
-    def get(self, since_timestamp=None, limit=100, order='descending',
-            partition=1):
+    def get(self, since=None, limit=100, order='descending', partitions=1):
         """Returns messages for the queue, by default from newest to oldest.
 
-        :param since_timestamp: All messages newer than this timestamp,
-            should be formatted as seconds since epoch in GMT
-        :type since_timestamp: int
+        :param since: All messages newer than this timestamp, should be
+            formatted as seconds since epoch in GMT
+        :type since: str
         :param limit: Only return N number of messages, defaults to 100
         :type limit: int
         :param order: 'descending' or 'ascending', defaults to descending
         :type order: str
-        :param partition: A specific partition number to retrieve messages
-            from. Defaults to retrieving messages from partition 1.
-        :type partition: int
+        :param partitions: A specific partition number to retrieve messages
+            from or a comma separated list of partitions. Defaults to
+            retrieving messages from partition 1.
+        :type partitions: str
         """
         params = {
             'limit': limit,
             'order': order,
-            'partition': partition,
+            'partitions': partitions,
         }
-        if since_timestamp is not None:
-            params['since_timestamp'] = since_timestamp
+        if since is not None:
+            params['since'] = since
 
-        response = self.connection.get(self.queue_get_url, params=params)
+        response = self.connection.get(self.queue_name, params=params)
         if response.status_code == 200:
             return response.text
         # TODO
