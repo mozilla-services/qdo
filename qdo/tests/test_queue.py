@@ -66,10 +66,9 @@ class TestQueue(unittest.TestCase):
         bodies = [m[u'body'] for m in result[u'messages']]
         self.assertTrue(u'Hello world!' in bodies)
 
-    @unittest.expectedFailure
     def test_get_since(self):
         queue = self._make_one()
         # query messages in the future
-        result = queue.get(since=str(int(time.time() + 1000)))
+        result = json.loads(queue.get(since=time.time() + 1000))
         self.assertTrue(u'messages' in result)
         self.assertEqual(len(result[u'messages']), 0)
