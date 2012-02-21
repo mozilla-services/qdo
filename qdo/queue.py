@@ -86,5 +86,5 @@ class Queue(object):
         response = self.connection.get(self.queue_name, params=params)
         if response.status_code == 200:
             return response.text
-        # TODO
-        return
+        # failure
+        return response.raise_for_status()
