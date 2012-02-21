@@ -20,7 +20,8 @@ class TestWorker(unittest.TestCase):
     def setUpClass(cls):
         root = '/' + ZOO_DEFAULT_NS
         cls.zkconn = ZooKeeper('127.0.0.1:2181', wait=True)
-        cls.zkconn.delete_recursive(root)
+        if cls.zkconn.exists(root):
+            cls.zkconn.delete_recursive(root)
         ZkNode(cls.zkconn, root)
         cls.zkconn.close()
         cls.zkconn = ZooKeeper('127.0.0.1:2181' + root, wait=True)
