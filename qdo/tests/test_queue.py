@@ -16,11 +16,12 @@ class TestQueueyConnection(unittest.TestCase):
         from qdo.queue import QueueyConnection
         return QueueyConnection(**kwargs)
 
-    def test_init(self):
-        conn = self._make_one(server_url='http://127.0.0.1:1234')
-        self.assertEqual(conn.server_url, 'http://127.0.0.1:1234')
-
     def test_connect(self):
+        conn = self._make_one(server_url='http://127.0.0.1:5000')
+        response = conn.connect()
+        self.assertEqual(response.status_code, 200)
+
+    def test_connect_fail(self):
         conn = self._make_one(server_url='http://127.0.0.1:9')
         self.assertRaises(requests.ConnectionError, conn.connect)
 
