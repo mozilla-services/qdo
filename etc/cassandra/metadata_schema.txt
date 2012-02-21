@@ -1,0 +1,41 @@
+create keyspace MetadataStore
+    with strategy_options={replication_factor:1}
+    and placement_strategy = 'org.apache.cassandra.locator.SimpleStrategy';
+
+use MetadataStore;
+
+create column family ApplicationQueueData
+    with comparator = UTF8Type
+    and key_validation_class = UTF8Type
+    and default_validation_class = CounterColumnType
+    and column_metadata = [{
+        column_name: queue_count,
+        validation_class: CounterColumnType
+    }];
+
+create column family Queues
+    with comparator = UTF8Type
+    and key_validation_class = UTF8Type
+    and rows_cached = 1000
+    and compression_options = [{
+        sstable_compression: SnappyCompressor,
+        chunk_length_kb: 64
+    }]
+    and column_metadata = [{
+        column_name: partitions,
+        validation_class: IntegerType
+    }, {
+        column_name: application,
+        validation_class: UTF8Type,
+        index_type: KEYS
+    }, {
+        column_name: created,
+        validation_class: FloatType
+    }, {
+        column_name: type,
+        validation_class: UTF8Type,
+        index_type: KEYS
+    }, {
+        column_name: consistency,
+        validation_class: UTF8Type
+    }];

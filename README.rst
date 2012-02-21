@@ -50,7 +50,8 @@ Afterwards install Cassandra and Zookeeper::
 Start Cassandra once in foreground mode and install the schema::
 
     ./bin/cassandra/bin/cassandra -f
-    ./bin/cassandra/bin/cassandra-cli -host localhost --file etc/cassandra/schema.txt
+    ./bin/cassandra/bin/cassandra-cli -host localhost --file etc/cassandra/message_schema.txt
+    ./bin/cassandra/bin/cassandra-cli -host localhost --file etc/cassandra/metadata_schema.txt
 
 Development
 ===========
