@@ -56,7 +56,7 @@ Start Cassandra once in foreground mode and install the schema::
 Development
 ===========
 
-Start Cassandra and Zookeeper via supervisor::
+Start Cassandra, Zookeeper and a Queuey instance via supervisor::
 
     bin/supervisord
 
