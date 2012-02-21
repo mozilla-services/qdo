@@ -3,7 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from collections import deque
 import json
 from urlparse import urljoin
 
@@ -57,7 +56,6 @@ class Queue(object):
         """
         self.connection = connection
         self.queue_name = queue_name
-        self._messages = deque()
 
     def get(self, since=None, limit=100, order='ascending', partitions=1):
         """Returns messages for the queue, by default from newest to oldest.
