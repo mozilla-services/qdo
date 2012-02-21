@@ -7,7 +7,6 @@ import json
 import time
 import unittest2 as unittest
 
-import mock
 import requests
 
 # as specified in the queuey-dev.ini
