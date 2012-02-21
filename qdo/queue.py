@@ -59,7 +59,7 @@ class Queue(object):
         self.queue_name = queue_name
         self._messages = deque()
 
-    def get(self, since=None, limit=100, order='descending', partitions=1):
+    def get(self, since=None, limit=100, order='ascending', partitions=1):
         """Returns messages for the queue, by default from newest to oldest.
 
         :param since: All messages newer than this timestamp or message id,
@@ -68,7 +68,7 @@ class Queue(object):
         :type since: str
         :param limit: Only return N number of messages, defaults to 100
         :type limit: int
-        :param order: 'descending' or 'ascending', defaults to descending
+        :param order: 'descending' or 'ascending', defaults to ascending
         :type order: str
         :param partitions: A specific partition number to retrieve messages
             from or a comma separated list of partitions. Defaults to
