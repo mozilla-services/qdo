@@ -70,6 +70,6 @@ class TestQueue(unittest.TestCase):
     def test_get_since(self):
         queue = self._make_one()
         # query messages in the future
-        result = queue.get(since=str(time.gmtime() + 1000))
+        result = queue.get(since=str(int(time.time() + 1000)))
         self.assertTrue(u'messages' in result)
         self.assertEqual(len(result[u'messages']), 0)
