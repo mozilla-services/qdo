@@ -62,8 +62,9 @@ class Queue(object):
     def get(self, since=None, limit=100, order='descending', partitions=1):
         """Returns messages for the queue, by default from newest to oldest.
 
-        :param since: All messages newer than this timestamp, should be
-            formatted as seconds since epoch in GMT
+        :param since: All messages newer than this timestamp or message id,
+            should be formatted as seconds since epoch in GMT, or the
+            hexadecimal message ID
         :type since: str
         :param limit: Only return N number of messages, defaults to 100
         :type limit: int
