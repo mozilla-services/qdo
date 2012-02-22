@@ -12,6 +12,8 @@ from requests.exceptions import HTTPError
 from requests.exceptions import Timeout
 import unittest2 as unittest
 
+from qdo import utils
+
 # as specified in the queuey-dev.ini
 TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
 
@@ -34,10 +36,12 @@ class TestQueueyConnection(unittest.TestCase):
 
     def test_connect_timeout(self):
         conn = self._make_one()
+        before = len(utils.metsender.msgs)
         with mock.patch('requests.sessions.Session.head') as head_mock:
             head_mock.side_effect = Timeout
             self.assertRaises(Timeout, conn.connect)
             self.assertEqual(len(head_mock.mock_calls), conn.retries)
+        self.assertEqual(len(utils.metsender.msgs), before + 3)
 
     def test_queue_list(self):
         conn = self._make_one()

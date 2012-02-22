@@ -9,6 +9,7 @@ from urlparse import urljoin
 import requests
 
 import qdo.exceptions
+from qdo.utils import metlogger
 
 
 class QueueyConnection(object):
@@ -39,7 +40,7 @@ class QueueyConnection(object):
             try:
                 response = self.session.head(url)
             except requests.Timeout, e:
-                pass
+                metlogger.incr('qdo.queuey_conn_timeout')
             else:
                 return response
         # raise timeout after all
