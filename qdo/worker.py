@@ -47,7 +47,7 @@ class Worker(object):
         self.queue = Queue(queuey_conn)
 
     def work(self):
-        """Work on jobs
+        """Work on jobs.
 
         This is the main method of the worker.
         """
