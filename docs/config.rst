@@ -13,18 +13,33 @@ For example::
 Settings
 ========
 
-All settings are specified in the `[qdo-worker]` section.
+Settings are organized into multiple sections.
+
+[qdo-worker]
+------------
 
 wait_interval
     Interval in seconds for which the worker pauses if it has no messages to
     work on. Defaults to 5 seconds.
 
-zookeeper_connection
+[queuey]
+--------
+
+url
+    The full URL to the Queuey instance, defaults to `http://127.0.0.1:5000`.
+
+application_key
+    The application key used for authorization.
+
+[zookeeper]
+-----------
+
+connection
     Which Zookeeper instance(s) to connect to. Defaults to `127.0.0.1:2181`.
     Multiple Zookeeper instances can be specified as a comma separated list:
     10.0.0.1:2181,10.0.0.2:2181,10.0.0.3:2181
 
-zookeeper_namespace
+namespace
     The path to the root Zookeeper node, under which `qdo` will store all its
     information. Defaults to `mozilla-qdo`. The node needs to be created
     before `qdo-worker` is run.
