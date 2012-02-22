@@ -26,7 +26,8 @@ wait_interval
 --------
 
 url
-    The full URL to the Queuey instance, defaults to `http://127.0.0.1:5000`.
+    The full URL to the :term:`Queuey` instance. Defaults to
+    `http://127.0.0.1:5000`.
 
 application_key
     The application key used for authorization.
@@ -35,11 +36,11 @@ application_key
 -----------
 
 connection
-    Which Zookeeper instance(s) to connect to. Defaults to `127.0.0.1:2181`.
-    Multiple Zookeeper instances can be specified as a comma separated list:
-    10.0.0.1:2181,10.0.0.2:2181,10.0.0.3:2181
+    Which :term:`Zookeeper` instance(s) to connect to. Defaults to
+    `127.0.0.1:2181`. Multiple :term:`Zookeeper` instances can be specified
+    as a comma separated list: 10.0.0.1:2181,10.0.0.2:2181,10.0.0.3:2181
 
 namespace
-    The path to the root Zookeeper node, under which `qdo` will store all its
-    information. Defaults to `mozilla-qdo`. The node needs to be created
-    before `qdo-worker` is run.
+    The path to the root :term:`Zookeeper` node, under which `qdo` will store
+    all its information. Defaults to `mozilla-qdo`. The node needs to be
+    created before `qdo-worker` is run.

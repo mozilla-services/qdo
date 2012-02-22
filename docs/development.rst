@@ -2,6 +2,9 @@
 Development
 ===========
 
+Development of qdo takes place on github at:
+https://github.com/mozilla-services/qdo
+
 Here's a list of useful docs and descriptions of some of the parts qdo is
 based on:
 

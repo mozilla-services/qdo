@@ -13,12 +13,13 @@ from qdo.utils import metlogger
 
 
 class QueueyConnection(object):
-    """Represents a connection to one Queuey server. The connection holds on
-    to a connection pool and automatically uses keep alive connections.
+    """Represents a connection to one :term:`Queuey` server. The connection
+    holds on to a connection pool and automatically uses keep alive
+    connections.
 
-    :param server_url: Base URL of the Queuey server
+    :param server_url: Base URL of the :term:`Queuey` server
     :type server_url: str
-    :param application_key: The applications key
+    :param application_key: The applications key used for authorization
     :type application_key: str
     """
 
@@ -37,8 +38,8 @@ class QueueyConnection(object):
             headers=headers, timeout=self.timeout)
 
     def connect(self):
-        """Establish a connection to the Queuey heartbeat url, retry up to
-        :py:attr:`retries` times on connection timeout.
+        """Establish a connection to the :term:`Queuey` heartbeat url, retry
+        up to :py:attr:`retries` times on connection timeout.
         """
         url = urljoin(self.server_url, '__heartbeat__')
         for n in range(self.retries):
@@ -52,7 +53,7 @@ class QueueyConnection(object):
         raise
 
     def get(self, url='', params=None):
-        """Perform a GET request against Queuey.
+        """Perform a GET request against :term:`Queuey`.
 
         :param url: Relative URL to get, without a leading slash.
         :type url: str
@@ -64,7 +65,7 @@ class QueueyConnection(object):
             params=params, timeout=self.timeout)
 
     def post(self, url='', params=None, data=''):
-        """Perform a POST request against Queuey.
+        """Perform a POST request against :term:`Queuey`.
 
         :param url: Relative URL to post to, without a leading slash.
         :type url: str

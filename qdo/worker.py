@@ -71,19 +71,19 @@ class Worker(object):
             self.unregister()
 
     def setup_zookeeper(self):
-        """Setup global data structures in Zookeeper."""
+        """Setup global data structures in :term:`Zookeeper`."""
         self.zkconn = ZooKeeper(self.zk_root_url)
         ZkNode(self.zkconn, "/workers")
         ZkNode(self.zkconn, "/queues")
         ZkNode(self.zkconn, "/queue-locks")
 
     def register(self):
-        """Register this worker with Zookeeper."""
+        """Register this worker with :term:`Zookeeper`."""
         self.zk_worker_node = ZkNode(self.zkconn, "/workers/%s" % self.name,
             create_mode=zookeeper.EPHEMERAL)
 
     def unregister(self):
-        """Unregister this worker from Zookeeper."""
+        """Unregister this worker from :term:`Zookeeper`."""
         self.zkconn.close()
 
 
