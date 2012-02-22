@@ -7,7 +7,8 @@ import json
 import time
 import unittest2 as unittest
 
-import requests
+from requests.exceptions import ConnectionError
+from requests.exceptions import HTTPError
 
 # as specified in the queuey-dev.ini
 TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
@@ -27,7 +28,7 @@ class TestQueueyConnection(unittest.TestCase):
 
     def test_connect_fail(self):
         conn = self._make_one(server_url='http://127.0.0.1:9')
-        self.assertRaises(requests.ConnectionError, conn.connect)
+        self.assertRaises(ConnectionError, conn.connect)
 
     def test_queue_list(self):
         conn = self._make_one()
@@ -72,3 +73,14 @@ class TestQueue(unittest.TestCase):
         result = json.loads(queue.get(since=time.time() + 1000))
         self.assertTrue(u'messages' in result)
         self.assertEqual(len(result[u'messages']), 0)
+
+    def test_get_error(self):
+        queue = self._make_one()
+        try:
+            result = queue.get(order='undefined')
+        except HTTPError, e:
+            self.assertEqual(e.args[0], 400)
+            messages = json.loads(e.args[1].text)[u'error_msg']
+            self.assertTrue(u'order' in messages, messages)
+        else:
+            self.fail('HTTPError not raised')

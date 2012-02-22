@@ -8,6 +8,8 @@ from urlparse import urljoin
 
 import requests
 
+import qdo.exceptions
+
 
 class QueueyConnection(object):
 
@@ -72,6 +74,8 @@ class Queue(object):
             from or a comma separated list of partitions. Defaults to
             retrieving messages from partition 1.
         :type partitions: str
+
+        In the error case a `qdo.exceptions.HTTPError` is raised.
         """
         params = {
             'limit': limit,
@@ -82,7 +86,7 @@ class Queue(object):
             params['since'] = since
 
         response = self.connection.get(self.queue_name, params=params)
-        if response.status_code == 200:
+        if response.ok:
             return response.text
         # failure
-        return response.raise_for_status()
+        raise qdo.exceptions.HTTPError(response.status_code, response)
