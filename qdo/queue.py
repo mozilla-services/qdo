@@ -13,19 +13,22 @@ from qdo.utils import metlogger
 
 
 class QueueyConnection(object):
+    """Represents a connection to one Queuey server. The connection holds on
+    to a connection pool and automatically uses keep alive connections.
 
+    :param server_url: Base URL of the Queuey server
+    :type server_url: str
+    :param application_key: The applications key
+    :type application_key: str
+    """
+
+    #: Number of retries on connection timeouts
     retries = 3
+    #: Connection timeout in seconds
     timeout = 2.0
 
     def __init__(self, server_url='http://127.0.0.1:5000',
                  application_key=''):
-        """Represents a connection to one Queuey server
-
-        :param server_url: Base URL of the Queuey server
-        :type server_url: str
-        :param application_key: The applications key
-        :type application_key: str
-        """
         self.server_url = server_url
         self.application_key = application_key
         self.base_url = self.server_url + '/queuey/'
@@ -34,7 +37,9 @@ class QueueyConnection(object):
             headers=headers, timeout=self.timeout)
 
     def connect(self):
-        """Establish connection to Queuey heartbeat url."""
+        """Establish a connection to the Queuey heartbeat url, retry up to
+        :py:attr:`retries` times on connection timeout.
+        """
         url = urljoin(self.server_url, '__heartbeat__')
         for n in range(self.retries):
             try:
@@ -47,26 +52,44 @@ class QueueyConnection(object):
         raise
 
     def get(self, url='', params=None):
-        """Perform an actual GET request against Queuey."""
+        """Perform a GET request against Queuey.
+
+        :param url: Relative URL to get, without a leading slash.
+        :type url: str
+        :param params: Additional query string parameters.
+        :type params: dict
+        :rtype: :py:class:`requests.models.Response`
+        """
         return self.session.get(urljoin(self.base_url, url),
             params=params, timeout=self.timeout)
 
     def post(self, url='', params=None, data=''):
-        """Perform an actual POST request against Queuey."""
+        """Perform a POST request against Queuey.
+
+        :param url: Relative URL to post to, without a leading slash.
+        :type url: str
+        :param params: Additional query string parameters.
+        :type params: dict
+        :param data: The body payload, either a string or a dict. A dict will
+            automatically be sent as form encoded data.
+        :type params: dict
+        :rtype: :py:class:`requests.models.Response`
+        """
         return self.session.post(urljoin(self.base_url, url),
             params=params, timeout=self.timeout, data=data)
 
 
 class Queue(object):
+    """Represents a queue containing messages.
+
+    :param connection: A
+        :py:class:`QueueyConnection <qdo.queue.QueueyConnection>` instance
+    :type server_url: object
+    :param queue_name: The queue name (a uuid4 hash)
+    :type queue_name: str
+    """
 
     def __init__(self, connection, queue_name=''):
-        """Create a queue containing messages
-
-        :param connection: A QueueyConnection object
-        :type server_url: object
-        :param queue_name: The queue name (a uuid4 hash)
-        :type queue_name: str
-        """
         self.connection = connection
         self.queue_name = queue_name
 
@@ -85,8 +108,8 @@ class Queue(object):
             from or a comma separated list of partitions. Defaults to
             retrieving messages from partition 1.
         :type partitions: str
-
-        In the error case a `qdo.exceptions.HTTPError` is raised.
+        :raises: :py:exc:`qdo.exceptions.HTTPError`
+        :rtype: unicode
         """
         params = {
             'limit': limit,

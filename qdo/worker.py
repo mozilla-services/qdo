@@ -17,14 +17,13 @@ from qdo.utils import metlogger
 
 
 class Worker(object):
-    """A Worker works on jobs"""
+    """A Worker works on jobs.
+
+    :param settings: Configuration settings
+    :type settings: dict
+    """
 
     def __init__(self, settings):
-        """Create a worker
-
-        :param settings: Configuration settings
-        :type settings: dict
-        """
         self.settings = settings
         self.shutdown = False
         self.name = "%s-%s" % (socket.getfqdn(), os.getpid())

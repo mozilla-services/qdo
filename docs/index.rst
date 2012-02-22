@@ -21,6 +21,7 @@ Contents
 
    config
    api
+   logging
    development
    internals
    changelog
