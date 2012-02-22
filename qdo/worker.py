@@ -66,7 +66,7 @@ class Worker(object):
                     if self.job:
                         self.job(message)
                 except IndexError:
-                    metlogger.incr('wait_for_jobs')
+                    metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
         finally:
             self.unregister()

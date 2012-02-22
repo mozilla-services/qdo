@@ -40,7 +40,7 @@ class QueueyConnection(object):
             try:
                 response = self.session.head(url)
             except requests.Timeout, e:
-                metlogger.incr('qdo.queuey_conn_timeout')
+                metlogger.incr('queuey.conn_timeout')
             else:
                 return response
         # raise timeout after all
