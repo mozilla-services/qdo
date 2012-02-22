@@ -36,3 +36,5 @@ future
 ------
 
 - look over design.rst - integrate into docs
+- reduce direct qdo dependencies (no pyramid please)
+- add back prod-reqs.txt / build rpm structure
