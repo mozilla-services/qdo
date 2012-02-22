@@ -13,6 +13,7 @@ import qdo.exceptions
 
 class QueueyConnection(object):
 
+    retries = 3
     timeout = 2.0
 
     def __init__(self, server_url='http://127.0.0.1:5000',
@@ -33,7 +34,16 @@ class QueueyConnection(object):
 
     def connect(self):
         """Establish connection to Queuey heartbeat url."""
-        return self.session.head(urljoin(self.server_url, '__heartbeat__'))
+        url = urljoin(self.server_url, '__heartbeat__')
+        for n in range(self.retries):
+            try:
+                response = self.session.head(url)
+            except requests.Timeout, e:
+                pass
+            else:
+                return response
+        # raise timeout after all
+        raise
 
     def get(self, url='', params=None):
         """Perform an actual GET request against Queuey."""
