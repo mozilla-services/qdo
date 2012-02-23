@@ -6,61 +6,18 @@
 import json
 import time
 
-import mock
-from requests.exceptions import ConnectionError
 from requests.exceptions import HTTPError
-from requests.exceptions import Timeout
 import unittest2 as unittest
-
-from qdo import utils
 
 # as specified in the queuey-dev.ini
 TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
 
 
-class TestQueueyConnection(unittest.TestCase):
-
-    def _make_one(self, server_url='http://127.0.0.1:5000'):
-        from qdo.queue import QueueyConnection
-        return QueueyConnection(
-            server_url=server_url, application_key=TEST_APP_KEY)
-
-    def test_connect(self):
-        conn = self._make_one()
-        response = conn.connect()
-        self.assertEqual(response.status_code, 200)
-
-    def test_connect_fail(self):
-        conn = self._make_one(server_url='http://127.0.0.1:9')
-        self.assertRaises(ConnectionError, conn.connect)
-
-    def test_connect_timeout(self):
-        conn = self._make_one()
-        before = len(utils.metsender.msgs)
-        with mock.patch('requests.sessions.Session.head') as head_mock:
-            head_mock.side_effect = Timeout
-            self.assertRaises(Timeout, conn.connect)
-            self.assertEqual(len(head_mock.mock_calls), conn.retries)
-        self.assertEqual(len(utils.metsender.msgs), before + 3)
-
-    def test_queue_list(self):
-        conn = self._make_one()
-        response = conn.get()
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue('queues' in response.text, response.text)
-
-    def test_queue_create(self):
-        conn = self._make_one()
-        response = conn.post()
-        self.assertEqual(response.status_code, 201)
-        result = json.loads(response.text)
-        self.assertTrue(u'queue_name' in result, result)
-
-
 class TestQueue(unittest.TestCase):
 
     def _make_one(self):
-        from qdo.queue import Queue, QueueyConnection
+        from qdo.queue import Queue
+        from qdo.queuey import QueueyConnection
         self.conn = QueueyConnection(application_key=TEST_APP_KEY)
         response = self.conn.post()
         result = json.loads(response.text)
@@ -72,7 +29,7 @@ class TestQueue(unittest.TestCase):
         queue = self._make_one()
         test_message = u'Hello world!'
         # add test message
-        response = self.conn.post(url=self.queue_name, data=test_message)
+        self.conn.post(url=self.queue_name, data=test_message)
         # query
         time.sleep(0.01)
         result = json.loads(queue.get())
@@ -90,7 +47,7 @@ class TestQueue(unittest.TestCase):
     def test_get_error(self):
         queue = self._make_one()
         try:
-            result = queue.get(order='undefined')
+            queue.get(order='undefined')
         except HTTPError, e:
             self.assertEqual(e.args[0], 400)
             messages = json.loads(e.args[1].text)[u'error_msg']

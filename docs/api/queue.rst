@@ -3,16 +3,12 @@
 :mod:`qdo.queue`
 --------------------
 
-Contains Queuey connection and queue helpers.
+Contains Queue helpers.
 
 .. automodule:: qdo.queue
 
 Classes
 ~~~~~~~
-
-.. autoclass:: QueueyConnection
-    :members:
-    :inherited-members:
 
 .. autoclass:: Queue
     :members:

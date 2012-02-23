@@ -61,7 +61,7 @@ class TestWorker(unittest.TestCase):
 
         worker.job = stop
         test_messages = json.dumps({u'msgid': 1, u'msgid': 2})
-        with mock.patch('qdo.queue.QueueyConnection.get') as get_mock:
+        with mock.patch('qdo.queuey.QueueyConnection.get') as get_mock:
             get_mock.return_value.text = unicode(test_messages, 'utf-8')
             get_mock.return_value.status_code = 200
             self.assertRaises(KeyboardInterrupt, worker.work)
@@ -78,7 +78,7 @@ class TestWorker(unittest.TestCase):
 
         worker.job = stop
         test_messages = json.dumps({u'msgid': 1, u'msgid': 2})
-        with mock.patch('qdo.queue.QueueyConnection.get') as get_mock:
+        with mock.patch('qdo.queuey.QueueyConnection.get') as get_mock:
             get_mock.return_value.text = unicode(test_messages, 'utf-8')
             get_mock.return_value.status_code = 200
             self.assertRaises(KeyboardInterrupt, worker.work)

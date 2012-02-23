@@ -12,7 +12,7 @@ from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
 from qdo.queue import Queue
-from qdo.queue import QueueyConnection
+from qdo.queuey import QueueyConnection
 from qdo.utils import metlogger
 
 
