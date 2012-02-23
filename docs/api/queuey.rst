@@ -13,3 +13,8 @@ Classes
 .. autoclass:: QueueyConnection
     :members:
     :inherited-members:
+
+Functions
+~~~~~~~~~
+
+.. autofunction:: retry
