@@ -27,12 +27,16 @@ class QueueyConnection(object):
     retries = 3
     #: Connection timeout in seconds
     timeout = 2.0
+    #: Queuey protocol version
+    protocol = 'v1'
 
     def __init__(self, server_url='http://127.0.0.1:5000',
-                 application_key=''):
+                 application_name='queuey', application_key=''):
         self.server_url = server_url
+        self.application_name = application_name
         self.application_key = application_key
-        self.base_url = self.server_url + '/queuey/'
+        self.base_url = '%s/%s/%s/' % (
+            self.server_url, self.protocol, application_name)
         headers = {'Authorization': 'Application %s' % application_key}
         self.session = requests.session(
             headers=headers, timeout=self.timeout)
@@ -71,9 +75,9 @@ class QueueyConnection(object):
         :type url: str
         :param params: Additional query string parameters.
         :type params: dict
-        :param data: The body payload, either a string or a dict. A dict will
-            automatically be sent as form encoded data.
-        :type params: dict
+        :param data: The body payload, either a string for a single message
+            or a JSON dictionary conforming with the :term:`Queuey` API.
+        :type params: str
         :rtype: :py:class:`requests.models.Response`
         """
         return self.session.post(urljoin(self.base_url, url),

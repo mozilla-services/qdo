@@ -11,7 +11,6 @@ queue
 
 - How to handle multiple queues? Only some partitions of one queue?
 - Add SSL handling
-- Update to queuey API update
 
 utils
 -----

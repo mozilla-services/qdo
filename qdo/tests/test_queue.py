@@ -70,7 +70,7 @@ class TestQueue(unittest.TestCase):
 
     def test_get(self):
         queue = self._make_one()
-        test_message = {u'body': u'Hello world!'}
+        test_message = u'Hello world!'
         # add test message
         response = self.conn.post(url=self.queue_name, data=test_message)
         # query
