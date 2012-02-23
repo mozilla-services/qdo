@@ -12,7 +12,7 @@ from metlog import senders
 # TODO: configure real sender
 if 'nosetests' in sys.argv[0]:
     metsender = senders.DebugCaptureSender()
-else: # pragma: no cover
+else:  # pragma: no cover
     metsender = senders.StdOutSender()
 
 metlogger = MetlogClient(metsender, logger='qdo-worker')
