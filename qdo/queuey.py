@@ -62,8 +62,17 @@ class QueueyConnection(object):
         :type params: dict
         :rtype: :py:class:`requests.models.Response`
         """
-        return self.session.get(urljoin(self.base_url, url),
-            params=params, timeout=self.timeout)
+        url = urljoin(self.base_url, url)
+        for n in range(self.retries):
+            try:
+                response = self.session.get(
+                    url, params=params, timeout=self.timeout)
+            except requests.Timeout:
+                metlogger.incr('queuey.conn_timeout')
+            else:
+                return response
+        # raise timeout after all
+        raise
 
     def post(self, url='', params=None, data=''):
         """Perform a POST request against :term:`Queuey`.
@@ -77,5 +86,14 @@ class QueueyConnection(object):
         :type params: str
         :rtype: :py:class:`requests.models.Response`
         """
-        return self.session.post(urljoin(self.base_url, url),
-            params=params, timeout=self.timeout, data=data)
+        url = urljoin(self.base_url, url)
+        for n in range(self.retries):
+            try:
+                response = self.session.post(
+                    url, params=params, timeout=self.timeout, data=data)
+            except requests.Timeout:
+                metlogger.incr('queuey.conn_timeout')
+            else:
+                return response
+        # raise timeout after all
+        raise

@@ -41,15 +41,33 @@ class TestQueueyConnection(unittest.TestCase):
             self.assertEqual(len(head_mock.mock_calls), conn.retries)
         self.assertEqual(len(utils.metsender.msgs), before + 3)
 
-    def test_queue_list(self):
+    def test_get(self):
         conn = self._make_one()
         response = conn.get()
         self.assertEqual(response.status_code, 200)
         self.assertTrue('queues' in response.text, response.text)
 
-    def test_queue_create(self):
+    def test_get_timeout(self):
+        conn = self._make_one()
+        before = len(utils.metsender.msgs)
+        with mock.patch('requests.sessions.Session.get') as get_mock:
+            get_mock.side_effect = Timeout
+            self.assertRaises(Timeout, conn.get)
+            self.assertEqual(len(get_mock.mock_calls), conn.retries)
+        self.assertEqual(len(utils.metsender.msgs), before + 3)
+
+    def test_post(self):
         conn = self._make_one()
         response = conn.post()
         self.assertEqual(response.status_code, 201)
         result = json.loads(response.text)
         self.assertTrue(u'queue_name' in result, result)
+
+    def test_post_timeout(self):
+        conn = self._make_one()
+        before = len(utils.metsender.msgs)
+        with mock.patch('requests.sessions.Session.post') as post_mock:
+            post_mock.side_effect = Timeout
+            self.assertRaises(Timeout, conn.post)
+            self.assertEqual(len(post_mock.mock_calls), conn.retries)
+        self.assertEqual(len(utils.metsender.msgs), before + 3)

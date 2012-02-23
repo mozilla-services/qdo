@@ -4,7 +4,6 @@ TODO
 queue
 -----
 
-- Add timeout reconnect to get/post
 - Add support for specifying multiple Queuey hosts and connect to a different
   one one connection problems
 - Verify connection pool and `consume / preload body` on head requests
