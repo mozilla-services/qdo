@@ -9,6 +9,29 @@ import requests
 from qdo.utils import metlogger
 
 
+def retry(retries, method, *args, **kwargs):
+    """Retry a given method up to `retries` times on connection timeouts.
+
+    :param retries: Number of retry attempt
+    :type retries: int
+    :param method: The method to call
+    :type method: func
+    :param args: Arguments to pass to the method
+    :type method: list
+    :param kwargs: Keyword arguments to pass to the method
+    :type method: dict
+    """
+    for n in range(retries):
+        try:
+            response = method(*args, **kwargs)
+        except requests.Timeout:
+            metlogger.incr('queuey.conn_timeout')
+        else:
+            return response
+    # raise timeout after all
+    raise
+
+
 class QueueyConnection(object):
     """Represents a connection to one :term:`Queuey` server. The connection
     holds on to a connection pool and automatically uses keep alive
@@ -43,15 +66,7 @@ class QueueyConnection(object):
         up to :py:attr:`retries` times on connection timeout.
         """
         url = urljoin(self.server_url, '__heartbeat__')
-        for n in range(self.retries):
-            try:
-                response = self.session.head(url)
-            except requests.Timeout:
-                metlogger.incr('queuey.conn_timeout')
-            else:
-                return response
-        # raise timeout after all
-        raise
+        return retry(self.retries, self.session.head, url)
 
     def get(self, url='', params=None):
         """Perform a GET request against :term:`Queuey`.
@@ -63,16 +78,8 @@ class QueueyConnection(object):
         :rtype: :py:class:`requests.models.Response`
         """
         url = urljoin(self.base_url, url)
-        for n in range(self.retries):
-            try:
-                response = self.session.get(
-                    url, params=params, timeout=self.timeout)
-            except requests.Timeout:
-                metlogger.incr('queuey.conn_timeout')
-            else:
-                return response
-        # raise timeout after all
-        raise
+        return retry(self.retries, self.session.get,
+            url, params=params, timeout=self.timeout)
 
     def post(self, url='', params=None, data=''):
         """Perform a POST request against :term:`Queuey`.
@@ -87,13 +94,5 @@ class QueueyConnection(object):
         :rtype: :py:class:`requests.models.Response`
         """
         url = urljoin(self.base_url, url)
-        for n in range(self.retries):
-            try:
-                response = self.session.post(
-                    url, params=params, timeout=self.timeout, data=data)
-            except requests.Timeout:
-                metlogger.incr('queuey.conn_timeout')
-            else:
-                return response
-        # raise timeout after all
-        raise
+        return retry(self.retries, self.session.post,
+            url, params=params, timeout=self.timeout, data=data)
