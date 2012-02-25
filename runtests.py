@@ -5,6 +5,7 @@
 
 import os
 import sys
+import time
 
 
 def main():
@@ -13,6 +14,8 @@ def main():
     if not os.path.exists(os.path.join('var', 'supervisor.sock')):
         started_supervisor = True
         os.system('bin/supervisord')
+        # give queuey time to start and connect to cassandra
+        time.sleep(3)
     try:
         ret = os.system('make test-python')
     finally:
