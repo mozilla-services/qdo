@@ -29,7 +29,7 @@ url
     The full URL to the :term:`Queuey` instance. Defaults to
     `http://127.0.0.1:5000`.
 
-application_key
+app_key
     The application key used for authorization.
 
 [zookeeper]
