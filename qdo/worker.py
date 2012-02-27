@@ -46,7 +46,8 @@ class Worker(object):
             queuey_section['app_key'],
             server_url=queuey_section['url'])
         # XXX: define a real queue name
-        self.queue = Queue(queuey_conn, '1234')
+        self.queue_name = '1234'
+        self.queue = Queue(queuey_conn, self.queue_name)
 
     def work(self):
         """Work on jobs.
@@ -58,19 +59,23 @@ class Worker(object):
         # Set up Zookeeper
         self.setup_zookeeper()
         self.register()
-        # XXX: Save in Zookeper
-        done = 0
+        # track queues
+        zk_queue_node = ZkNode(self.zkconn, "/queues/" + self.queue_name,
+            use_json=True)
+        if zk_queue_node.value is None:
+            zk_queue_node.value = 0.0
         try:
             while 1:
                 if self.shutdown:
                     break
                 try:
-                    messages = self.queue.get(since=done, limit=1)
+                    since = float(zk_queue_node.value)
+                    messages = self.queue.get(since=since, limit=1)
                     message = messages[u'messages'][0]
                     timestamp = message[u'timestamp']
                     if self.job:
                         self.job(message)
-                        done = timestamp
+                        zk_queue_node.value = repr(timestamp)
                 except IndexError:
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
@@ -86,7 +91,7 @@ class Worker(object):
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
-        self.zk_worker_node = ZkNode(self.zkconn, "/workers/%s" % self.name,
+        self.zk_worker_node = ZkNode(self.zkconn, "/workers/" + self.name,
             create_mode=zookeeper.EPHEMERAL)
 
     def unregister(self):

@@ -75,20 +75,12 @@ example::
     /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-2
     /<qdo-ns>/queues/958f8c0643484f13b7fb32f27a4a2a9f-1
 
-Each queue node stores a JSON value, specifying until when messages have been
-processed:
+Each queue node stores a float value, specifying until when messages have been
+processed::
 
 .. code-block:: javascript
 
-    '{"last": ""}'
-
-If no message has been processed yet, an empty string is stored.
-
-For example:
-
-.. code-block:: javascript
-
-    '{"last": "135471512647131000L"}'
+    '1330365230.03807'
 
 Queue assignment
 ++++++++++++++++
