@@ -84,3 +84,13 @@ class TestQueueyConnection(unittest.TestCase):
             self.assertRaises(Timeout, conn.post)
             self.assertEqual(len(post_mock.mock_calls), conn.retries)
         self.assertEqual(len(utils.metsender.msgs), before + 3)
+
+    def test_delete(self):
+        conn = self._make_one()
+        response = conn.post()
+        name = json.loads(response.text)[u'queue_name']
+        conn.delete(name)
+        self.assertEqual(response.status_code, 201)
+        response = conn.get()
+        queues = json.loads(response.text)[u'queues']
+        self.assertTrue(name not in queues)
