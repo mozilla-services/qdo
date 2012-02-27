@@ -46,7 +46,9 @@ class Queue(object):
             'partitions': partitions,
         }
         if since is not None:
-            params['since'] = since
+            # use the repr, to avoid a float getting clobbered by implicit
+            # str() calls in the URL generation
+            params['since'] = repr(since)
 
         response = self.connection.get(self.queue_name, params=params)
         if response.ok:

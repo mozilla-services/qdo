@@ -70,16 +70,16 @@ class Worker(object):
                     break
                 try:
                     since = float(zk_queue_node.value)
-                    messages = self.queue.get(since=since, limit=1)
+                    messages = self.queue.get(since=since, limit=2)
                     message = messages[u'messages'][0]
                     timestamp = message[u'timestamp']
+                    if timestamp == since:
+                        # skip an exact match
+                        message = messages[u'messages'][1]
+                        timestamp = message[u'timestamp']
                     if self.job:
                         self.job(message)
                         zk_queue_node.value = repr(timestamp)
-                        # XXX if the job finishes too fast, our ZK node
-                        # hasn't been updated yet. Ideally we'd like to wait
-                        # for our local zk node value to get updated
-                        time.sleep(0.1)
                 except IndexError:
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
