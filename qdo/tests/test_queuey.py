@@ -94,3 +94,14 @@ class TestQueueyConnection(unittest.TestCase):
         response = conn.get()
         queues = json.loads(response.text)[u'queues']
         self.assertTrue(name not in queues)
+
+    def test_delete_timeout(self):
+        conn = self._make_one()
+        response = conn.post()
+        name = json.loads(response.text)[u'queue_name']
+        before = len(utils.metsender.msgs)
+        with mock.patch('requests.sessions.Session.delete') as delete_mock:
+            delete_mock.side_effect = Timeout
+            self.assertRaises(Timeout, conn.delete, name)
+            self.assertEqual(len(delete_mock.mock_calls), conn.retries)
+        self.assertEqual(len(utils.metsender.msgs), before + 3)
