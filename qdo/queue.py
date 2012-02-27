@@ -16,7 +16,7 @@ class Queue(object):
     :type queue_name: str
     """
 
-    def __init__(self, connection, queue_name=''):
+    def __init__(self, connection, queue_name):
         self.connection = connection
         self.queue_name = queue_name
 

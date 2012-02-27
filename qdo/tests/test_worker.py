@@ -13,6 +13,9 @@ from zktools.node import ZkNode
 from qdo.config import QdoSettings
 from qdo.config import ZOO_DEFAULT_NS
 
+# as specified in the queuey-dev.ini
+TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
+
 
 class TestWorker(unittest.TestCase):
 
@@ -43,6 +46,7 @@ class TestWorker(unittest.TestCase):
     def _make_one(self, extra=None):
         from qdo.worker import Worker
         settings = QdoSettings()
+        settings['queuey.app_key'] = TEST_APP_KEY
         if extra is not None:
             settings.update(extra)
         self.worker = Worker(settings)
