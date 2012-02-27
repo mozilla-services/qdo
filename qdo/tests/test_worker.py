@@ -38,10 +38,18 @@ class TestWorker(unittest.TestCase):
             self.zkconn.delete_recursive('/' + child)
 
     def tearDown(self):
+        # clean up zookeeper
         if (self.worker and self.worker.zkconn and
             self.worker.zkconn.handle is not None):
 
             self.worker.zkconn.close()
+        # clean up queuey
+        queuey_conn = self.worker.queuey_conn
+        response = queuey_conn.get()
+        queues = json.loads(response.text)[u'queues']
+        names = [q[u'queue_name'] for q in queues]
+        for n in names:
+            queuey_conn.delete(n)
 
     def _make_one(self, extra=None):
         from qdo.worker import Worker

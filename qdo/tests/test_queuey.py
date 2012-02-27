@@ -18,9 +18,23 @@ TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
 
 class TestQueueyConnection(unittest.TestCase):
 
+    conn = None
+
+    def tearDown(self):
+        if self.conn:
+            try:
+                response = self.conn.get()
+                queues = json.loads(response.text)[u'queues']
+                names = [q[u'queue_name'] for q in queues]
+                for n in names:
+                    self.conn.delete(n)
+            except ConnectionError:
+                pass
+
     def _make_one(self, server_url='http://127.0.0.1:5000'):
         from qdo.queuey import QueueyConnection
-        return QueueyConnection(TEST_APP_KEY, server_url=server_url)
+        self.conn = QueueyConnection(TEST_APP_KEY, server_url=server_url)
+        return self.conn
 
     def test_connect(self):
         conn = self._make_one()

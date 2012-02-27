@@ -94,9 +94,23 @@ class QueueyConnection(object):
         :type params: dict
         :param data: The body payload, either a string for a single message
             or a JSON dictionary conforming with the :term:`Queuey` API.
-        :type params: str
+        :type data: str
         :rtype: :py:class:`requests.models.Response`
         """
         url = urljoin(self.app_url, url)
         return retry(self.retries, self.session.post,
             url, params=params, timeout=self.timeout, data=data)
+
+    def delete(self, url='', params=None):
+        """Perform a DELETE request against :term:`Queuey`, retry
+        up to :py:attr:`retries` times on connection timeout.
+
+        :param url: Relative URL to post to, without a leading slash.
+        :type url: str
+        :param params: Additional query string parameters.
+        :type params: dict
+        :rtype: :py:class:`requests.models.Response`
+        """
+        url = urljoin(self.app_url, url)
+        return retry(self.retries, self.session.delete,
+            url, params=params, timeout=self.timeout)
