@@ -32,7 +32,7 @@ class TestQueue(unittest.TestCase):
         self.conn.post(url=self.queue_name, data=test_message)
         # query
         time.sleep(0.01)
-        result = json.loads(queue.get())
+        result = queue.get()
         self.assertTrue(u'messages' in result)
         bodies = [m[u'body'] for m in result[u'messages']]
         self.assertTrue(u'Hello world!' in bodies)
@@ -40,7 +40,7 @@ class TestQueue(unittest.TestCase):
     def test_get_since(self):
         queue = self._make_one()
         # query messages in the future
-        result = json.loads(queue.get(since=time.time() + 1000))
+        result = queue.get(since=time.time() + 1000)
         self.assertTrue(u'messages' in result)
         self.assertEqual(len(result[u'messages']), 0)
 

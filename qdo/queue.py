@@ -3,6 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import json
+
 import qdo.exceptions
 
 
@@ -21,7 +23,7 @@ class Queue(object):
         self.queue_name = queue_name
 
     def get(self, since=None, limit=100, order='ascending', partitions=1):
-        """Returns messages for the queue, by default from newest to oldest.
+        """Returns messages for the queue, by default from oldest to newest.
 
         :param since: All messages newer than this timestamp or message id,
             should be formatted as seconds since epoch in GMT, or the
@@ -36,7 +38,7 @@ class Queue(object):
             retrieving messages from partition 1.
         :type partitions: str
         :raises: :py:exc:`qdo.exceptions.HTTPError`
-        :rtype: unicode
+        :rtype: dict
         """
         params = {
             'limit': limit,
@@ -48,6 +50,6 @@ class Queue(object):
 
         response = self.connection.get(self.queue_name, params=params)
         if response.ok:
-            return response.text
+            return json.loads(response.text)
         # failure
         raise qdo.exceptions.HTTPError(response.status_code, response)

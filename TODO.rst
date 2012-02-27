@@ -19,7 +19,6 @@ utils
 worker
 ------
 
-- rewrite test_worker tests to use real queuey data
 - add `get queues` hook (dotted path to function via ini file - get ZK and
   Queuey connection as arguments?)
 - define `job` API

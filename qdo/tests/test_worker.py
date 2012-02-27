@@ -50,12 +50,14 @@ class TestWorker(unittest.TestCase):
         if extra is not None:
             settings.update(extra)
         self.worker = Worker(settings)
-
-        def no_connect():
-            # disable queuey connection
-            pass
-        self.worker.queuey_conn.connect = no_connect
+        response = self.worker.queuey_conn.post()
+        queue_name = json.loads(response.text)[u'queue_name']
+        self.worker.queue.queue_name = self.queue_name = queue_name
         return self.worker
+
+    def _post_message(self, data):
+        queuey_conn = self.worker.queuey_conn
+        queuey_conn.post(self.queue_name, data=data)
 
     def test_work(self):
         worker = self._make_one()
@@ -64,28 +66,29 @@ class TestWorker(unittest.TestCase):
             raise KeyboardInterrupt
 
         worker.job = stop
-        test_messages = json.dumps({u'msgid': 1, u'msgid': 2})
-        with mock.patch('qdo.queuey.QueueyConnection.get') as get_mock:
-            get_mock.return_value.text = unicode(test_messages, 'utf-8')
-            get_mock.return_value.status_code = 200
-            self.assertRaises(KeyboardInterrupt, worker.work)
+        self._post_message(u'Hello')
+        self.assertRaises(KeyboardInterrupt, worker.work)
 
     def test_work_twice(self):
         worker = self._make_one()
+        # keep a runtime counter
+        processed = [0]
 
-        def stop(message):
-            data = json.loads(message)
-            if data['msgid'] == 1:
+        def stop(message, processed=processed):
+            if processed[0] > 2:
+                raise ValueError
+            if message[u'body'] == u'Hello 1':
                 # process the first message
+                processed[0] += 1
                 return
             raise KeyboardInterrupt
 
         worker.job = stop
-        test_messages = json.dumps({u'msgid': 1, u'msgid': 2})
-        with mock.patch('qdo.queuey.QueueyConnection.get') as get_mock:
-            get_mock.return_value.text = unicode(test_messages, 'utf-8')
-            get_mock.return_value.status_code = 200
-            self.assertRaises(KeyboardInterrupt, worker.work)
+        self._post_message(u'Hello 1')
+        self._post_message(u'Hello 2')
+
+        self.assertRaises(KeyboardInterrupt, worker.work)
+        self.assertEqual(processed[0], 1)
 
     def test_work_shutdown(self):
         worker = self._make_one()

@@ -58,14 +58,19 @@ class Worker(object):
         # Set up Zookeeper
         self.setup_zookeeper()
         self.register()
+        # XXX: Save in Zookeper
+        done = 0
         try:
             while 1:
                 if self.shutdown:
                     break
                 try:
-                    message = self.queue.get()
+                    messages = self.queue.get(since=done, limit=1)
+                    message = messages[u'messages'][0]
+                    timestamp = message[u'timestamp']
                     if self.job:
                         self.job(message)
+                        done = timestamp
                 except IndexError:
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
