@@ -71,7 +71,8 @@ class QueueyConnection(object):
         return retry(self.retries, self.session.head, url)
 
     def get(self, url='', params=None):
-        """Perform a GET request against :term:`Queuey`.
+        """Perform a GET request against :term:`Queuey`, retry
+        up to :py:attr:`retries` times on connection timeout.
 
         :param url: Relative URL to get, without a leading slash.
         :type url: str
@@ -84,7 +85,8 @@ class QueueyConnection(object):
             url, params=params, timeout=self.timeout)
 
     def post(self, url='', params=None, data=''):
-        """Perform a POST request against :term:`Queuey`.
+        """Perform a POST request against :term:`Queuey`, retry
+        up to :py:attr:`retries` times on connection timeout.
 
         :param url: Relative URL to post to, without a leading slash.
         :type url: str
