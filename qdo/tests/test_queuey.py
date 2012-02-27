@@ -20,8 +20,7 @@ class TestQueueyConnection(unittest.TestCase):
 
     def _make_one(self, server_url='http://127.0.0.1:5000'):
         from qdo.queuey import QueueyConnection
-        return QueueyConnection(
-            server_url=server_url, application_key=TEST_APP_KEY)
+        return QueueyConnection(TEST_APP_KEY, server_url=server_url)
 
     def test_connect(self):
         conn = self._make_one()

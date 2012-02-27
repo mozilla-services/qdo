@@ -43,7 +43,8 @@ class Worker(object):
         self.zk_root_url = zkhost + '/' + zkns
         queuey_section = self.settings.getsection('queuey')
         self.queuey_conn = queuey_conn = QueueyConnection(
-            queuey_section['url'], queuey_section['application_key'])
+            queuey_section['application_key'],
+            server_url=queuey_section['url'])
         self.queue = Queue(queuey_conn)
 
     def work(self):

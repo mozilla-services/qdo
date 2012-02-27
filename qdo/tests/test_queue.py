@@ -18,7 +18,7 @@ class TestQueue(unittest.TestCase):
     def _make_one(self):
         from qdo.queue import Queue
         from qdo.queuey import QueueyConnection
-        self.conn = QueueyConnection(application_key=TEST_APP_KEY)
+        self.conn = QueueyConnection(TEST_APP_KEY)
         response = self.conn.post()
         result = json.loads(response.text)
         self.queue_name = result[u'queue_name']

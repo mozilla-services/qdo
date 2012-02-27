@@ -37,10 +37,12 @@ class QueueyConnection(object):
     holds on to a connection pool and automatically uses keep alive
     connections.
 
-    :param server_url: Base URL of the :term:`Queuey` server
-    :type server_url: str
-    :param application_key: The applications key used for authorization
-    :type application_key: str
+    :param app_key: The applications key used for authorization
+    :type app_key: str
+    :param app_name: The application name, defaults to `queuey`
+    :type app_name: str
+    :param url: Base URL of the :term:`Queuey` server
+    :type url: str
     """
 
     #: Number of retries on connection timeouts
@@ -50,14 +52,14 @@ class QueueyConnection(object):
     #: Queuey protocol version
     protocol = 'v1'
 
-    def __init__(self, server_url='http://127.0.0.1:5000',
-                 application_name='queuey', application_key=''):
+    def __init__(self, app_key, app_name='queuey',
+                 server_url='http://127.0.0.1:5000'):
+        self.app_key = app_key
+        self.app_name = app_name
         self.server_url = server_url
-        self.application_name = application_name
-        self.application_key = application_key
-        self.base_url = '%s/%s/%s/' % (
-            self.server_url, self.protocol, application_name)
-        headers = {'Authorization': 'Application %s' % application_key}
+        self.app_url = '%s/%s/%s/' % (
+            self.server_url, self.protocol, app_name)
+        headers = {'Authorization': 'Application %s' % app_key}
         self.session = requests.session(
             headers=headers, timeout=self.timeout)
 
@@ -77,7 +79,7 @@ class QueueyConnection(object):
         :type params: dict
         :rtype: :py:class:`requests.models.Response`
         """
-        url = urljoin(self.base_url, url)
+        url = urljoin(self.app_url, url)
         return retry(self.retries, self.session.get,
             url, params=params, timeout=self.timeout)
 
@@ -93,6 +95,6 @@ class QueueyConnection(object):
         :type params: str
         :rtype: :py:class:`requests.models.Response`
         """
-        url = urljoin(self.base_url, url)
+        url = urljoin(self.app_url, url)
         return retry(self.retries, self.session.post,
             url, params=params, timeout=self.timeout, data=data)
