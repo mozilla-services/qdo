@@ -76,6 +76,10 @@ class Worker(object):
                     if self.job:
                         self.job(message)
                         zk_queue_node.value = repr(timestamp)
+                        # XXX if the job finishes too fast, our ZK node
+                        # hasn't been updated yet. Ideally we'd like to wait
+                        # for our local zk node value to get updated
+                        time.sleep(0.1)
                 except IndexError:
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)

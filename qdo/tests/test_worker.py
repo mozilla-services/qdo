@@ -80,9 +80,6 @@ class TestWorker(unittest.TestCase):
             if message[u'body'] == u'Hello 1':
                 # process the first message
                 processed[0] += 1
-                # XXX if the job finishes too fast, our ZK node hasn't been
-                # updated yet
-                time.sleep(0.1)
                 return
             raise KeyboardInterrupt
 
