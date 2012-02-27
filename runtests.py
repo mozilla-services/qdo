@@ -15,7 +15,7 @@ def main():
         started_supervisor = True
         os.system('bin/supervisord')
         # give queuey time to start and connect to cassandra
-        time.sleep(3)
+        time.sleep(5)
     try:
         ret = os.system('make test-python')
     finally:
