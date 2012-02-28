@@ -42,6 +42,7 @@ INSTALL += $(INSTALLOPTIONS)
 
 SW = sw
 CASSANDRA = $(BIN)/cassandra/bin/cassandra
+NGINX = $(BIN)/nginx
 ZOOKEEPER = $(BIN)/zookeeper
 BUILD_DIRS = bin build deps include lib lib64 man
 
@@ -71,6 +72,20 @@ $(CASSANDRA):
 
 cassandra: $(CASSANDRA)
 
+$(NGINX):
+	mkdir -p bin
+	cd bin && \
+	curl --silent http://nginx.org/download/nginx-1.1.15.tar.gz | tar -zvx
+	mv bin/nginx-1.1.15 bin/nginx
+	cd bin/nginx && \
+	./configure --prefix=/opt/mozilla/qdo/bin/nginx --with-http_ssl_module \
+	--conf-path=../../etc/nginx/nginx.conf --pid-path=../../var/nginx.pid \
+	--lock-path=../../var/nginx.lock --error-log-path=../../var/log/nginx-error.log \
+	--http-log-path=../../var/log/nginx-access.log && \
+	make && make install
+
+nginx: $(NGINX)
+
 $(ZOOKEEPER):
 	mkdir -p bin
 	cd bin && \
@@ -97,6 +112,9 @@ clean-env:
 
 clean-cassandra:
 	rm -rf cassandra bin/cassandra
+
+clean-nginx:
+	rm -rf bin/nginx
 
 clean-zookeeper:
 	rm -rf zookeeper bin/zookeeper

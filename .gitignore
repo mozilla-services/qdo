@@ -2,6 +2,7 @@ bin
 build
 cassandra
 dist
+etc/nginx
 include
 lib
 man
