@@ -53,7 +53,7 @@ class QueueyConnection(object):
     protocol = 'v1'
 
     def __init__(self, app_key, app_name='queuey',
-                 server_url='http://127.0.0.1:5000'):
+                 server_url='https://127.0.0.1:5001'):
         self.app_key = app_key
         self.app_name = app_name
         self.server_url = server_url

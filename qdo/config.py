@@ -19,7 +19,7 @@ class QdoSettings(SettingsDict):
         """Populate settings with default values"""
         self['qdo-worker.wait_interval'] = 5
 
-        self['queuey.url'] = 'http://127.0.0.1:5000'
+        self['queuey.url'] = 'https://127.0.0.1:5001'
         self['queuey.app_key'] = None
 
         self['zookeeper.connection'] = '127.0.0.1:2181'

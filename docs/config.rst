@@ -27,7 +27,7 @@ wait_interval
 
 url
     The full URL to the :term:`Queuey` instance. Defaults to
-    `http://127.0.0.1:5000`.
+    `https://127.0.0.1:5001`.
 
 app_key
     The application key used for authorization.

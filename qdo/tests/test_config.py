@@ -20,7 +20,7 @@ class TestConfig(unittest.TestCase):
         qdo_section = settings.getsection('qdo-worker')
         self.assertEqual(qdo_section['wait_interval'], 5)
         queuey_section = settings.getsection('queuey')
-        self.assertEqual(queuey_section['url'], 'http://127.0.0.1:5000')
+        self.assertEqual(queuey_section['url'], 'https://127.0.0.1:5001')
         zk_section = settings.getsection('zookeeper')
         self.assertEqual(zk_section['connection'], '127.0.0.1:2181')
 
