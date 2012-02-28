@@ -59,6 +59,18 @@ $(BIN)/pip: $(BIN)/python
 lib: $(BIN)/pip
 	$(INSTALL) -r dev-reqs.txt
 
+$(CASSANDRA):
+	mkdir -p bin
+	cd bin && \
+	curl --silent http://archive.apache.org/dist/cassandra/1.0.6/apache-cassandra-1.0.6-bin.tar.gz | tar -zvx
+	mv bin/apache-cassandra-1.0.6 bin/cassandra
+	cp etc/cassandra/cassandra.yaml bin/cassandra/conf/cassandra.yaml
+	cp etc/cassandra/log4j-server.properties bin/cassandra/conf/log4j-server.properties
+	cd bin/cassandra/lib && \
+	curl -O http://java.net/projects/jna/sources/svn/content/trunk/jnalib/dist/jna.jar
+
+cassandra: $(CASSANDRA)
+
 $(ZOOKEEPER):
 	mkdir -p bin
 	cd bin && \
@@ -79,18 +91,6 @@ $(ZOOKEEPER):
 	chmod a+x zkServer.sh
 
 zookeeper: $(ZOOKEEPER)
-
-$(CASSANDRA):
-	mkdir -p bin
-	cd bin && \
-	curl --silent http://archive.apache.org/dist/cassandra/1.0.6/apache-cassandra-1.0.6-bin.tar.gz | tar -zvx
-	mv bin/apache-cassandra-1.0.6 bin/cassandra
-	cp etc/cassandra/cassandra.yaml bin/cassandra/conf/cassandra.yaml
-	cp etc/cassandra/log4j-server.properties bin/cassandra/conf/log4j-server.properties
-	cd bin/cassandra/lib && \
-	curl -O http://java.net/projects/jna/sources/svn/content/trunk/jnalib/dist/jna.jar
-
-cassandra: $(CASSANDRA)
 
 clean-env:
 	rm -rf $(BUILD_DIRS)
