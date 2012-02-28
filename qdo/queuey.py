@@ -27,6 +27,9 @@ def retry(retries, method, *args, **kwargs):
             response = method(*args, **kwargs)
         except requests.Timeout:
             metlogger.incr('queuey.conn_timeout')
+        except requests.ConnectionError:
+            metlogger.incr('queuey.conn_error')
+            raise
         else:
             return response
     # raise timeout after all
