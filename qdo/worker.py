@@ -44,7 +44,7 @@ class Worker(object):
         queuey_section = self.settings.getsection('queuey')
         self.queuey_conn = queuey_conn = QueueyConnection(
             queuey_section['app_key'],
-            server_url=queuey_section['url'])
+            connection=queuey_section['connection'])
         # XXX: define a real queue name
         self.queue_name = '1234'
         self.queue = Queue(queuey_conn, self.queue_name)

@@ -31,9 +31,9 @@ class TestQueueyConnection(unittest.TestCase):
             except ConnectionError:
                 pass
 
-    def _make_one(self, server_url='http://127.0.0.1:5000'):
+    def _make_one(self, connection='https://127.0.0.1:5001/v1/queuey/'):
         from qdo.queuey import QueueyConnection
-        self.conn = QueueyConnection(TEST_APP_KEY, server_url=server_url)
+        self.conn = QueueyConnection(TEST_APP_KEY, connection=connection)
         return self.conn
 
     def test_connect(self):
@@ -42,7 +42,7 @@ class TestQueueyConnection(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_connect_fail(self):
-        conn = self._make_one(server_url='http://127.0.0.1:9')
+        conn = self._make_one(connection='http://127.0.0.1:9/')
         self.assertRaises(ConnectionError, conn.connect)
 
     def test_connect_timeout(self):

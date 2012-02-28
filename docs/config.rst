@@ -25,9 +25,10 @@ wait_interval
 [queuey]
 --------
 
-url
-    The full URL to the :term:`Queuey` instance. Defaults to
-    `https://127.0.0.1:5001`.
+connection
+    Which :term:`Queuey` instance(s) to connect to. Defaults to
+    `https://127.0.0.1:5001/v1/queuey/`. Multiple instances can be specified
+    as a comma separated list: `https://127.0.0.1:5001/v1/queuey/,https://127.0.0.1:5002/v1/queuey/`
 
 app_key
     The application key used for authorization.

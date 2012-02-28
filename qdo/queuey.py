@@ -3,6 +3,7 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from urlparse import urljoin
+from urlparse import urlsplit
 
 import requests
 
@@ -39,26 +40,22 @@ class QueueyConnection(object):
 
     :param app_key: The applications key used for authorization
     :type app_key: str
-    :param app_name: The application name, defaults to `queuey`
-    :type app_name: str
-    :param url: Base URL of the :term:`Queuey` server
-    :type url: str
+    :param connection: Connection information for the :term:`Queuey` server
+    :type connection: str
     """
 
     #: Number of retries on connection timeouts
     retries = 3
     #: Connection timeout in seconds
     timeout = 2.0
-    #: Queuey protocol version
-    protocol = 'v1'
 
-    def __init__(self, app_key, app_name='queuey',
-                 server_url='https://127.0.0.1:5001'):
+    def __init__(self, app_key,
+                 connection='https://127.0.0.1:5001/v1/queuey/'):
         self.app_key = app_key
-        self.app_name = app_name
-        self.server_url = server_url
-        self.app_url = '%s/%s/%s/' % (
-            self.server_url, self.protocol, app_name)
+        self.connection = connection
+        self.app_url = connection.split(',')[0]
+        parts = urlsplit(self.app_url)
+        self.server_url = parts.scheme + '://' + parts.netloc + '/'
         headers = {'Authorization': 'Application %s' % app_key}
         self.session = requests.session(
             headers=headers, timeout=self.timeout)
