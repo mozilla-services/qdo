@@ -26,7 +26,9 @@ gunicorn==0.13.4
 meld3==0.6.8
 metlog-py==0.8
 mock==0.8.0
+mozsvc==0.1
 nose==1.1.2
+nose-setenv==0.1-1
 ordereddict==1.1
 pycassa==1.4.0
 pypi2rpm==0.6.0
@@ -53,6 +55,5 @@ zope.deprecation==3.5.0
 zope.event==3.5.1
 zope.interface==3.8.0
 
--e git://github.com/mozilla-services/mozservices.git#egg=mozsvc-dev
 -e git://github.com/mozilla-services/pyramid_ipauth.git#egg=pyramid_ipauth
 -e git://github.com/mozilla-services/queuey.git@feature/api_redesign#egg=queuey-dev
