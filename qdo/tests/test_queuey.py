@@ -42,7 +42,7 @@ class TestQueueyConnection(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_connect_fail(self):
-        conn = self._make_one(connection='http://127.0.0.1:9/')
+        conn = self._make_one(connection='https://127.0.0.1:9/')
         self.assertRaises(ConnectionError, conn.connect)
 
     def test_connect_timeout(self):
