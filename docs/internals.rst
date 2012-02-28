@@ -115,10 +115,7 @@ As a general outline flow for the worker, I'd imagine at start-up it functions l
 2. Enter 'rebalancing mode', wait until /workers node children are 'stable'
 3. Obtain (and wait if needed) locks for assigned queue+partition's
 4. Pull message and process it, or wait X seconds and poll again
-   - In the event multiple queuey hosts were supplied, they should be divvied up to reduce how many queuey instances
-     each worker needs to connect to. If there's 6 queuey instances, and 3 workers, each worker will be connected to
-     just 2 queuey instances, etc. When pulling messages from multiple queuey instances, the oldest messages should
-     be processed first.
+   - In the event multiple queuey hosts were supplied, they should be divvied up to reduce how many queuey instances each worker needs to connect to. If there's 6 queuey instances, and 3 workers, each worker will be connected to just 2 queuey instances, etc. When pulling messages from multiple queuey instances, the oldest messages should be processed first.
 5. Record message id that was just processed in ZK
 6. Check to see if workers available has changed, go to step 2 if so
 7. If workers haven't changed, go to step 4
