@@ -52,10 +52,8 @@ class QueueyConnection(object):
     def __init__(self, app_key,
                  connection='https://127.0.0.1:5001/v1/queuey/'):
         self.app_key = app_key
-        self.connection = connection
-        self.app_url = connection.split(',')[0]
-        parts = urlsplit(self.app_url)
-        self.server_url = parts.scheme + '://' + parts.netloc + '/'
+        self.connection = connection.split(',')
+        self.app_url = self.connection[0]
         headers = {'Authorization': 'Application %s' % app_key}
         self.session = requests.session(
             headers=headers, timeout=self.timeout)
@@ -64,7 +62,8 @@ class QueueyConnection(object):
         """Establish a connection to the :term:`Queuey` heartbeat url, retry
         up to :py:attr:`retries` times on connection timeout.
         """
-        url = urljoin(self.server_url, '__heartbeat__')
+        parts = urlsplit(self.app_url)
+        url = parts.scheme + '://' + parts.netloc + '/__heartbeat__'
         return retry(self.retries, self.session.head, url)
 
     def get(self, url='', params=None):
