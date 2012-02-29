@@ -42,8 +42,11 @@ def fallback(func):
     def wrapped(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-        except ConnectionError:
-            metlogger.incr('queuey.conn_error')
+        except (SSLError, ConnectionError) as e:
+            if isinstance(e, SSLError):
+                metlogger.incr('queuey.conn_ssl_error')
+            else:
+                metlogger.incr('queuey.conn_error')
             if self.fallback_urls:
                 self.failed_urls.append(self.app_url)
                 self.app_url = self.fallback_urls.pop()

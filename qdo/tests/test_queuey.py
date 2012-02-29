@@ -66,6 +66,12 @@ class TestQueueyConnection(unittest.TestCase):
         response = conn.connect()
         self.assertEqual(response.status_code, 200)
 
+    def test_connect_multiple_first_invalid_ssl(self):
+        conn = self._make_one(connection='https://127.0.0.1:5003/v1/queuey/,'
+            'https://127.0.0.1:5001/v1/queuey/')
+        response = conn.connect()
+        self.assertEqual(response.status_code, 200)
+
     def test_get(self):
         conn = self._make_one()
         response = conn.get()

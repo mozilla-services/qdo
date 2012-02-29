@@ -12,6 +12,9 @@ The following metrics are sent as incrementing counter events.
 queuey.conn_error
     Sent when there's a connection error reaching the :term:`Queuey` server.
 
+queuey.conn_ssl_error
+    Sent when there's a SSL error reaching the :term:`Queuey` server.
+
 queuey.conn_timeout
     Sent when the connection to the :term:`Queuey` server times out.
 
