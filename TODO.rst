@@ -4,8 +4,6 @@ TODO
 queue
 -----
 
-- Verify connection pool and `consume / preload body` on head requests
-
 - How to handle multiple queues? Only some partitions of one queue?
 
 utils
