@@ -25,6 +25,11 @@ zookeeper
 - ensure / document how fail-over to multiple hosts works
 - implement event handling / queue distribution
 
+general
+-------
+
+- Be explicit about unicode / bytes
+
 future
 ------
 
