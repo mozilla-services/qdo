@@ -3,9 +3,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import json
 import unittest
 
+import ujson
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
@@ -45,7 +45,7 @@ class TestWorker(unittest.TestCase):
         # clean up queuey
         queuey_conn = self.worker.queuey_conn
         response = queuey_conn.get()
-        queues = json.loads(response.text)[u'queues']
+        queues = ujson.decode(response.text)[u'queues']
         names = [q[u'queue_name'] for q in queues]
         for n in names:
             queuey_conn.delete(n)
@@ -58,7 +58,7 @@ class TestWorker(unittest.TestCase):
             settings.update(extra)
         self.worker = Worker(settings)
         response = self.worker.queuey_conn.post()
-        self.queue_name = json.loads(response.text)[u'queue_name']
+        self.queue_name = ujson.decode(response.text)[u'queue_name']
         return self.worker
 
     def _post_message(self, data):

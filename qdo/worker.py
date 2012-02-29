@@ -3,11 +3,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import json
 import os
 import time
 import socket
 
+import ujson
 import zookeeper
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
@@ -50,7 +50,7 @@ class Worker(object):
     def _get_queues(self):
         # Prototype for listing all queues
         response = self.queuey_conn.get(params={'details': True})
-        queues = json.loads(response.text)[u'queues']
+        queues = ujson.decode(response.text)[u'queues']
         queue_names = []
         for q in queues:
             name = q[u'queue_name']

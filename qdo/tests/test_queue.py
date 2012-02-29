@@ -3,10 +3,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import json
 import time
 
 from requests.exceptions import HTTPError
+import ujson
 import unittest2 as unittest
 
 # as specified in the queuey-dev.ini
@@ -20,7 +20,7 @@ class TestQueue(unittest.TestCase):
         from qdo.queuey import QueueyConnection
         self.conn = QueueyConnection(TEST_APP_KEY)
         response = self.conn.post()
-        result = json.loads(response.text)
+        result = ujson.decode(response.text)
         self.queue_name = result[u'queue_name']
         self.queue = Queue(self.conn, self.queue_name)
         return self.queue
@@ -50,7 +50,7 @@ class TestQueue(unittest.TestCase):
             queue.get(order='undefined')
         except HTTPError, e:
             self.assertEqual(e.args[0], 400)
-            messages = json.loads(e.args[1].text)[u'error_msg']
+            messages = ujson.decode(e.args[1].text)[u'error_msg']
             self.assertTrue(u'order' in messages, messages)
         else:
             self.fail('HTTPError not raised')

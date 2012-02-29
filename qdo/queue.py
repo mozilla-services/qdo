@@ -3,7 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import json
+import ujson
 
 import qdo.exceptions
 
@@ -52,6 +52,6 @@ class Queue(object):
 
         response = self.connection.get(self.queue_name, params=params)
         if response.ok:
-            return json.loads(response.text)
+            return ujson.decode(response.text)
         # failure
         raise qdo.exceptions.HTTPError(response.status_code, response)

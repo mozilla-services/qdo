@@ -3,12 +3,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import json
 import unittest
 
 import mock
 from requests.exceptions import ConnectionError
 from requests.exceptions import Timeout
+import ujson
 
 from qdo import utils
 
@@ -24,7 +24,7 @@ class TestQueueyConnection(unittest.TestCase):
         if self.conn:
             try:
                 response = self.conn.get()
-                queues = json.loads(response.text)[u'queues']
+                queues = ujson.decode(response.text)[u'queues']
                 names = [q[u'queue_name'] for q in queues]
                 for n in names:
                     self.conn.delete(n)
@@ -97,7 +97,7 @@ class TestQueueyConnection(unittest.TestCase):
         conn = self._make_one()
         response = conn.post()
         self.assertEqual(response.status_code, 201)
-        result = json.loads(response.text)
+        result = ujson.decode(response.text)
         self.assertTrue(u'queue_name' in result, result)
 
     def test_post_timeout(self):
@@ -118,17 +118,17 @@ class TestQueueyConnection(unittest.TestCase):
     def test_delete(self):
         conn = self._make_one()
         response = conn.post()
-        name = json.loads(response.text)[u'queue_name']
+        name = ujson.decode(response.text)[u'queue_name']
         conn.delete(name)
         self.assertEqual(response.status_code, 201)
         response = conn.get()
-        queues = json.loads(response.text)[u'queues']
+        queues = ujson.decode(response.text)[u'queues']
         self.assertTrue(name not in queues)
 
     def test_delete_timeout(self):
         conn = self._make_one()
         response = conn.post()
-        name = json.loads(response.text)[u'queue_name']
+        name = ujson.decode(response.text)[u'queue_name']
         before = len(utils.metsender.msgs)
         with mock.patch('requests.sessions.Session.delete') as delete_mock:
             delete_mock.side_effect = Timeout
@@ -140,6 +140,6 @@ class TestQueueyConnection(unittest.TestCase):
         conn = self._make_one(connection='https://127.0.0.1:9/,'
             'https://127.0.0.1:5002/v1/queuey/')
         response = conn.post()
-        name = json.loads(response.text)[u'queue_name']
+        name = ujson.decode(response.text)[u'queue_name']
         conn.delete(name)
         self.assertEqual(response.status_code, 201)

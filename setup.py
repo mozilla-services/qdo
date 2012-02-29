@@ -18,6 +18,7 @@ reqs = [
     'mock',
     'mozsvc',
     'requests',
+    'ujson',
     'zc.zk',
     'zktools',
 ]
