@@ -18,3 +18,5 @@ Functions
 ~~~~~~~~~
 
 .. autofunction:: retry
+
+.. autofunction:: fallback

@@ -27,13 +27,26 @@ def retry(retries, func, *args, **kwargs):
             response = func(*args, **kwargs)
         except requests.Timeout:
             metlogger.incr('queuey.conn_timeout')
-        except requests.ConnectionError:
-            metlogger.incr('queuey.conn_error')
-            raise
         else:
             return response
     # raise timeout after all
     raise
+
+
+def fallback(func):
+    """On connection problems, fall back to secondary Queuey hosts.
+    """
+    def wrapped(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except requests.ConnectionError:
+            metlogger.incr('queuey.conn_error')
+            if self.fallback_urls:
+                self.failed_urls.append(self.app_url)
+                self.app_url = self.fallback_urls.pop()
+                return func(self, *args, **kwargs)
+            raise
+    return wrapped
 
 
 class QueueyConnection(object):
@@ -55,12 +68,15 @@ class QueueyConnection(object):
     def __init__(self, app_key,
                  connection='https://127.0.0.1:5001/v1/queuey/'):
         self.app_key = app_key
-        self.connection = connection.split(',')
+        self.connection = [c.strip() for c in connection.split(',')]
         self.app_url = self.connection[0]
+        self.fallback_urls = self.connection[1:]
+        self.failed_urls = []
         headers = {'Authorization': 'Application %s' % app_key}
         self.session = requests.session(
             headers=headers, timeout=self.timeout)
 
+    @fallback
     def connect(self):
         """Establish a connection to the :term:`Queuey` heartbeat url, retry
         up to :py:attr:`retries` times on connection timeout.
@@ -69,6 +85,7 @@ class QueueyConnection(object):
         url = parts.scheme + '://' + parts.netloc + '/__heartbeat__'
         return retry(self.retries, self.session.head, url)
 
+    @fallback
     def get(self, url='', params=None):
         """Perform a GET request against :term:`Queuey`, retry
         up to :py:attr:`retries` times on connection timeout.
@@ -83,6 +100,7 @@ class QueueyConnection(object):
         return retry(self.retries, self.session.get,
             url, params=params, timeout=self.timeout)
 
+    @fallback
     def post(self, url='', params=None, data=''):
         """Perform a POST request against :term:`Queuey`, retry
         up to :py:attr:`retries` times on connection timeout.
@@ -100,6 +118,7 @@ class QueueyConnection(object):
         return retry(self.retries, self.session.post,
             url, params=params, timeout=self.timeout, data=data)
 
+    @fallback
     def delete(self, url='', params=None):
         """Perform a DELETE request against :term:`Queuey`, retry
         up to :py:attr:`retries` times on connection timeout.

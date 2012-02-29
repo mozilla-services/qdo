@@ -54,6 +54,18 @@ class TestQueueyConnection(unittest.TestCase):
             self.assertEqual(len(head_mock.mock_calls), conn.retries)
         self.assertEqual(len(utils.metsender.msgs), before + 3)
 
+    def test_connect_multiple(self):
+        conn = self._make_one(connection='https://127.0.0.1:5001/v1/queuey/,'
+            'https://127.0.0.1:5002/v1/queuey/')
+        response = conn.connect()
+        self.assertEqual(response.status_code, 200)
+
+    def test_connect_multiple_first_unreachable(self):
+        conn = self._make_one(connection='https://127.0.0.1:9/,'
+            'https://127.0.0.1:5002/v1/queuey/')
+        response = conn.connect()
+        self.assertEqual(response.status_code, 200)
+
     def test_get(self):
         conn = self._make_one()
         response = conn.get()
@@ -68,6 +80,12 @@ class TestQueueyConnection(unittest.TestCase):
             self.assertRaises(Timeout, conn.get)
             self.assertEqual(len(get_mock.mock_calls), conn.retries)
         self.assertEqual(len(utils.metsender.msgs), before + 3)
+
+    def test_get_multiple_first_unreachable(self):
+        conn = self._make_one(connection='https://127.0.0.1:9/,'
+            'https://127.0.0.1:5002/v1/queuey/')
+        response = conn.get()
+        self.assertEqual(response.status_code, 200)
 
     def test_post(self):
         conn = self._make_one()
@@ -84,6 +102,12 @@ class TestQueueyConnection(unittest.TestCase):
             self.assertRaises(Timeout, conn.post)
             self.assertEqual(len(post_mock.mock_calls), conn.retries)
         self.assertEqual(len(utils.metsender.msgs), before + 3)
+
+    def test_post_multiple_first_unreachable(self):
+        conn = self._make_one(connection='https://127.0.0.1:9/,'
+            'https://127.0.0.1:5002/v1/queuey/')
+        response = conn.post()
+        self.assertEqual(response.status_code, 201)
 
     def test_delete(self):
         conn = self._make_one()
@@ -105,3 +129,11 @@ class TestQueueyConnection(unittest.TestCase):
             self.assertRaises(Timeout, conn.delete, name)
             self.assertEqual(len(delete_mock.mock_calls), conn.retries)
         self.assertEqual(len(utils.metsender.msgs), before + 3)
+
+    def test_delete_multiple_first_unreachable(self):
+        conn = self._make_one(connection='https://127.0.0.1:9/,'
+            'https://127.0.0.1:5002/v1/queuey/')
+        response = conn.post()
+        name = json.loads(response.text)[u'queue_name']
+        conn.delete(name)
+        self.assertEqual(response.status_code, 201)
