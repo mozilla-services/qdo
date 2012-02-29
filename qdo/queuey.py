@@ -28,7 +28,7 @@ def retry(func):
 
 
 def fallback(func):
-    """On connection problems, fall back to alternate :term:`Queuey` servers.
+    """On connection errors, fall back to alternate :term:`Queuey` servers.
     """
     def wrapped(self, *args, **kwargs):
         try:
