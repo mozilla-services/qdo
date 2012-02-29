@@ -5,7 +5,10 @@
 from urlparse import urljoin
 from urlparse import urlsplit
 
-import requests
+from requests import session
+from requests.exceptions import ConnectionError
+from requests.exceptions import SSLError
+from requests.exceptions import Timeout
 
 from qdo.utils import metlogger
 
@@ -25,7 +28,7 @@ def retry(retries, func, *args, **kwargs):
     for n in range(retries):
         try:
             response = func(*args, **kwargs)
-        except requests.Timeout:
+        except Timeout:
             metlogger.incr('queuey.conn_timeout')
         else:
             return response
@@ -34,12 +37,12 @@ def retry(retries, func, *args, **kwargs):
 
 
 def fallback(func):
-    """On connection problems, fall back to secondary Queuey hosts.
+    """On connection problems, fall back to alternate :term:`Queuey` servers.
     """
     def wrapped(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-        except requests.ConnectionError:
+        except ConnectionError:
             metlogger.incr('queuey.conn_error')
             if self.fallback_urls:
                 self.failed_urls.append(self.app_url)
@@ -73,8 +76,7 @@ class QueueyConnection(object):
         self.fallback_urls = self.connection[1:]
         self.failed_urls = []
         headers = {'Authorization': 'Application %s' % app_key}
-        self.session = requests.session(
-            headers=headers, timeout=self.timeout)
+        self.session = session(headers=headers, timeout=self.timeout)
 
     @fallback
     def connect(self):
