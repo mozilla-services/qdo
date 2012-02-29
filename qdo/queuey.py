@@ -10,21 +10,21 @@ import requests
 from qdo.utils import metlogger
 
 
-def retry(retries, method, *args, **kwargs):
-    """Retry a given method up to `retries` times on connection timeouts.
+def retry(retries, func, *args, **kwargs):
+    """Retry a given function up to `retries` times on connection timeouts.
 
     :param retries: Number of retry attempt
     :type retries: int
-    :param method: The method to call
-    :type method: func
-    :param args: Arguments to pass to the method
-    :type method: list
-    :param kwargs: Keyword arguments to pass to the method
-    :type method: dict
+    :param func: The function to call
+    :type func: func
+    :param args: Arguments to pass to the function
+    :type args: list
+    :param kwargs: Keyword arguments to pass to the function
+    :type kwargs: dict
     """
     for n in range(retries):
         try:
-            response = method(*args, **kwargs)
+            response = func(*args, **kwargs)
         except requests.Timeout:
             metlogger.incr('queuey.conn_timeout')
         except requests.ConnectionError:
