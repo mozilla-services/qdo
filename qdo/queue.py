@@ -20,9 +20,13 @@ class Queue(object):
 
     def __init__(self, connection, queue_name):
         self.connection = connection
-        self.queue_name = queue_name
+        if '-' in queue_name:
+            self.queue_name, self.partition = queue_name.split(u'-')
+        else:
+            self.queue_name = queue_name
+            self.partition = 1
 
-    def get(self, since=None, limit=100, order='ascending', partitions=1):
+    def get(self, since=None, limit=100, order='ascending'):
         """Returns messages for the queue, by default from oldest to newest.
 
         :param since: All messages newer than this timestamp or message id,
@@ -33,17 +37,13 @@ class Queue(object):
         :type limit: int
         :param order: 'descending' or 'ascending', defaults to ascending
         :type order: str
-        :param partitions: A specific partition number to retrieve messages
-            from or a comma separated list of partitions. Defaults to
-            retrieving messages from partition 1.
-        :type partitions: str
         :raises: :py:exc:`qdo.exceptions.HTTPError`
         :rtype: dict
         """
         params = {
             'limit': limit,
             'order': order,
-            'partitions': partitions,
+            'partitions': self.partition,
         }
         if since is not None:
             # use the repr, to avoid a float getting clobbered by implicit

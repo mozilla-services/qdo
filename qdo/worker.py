@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import json
 import os
 import time
 import socket
@@ -42,12 +43,21 @@ class Worker(object):
         zkns = zk_section['namespace']
         self.zk_root_url = zkhost + '/' + zkns
         queuey_section = self.settings.getsection('queuey')
-        self.queuey_conn = queuey_conn = QueueyConnection(
+        self.queuey_conn = QueueyConnection(
             queuey_section['app_key'],
             connection=queuey_section['connection'])
-        # XXX: define a real queue name
-        self.queue_name = '1234'
-        self.queue = Queue(queuey_conn, self.queue_name)
+
+    def _get_queues(self):
+        # Prototype for listing all queues
+        response = self.queuey_conn.get(params={'details': True})
+        queues = json.loads(response.text)[u'queues']
+        queue_names = []
+        for q in queues:
+            name = q[u'queue_name']
+            part = q[u'partitions']
+            for i in xrange(1, part+1):
+                queue_names.append(name + u'-%s' % i)
+        return queue_names
 
     def work(self):
         """Work on jobs.
@@ -60,10 +70,18 @@ class Worker(object):
         self.setup_zookeeper()
         self.register()
         # track queues
-        zk_queue_node = ZkNode(self.zkconn, "/queues/" + self.queue_name,
-            use_json=True)
-        if zk_queue_node.value is None:
-            zk_queue_node.value = 0.0
+        queue_names = self._get_queues()
+        self.zk_queue_nodes = zk_queue_nodes = []
+        self.queues = queues = []
+        for name in queue_names:
+            node = ZkNode(self.zkconn, u'/queues/' + name, use_json=True)
+            if node.value is None:
+                node.value = 0.0
+            zk_queue_nodes.append(node)
+            queues.append(Queue(self.queuey_conn, name))
+
+        zk_queue_node = self.zk_queue_nodes[0]
+        self.queue = queues[0]
         try:
             while 1:
                 if self.shutdown:

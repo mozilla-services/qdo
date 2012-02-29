@@ -58,8 +58,7 @@ class TestWorker(unittest.TestCase):
             settings.update(extra)
         self.worker = Worker(settings)
         response = self.worker.queuey_conn.post()
-        queue_name = json.loads(response.text)[u'queue_name']
-        self.worker.queue.queue_name = self.queue_name = queue_name
+        self.queue_name = json.loads(response.text)[u'queue_name']
         return self.worker
 
     def _post_message(self, data):
