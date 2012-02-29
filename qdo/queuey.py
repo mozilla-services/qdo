@@ -2,6 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from functools import wraps
 from urlparse import urljoin
 from urlparse import urlsplit
 
@@ -14,8 +15,7 @@ from qdo.utils import metlogger
 
 
 def retry(func):
-    """On connection timeouts, retry the action.
-    """
+    @wraps(func)
     def wrapped(self, *args, **kwargs):
         for n in range(self.retries):
             try:
@@ -28,8 +28,7 @@ def retry(func):
 
 
 def fallback(func):
-    """On connection errors, fall back to alternate :term:`Queuey` servers.
-    """
+    @wraps(func)
     def wrapped(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
@@ -48,13 +47,13 @@ def fallback(func):
 
 
 class QueueyConnection(object):
-    """Represents a connection to one :term:`Queuey` server. The connection
-    holds on to a connection pool and automatically uses keep alive
-    connections.
+    """Represents a connection to one :term:`Queuey` server.
 
     :param app_key: The applications key used for authorization
     :type app_key: str
-    :param connection: Connection information for the :term:`Queuey` server
+    :param connection: Connection information for the Queuey server.
+        Either a single full URL to the Queuey app or multiple comma
+        separated URLs.
     :type connection: str
     """
 
