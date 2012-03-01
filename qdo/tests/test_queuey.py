@@ -117,18 +117,16 @@ class TestQueueyConnection(unittest.TestCase):
 
     def test_delete(self):
         conn = self._make_one()
-        response = conn.post()
-        name = ujson.decode(response.text)[u'queue_name']
-        conn.delete(name)
-        self.assertEqual(response.status_code, 201)
+        name = conn._create_queue()
+        response = conn.delete(name)
+        self.assertEqual(response.status_code, 200)
         response = conn.get()
         queues = ujson.decode(response.text)[u'queues']
         self.assertTrue(name not in queues)
 
     def test_delete_timeout(self):
         conn = self._make_one()
-        response = conn.post()
-        name = ujson.decode(response.text)[u'queue_name']
+        name = conn._create_queue()
         before = len(utils.metsender.msgs)
         with mock.patch('requests.sessions.Session.delete') as delete_mock:
             delete_mock.side_effect = Timeout
@@ -139,7 +137,6 @@ class TestQueueyConnection(unittest.TestCase):
     def test_delete_multiple_first_unreachable(self):
         conn = self._make_one(connection='https://127.0.0.1:9/,'
             'https://127.0.0.1:5002/v1/queuey/')
-        response = conn.post()
-        name = ujson.decode(response.text)[u'queue_name']
-        conn.delete(name)
-        self.assertEqual(response.status_code, 201)
+        name = conn._create_queue()
+        response = conn.delete(name)
+        self.assertEqual(response.status_code, 200)

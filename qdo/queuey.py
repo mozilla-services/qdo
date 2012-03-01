@@ -10,6 +10,7 @@ from requests import session
 from requests.exceptions import ConnectionError
 from requests.exceptions import SSLError
 from requests.exceptions import Timeout
+import ujson
 
 from qdo.utils import metlogger
 
@@ -130,3 +131,8 @@ class QueueyConnection(object):
         """
         url = urljoin(self.app_url, url)
         return self.session.delete(url, params=params, timeout=self.timeout)
+
+    def _create_queue(self):
+        # helper method to create a new queue and return its name
+        response = self.post()
+        return ujson.decode(response.text)[u'queue_name']

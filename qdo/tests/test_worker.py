@@ -57,8 +57,7 @@ class TestWorker(unittest.TestCase):
         if extra is not None:
             settings.update(extra)
         self.worker = Worker(settings)
-        response = self.worker.queuey_conn.post()
-        self.queue_name = ujson.decode(response.text)[u'queue_name']
+        self.queue_name = self.worker.queuey_conn._create_queue()
         return self.worker
 
     def _post_message(self, data):
