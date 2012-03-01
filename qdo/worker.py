@@ -64,6 +64,8 @@ class Worker(object):
 
         This is the main method of the worker.
         """
+        if not self.job:
+            return
         # Try Queuey heartbeat connection
         self.queuey_conn.connect()
         # Set up Zookeeper
@@ -95,9 +97,8 @@ class Worker(object):
                         # skip an exact match
                         message = messages[u'messages'][1]
                         timestamp = message[u'timestamp']
-                    if self.job:
-                        self.job(message)
-                        zk_queue_node.value = repr(timestamp)
+                    self.job(message)
+                    zk_queue_node.value = repr(timestamp)
                 except IndexError:
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
