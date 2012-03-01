@@ -30,6 +30,7 @@ proceeding:
 - Make
 - Python 2.6 (with virtualenv installed, available as `virtualenv-2.6`)
 - Zero MQ (zmq)
+- libevent
 
 Installation
 ============
@@ -52,6 +53,13 @@ Start Cassandra once in foreground mode and install the schema::
     ./bin/cassandra/bin/cassandra -f
     ./bin/cassandra/bin/cassandra-cli -host localhost --file etc/cassandra/message_schema.txt
     ./bin/cassandra/bin/cassandra-cli -host localhost --file etc/cassandra/metadata_schema.txt
+
+If you get a problem installing gevent on Mac OS, make sure you have libevent
+installed and retry installation::
+
+    export CFLAGS=-I/opt/local/include
+    export LDFLAGS=-L/opt/local/lib
+    bin/pip install gevent
 
 Development
 ===========

@@ -22,6 +22,7 @@ coverage==3.5.1
 distribute==0.6.24
 docutils==0.8.1
 flake8==1.0
+gevent==0.13.6
 gunicorn==0.13.4
 meld3==0.6.8
 metlog-py==0.8
