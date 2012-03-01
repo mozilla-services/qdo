@@ -17,8 +17,9 @@ TEST_CONFIG = os.path.join(DATA_DIR, 'test.conf')
 class TestConfigParser(unittest.TestCase):
 
     def test_parse_config(self):
+        from qdo.config import QdoSettings
         from qdo.runner import parse_config
-        settings = {}
+        settings = QdoSettings()
         config = parse_config(TEST_CONFIG, settings)
         self.assertEqual(config.sections(), ['qdo-worker'])
         self.assertEqual(settings['qdo-worker.wait_interval'], 10)

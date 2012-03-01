@@ -22,6 +22,10 @@ wait_interval
     Interval in seconds for which the worker pauses if it has no messages to
     work on. Defaults to 5 seconds.
 
+ca_bundle
+    Path to a private certificate used for SSL connections, in addition to all
+    officially signed ones.
+
 [queuey]
 --------
 

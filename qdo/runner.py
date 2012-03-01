@@ -17,6 +17,14 @@ from qdo.config import QdoSettings
 DEFAULT_CONFIGFILE = os.path.join(os.curdir, 'etc', 'qdo-worker.conf')
 
 
+def _nicepath(filename):
+    filename = os.path.abspath(os.path.normpath(os.path.expandvars(
+        os.path.expanduser(filename))))
+    if os.path.isfile(filename):
+        return filename
+    return None
+
+
 def parse_args(args):
     version = pkg_resources.get_distribution('qdo').version
     parser = argparse.ArgumentParser(description='qdo worker')
@@ -30,12 +38,18 @@ def parse_args(args):
 
 
 def parse_config(filename, settings):
-    filename = os.path.abspath(os.path.normpath(os.path.expandvars(
-        os.path.expanduser(filename))))
-    if not os.path.isfile(filename):
+    filename = _nicepath(filename)
+    if filename is None:
         return None
     # side effect, populates settings dictionary
-    return load_into_settings(filename, settings)
+    config = load_into_settings(filename, settings)
+    # handle ca_bundle
+    ca_bundle = settings['qdo-worker.ca_bundle']
+    if ca_bundle:
+        ca_bundle = _nicepath(ca_bundle)
+        if ca_bundle is not None:
+            os.environ['REQUESTS_CA_BUNDLE'] = ca_bundle
+    return config
 
 
 def run(args=sys.argv[1:]):

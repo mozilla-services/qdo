@@ -18,6 +18,7 @@ class QdoSettings(SettingsDict):
     def load_defaults(self):
         """Populate settings with default values"""
         self['qdo-worker.wait_interval'] = 5
+        self['qdo-worker.ca_bundle'] = None
 
         self['queuey.connection'] = 'https://127.0.0.1:5001/v1/queuey/'
         self['queuey.app_key'] = None
