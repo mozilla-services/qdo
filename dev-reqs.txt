@@ -25,7 +25,7 @@ flake8==1.0
 gevent==0.13.6
 gunicorn==0.13.4
 meld3==0.6.8
-metlog-py==0.8
+metlog-py==0.8.1
 mock==0.8.0
 mozsvc==0.1
 nose==1.1.2
