@@ -43,9 +43,10 @@ This will do the following:
 - Create a virtual Python environment
 - Install required Python packages into this environment
 
-Afterwards install Cassandra and Zookeeper::
+Afterwards install Cassandra, Nginx and Zookeeper::
 
     make cassandra
+    make nginx
     make zookeeper
 
 Start Cassandra once in foreground mode and install the schema::
@@ -64,7 +65,7 @@ installed and retry installation::
 Development
 ===========
 
-Start Cassandra, Zookeeper and a Queuey instance via supervisor::
+Start Cassandra, Nginx, Zookeeper and a Queuey instance via supervisor::
 
     bin/supervisord
 
