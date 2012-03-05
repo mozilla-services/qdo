@@ -73,6 +73,12 @@ To shut them down::
 
     bin/supervisorctl shutdown
 
-To run the tests start supervisor and then call::
+To run the tests call::
 
     make test
+
+This will start and stop supervisord. You can start supervisord yourself,
+in which case it won't be stopped at the end of the test run. Do this if you
+want to run the tests multiple times. Also note, that the tests use the
+Cassandra and Zookeeper instances and will recursively delete any data in them
+as part of the test tear down.
