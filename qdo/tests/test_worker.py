@@ -95,9 +95,16 @@ class TestWorker(unittest.TestCase):
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 1)
 
+    def test_work_no_job(self):
+        worker = self._make_one()
+        worker.work()
+        # without a job, we should reach this and not loop
+        self.assertTrue(True)
+
     def test_work_shutdown(self):
         worker = self._make_one()
         worker.shutdown = True
+        worker.job = True
         worker.work()
         self.assertEqual(worker.shutdown, True)
 
