@@ -39,7 +39,7 @@ class TestWorker(unittest.TestCase):
 
     def tearDown(self):
         # clean up zookeeper
-        if (self.worker and self.worker.zkconn and
+        if (self.worker.zkconn and
             self.worker.zkconn.handle is not None):
 
             self.worker.zkconn.close()
@@ -50,6 +50,8 @@ class TestWorker(unittest.TestCase):
         names = [q[u'queue_name'] for q in queues]
         for n in names:
             queuey_conn.delete(n)
+        del self.worker
+        del self.queue_name
 
     def _make_one(self, extra=None):
         from qdo.worker import Worker
