@@ -105,7 +105,7 @@ class QueueyConnection(object):
 
     @fallback
     @retry
-    def post(self, url='', params=None, data=''):
+    def post(self, url='', params=None, data='', headers=None):
         """Perform a POST request against :term:`Queuey`, retry
         up to :py:attr:`retries` times on connection timeout.
 
@@ -116,10 +116,19 @@ class QueueyConnection(object):
         :param data: The body payload, either a string for a single message
             or a JSON dictionary conforming with the :term:`Queuey` API.
         :type data: str
+        :param headers: Additional request headers.
+        :type headers: dict
         :rtype: :py:class:`requests.models.Response`
         """
         url = urljoin(self.app_url, url)
-        return self.session.post(url,
+        if isinstance(data, list):
+            # support message batches
+            messages = []
+            for d in data:
+                messages.append({'body': d, 'ttl': 3600})
+            data = ujson.encode({'messages': messages})
+            headers = {'content-type': 'application/json'}
+        return self.session.post(url, headers=headers,
             params=params, timeout=self.timeout, data=data, prefetch=True)
 
     @fallback
