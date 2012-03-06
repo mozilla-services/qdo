@@ -71,7 +71,11 @@ class QueueyConnection(object):
         self.fallback_urls = self.connection[1:]
         self.failed_urls = []
         headers = {'Authorization': 'Application %s' % app_key}
-        self.session = session(headers=headers, timeout=self.timeout)
+        # setting pool_maxsize to 1 ensures we re-use the same connection
+        # requests/urllib3 will always create maxsize connections and then
+        # cycle through them one after the other. internally it's a queue
+        self.session = session(headers=headers, timeout=self.timeout,
+            config={'pool_maxsize': 1, 'keep_alive': True})
 
     @fallback
     @retry
@@ -81,7 +85,7 @@ class QueueyConnection(object):
         """
         parts = urlsplit(self.app_url)
         url = parts.scheme + '://' + parts.netloc + '/__heartbeat__'
-        return self.session.head(url)
+        return self.session.head(url, prefetch=True)
 
     @fallback
     @retry
@@ -96,7 +100,8 @@ class QueueyConnection(object):
         :rtype: :py:class:`requests.models.Response`
         """
         url = urljoin(self.app_url, url)
-        return self.session.get(url, params=params, timeout=self.timeout)
+        return self.session.get(url,
+            params=params, timeout=self.timeout, prefetch=True)
 
     @fallback
     @retry
@@ -115,7 +120,7 @@ class QueueyConnection(object):
         """
         url = urljoin(self.app_url, url)
         return self.session.post(url,
-            params=params, timeout=self.timeout, data=data)
+            params=params, timeout=self.timeout, data=data, prefetch=True)
 
     @fallback
     @retry
@@ -130,7 +135,8 @@ class QueueyConnection(object):
         :rtype: :py:class:`requests.models.Response`
         """
         url = urljoin(self.app_url, url)
-        return self.session.delete(url, params=params, timeout=self.timeout)
+        return self.session.delete(url,
+            params=params, timeout=self.timeout, prefetch=True)
 
     def _create_queue(self):
         # helper method to create a new queue and return its name

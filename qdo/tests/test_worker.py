@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import time
 import unittest
 
 import ujson
@@ -74,26 +75,37 @@ class TestWorker(unittest.TestCase):
         self._post_message(u'Hello')
         self.assertRaises(KeyboardInterrupt, worker.work)
 
-    def test_work_twice(self):
+    def test_work_multiple(self):
+        from qdo.utils import metlogger
+        before = len(metlogger.sender.msgs)
         worker = self._make_one()
         # keep a runtime counter
         processed = [0]
 
         def stop(message, processed=processed):
-            if processed[0] > 2:
+            if processed[0] > 4:
                 raise ValueError
-            if message[u'body'] == u'Hello 1':
-                # process the first message
-                processed[0] += 1
-                return
-            raise KeyboardInterrupt
+            if message[u'body'] == u'end':
+                raise KeyboardInterrupt
+            # process the message
+            processed[0] += 1
+            return
 
         worker.job = stop
-        self._post_message(u'Hello 1')
-        self._post_message(u'Hello 2')
+        self._post_message(u'work')
+        self._post_message(u'work')
+        self._post_message(u'work')
+        time.sleep(0.02)
+        self._post_message(u'work')
+        self._post_message(u'end')
 
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual(processed[0], 1)
+        self.assertEqual(processed[0], 4)
+        log_messages = list(metlogger.sender.msgs)[before:]
+        names = [ujson.decode(l)[u'fields'][u'name'] for l in log_messages]
+        self.assertEqual(set(names),
+            set([u'zookeeper.get_value', u'queuey.get_queues',
+                 u'queuey.get_messages', u'zookeeper.set_value']))
 
     def test_work_no_job(self):
         worker = self._make_one()
