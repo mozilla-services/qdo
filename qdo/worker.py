@@ -72,7 +72,8 @@ class Worker(object):
         self.setup_zookeeper()
         self.register()
         # track queues
-        queue_names = self._get_queues()
+        with metlogger.timer('queuey.get_queues'):
+            queue_names = self._get_queues()
         self.zk_queue_nodes = zk_queue_nodes = []
         self.queues = queues = []
         for name in queue_names:
@@ -89,8 +90,10 @@ class Worker(object):
                 if self.shutdown:
                     break
                 try:
-                    since = float(zk_queue_node.value)
-                    messages = self.queue.get(since=since, limit=2)
+                    with metlogger.timer('zookeeper.get_value'):
+                        since = float(zk_queue_node.value)
+                    with metlogger.timer('queuey.get_messages'):
+                        messages = self.queue.get(since=since, limit=2)
                     message = messages[u'messages'][0]
                     timestamp = message[u'timestamp']
                     if timestamp == since:
@@ -98,7 +101,8 @@ class Worker(object):
                         message = messages[u'messages'][1]
                         timestamp = message[u'timestamp']
                     self.job(message)
-                    zk_queue_node.value = repr(timestamp)
+                    with metlogger.timer('zookeeper.set_value'):
+                        zk_queue_node.value = repr(timestamp)
                 except IndexError:
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
