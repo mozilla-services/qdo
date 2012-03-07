@@ -114,7 +114,8 @@ class QueueyConnection(object):
         :param params: Additional query string parameters.
         :type params: dict
         :param data: The body payload, either a string for a single message
-            or a JSON dictionary conforming with the :term:`Queuey` API.
+            or a list of strings for posting multiple messages or a dict
+            for form encoded values.
         :type data: str
         :param headers: Additional request headers.
         :type headers: dict
