@@ -15,6 +15,10 @@ TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
 
 class TestQueue(unittest.TestCase):
 
+    def tearDown(self):
+        del self.queue
+        del self.queue_name
+
     def _make_one(self):
         from qdo.queue import Queue
         from qdo.queuey import QueueyConnection
@@ -24,6 +28,10 @@ class TestQueue(unittest.TestCase):
         self.queue_name = result[u'queue_name']
         self.queue = Queue(self.conn, self.queue_name)
         return self.queue
+
+    def test_name(self):
+        queue = self._make_one()
+        self.assertTrue(queue.name.startswith(self.queue_name), queue.name)
 
     def test_get(self):
         queue = self._make_one()

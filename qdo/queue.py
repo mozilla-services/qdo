@@ -26,6 +26,10 @@ class Queue(object):
             self.queue_name = queue_name
             self.partition = 1
 
+    @property
+    def name(self):
+        return self.queue_name + u'-' + unicode(self.partition)
+
     def get(self, since=None, limit=100, order='ascending'):
         """Returns messages for the queue, by default from oldest to newest.
 
