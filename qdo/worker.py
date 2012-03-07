@@ -94,7 +94,9 @@ class Worker(object):
                 no_messages = 0
                 for num in xrange(len(queues)):
                     queue = queues[num]
-                    zk_queue_node = zk_queue_nodes[queue.name]
+                    queue_name = queue.name
+                    zk_queue_node = zk_queue_nodes[queue_name]
+                    # zk_queue_lock = zk_queue_locks[queue_name]
                     try:
                         with metlogger.timer('zookeeper.get_value'):
                             since = float(zk_queue_node.value)
