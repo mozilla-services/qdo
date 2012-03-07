@@ -148,3 +148,19 @@ class TestQueueyConnection(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         result = ujson.decode(response.text)
         self.assertEqual(len(result[u'messages']), 3, result)
+
+    def test_create_queue(self):
+        conn = self._make_one()
+        name = conn._create_queue()
+        response = ujson.decode(conn.get(params={'details': True}).text)
+        queues = response[u'queues']
+        info = [q for q in queues if q[u'queue_name'] == name][0]
+        self.assertEqual(info[u'partitions'], 1)
+
+    def test_create_queue_partitions(self):
+        conn = self._make_one()
+        name = conn._create_queue(partitions=3)
+        response = ujson.decode(conn.get(params={'details': True}).text)
+        queues = response[u'queues']
+        info = [q for q in queues if q[u'queue_name'] == name][0]
+        self.assertEqual(info[u'partitions'], 3)
