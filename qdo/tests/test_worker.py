@@ -67,6 +67,47 @@ class TestWorker(unittest.TestCase):
         queuey_conn = self.worker.queuey_conn
         queuey_conn.post(self.queue_name, data=data)
 
+    def test_setup_zookeeper(self):
+        worker = self._make_one()
+        worker.setup_zookeeper()
+        children = worker.zkconn.get_children('/')
+        self.assertTrue('workers' in children, children)
+        self.assertTrue('queues' in children, children)
+        self.assertTrue('queue-locks' in children, children)
+
+    def test_register(self):
+        worker = self._make_one()
+        worker.setup_zookeeper()
+        worker.register()
+        self.assertTrue(worker.zkconn.exists('/workers'))
+        children = worker.zkconn.get_children('/workers')
+        self.assertEqual(len(children), 1)
+
+    def test_register_twice(self):
+        worker = self._make_one()
+        worker.setup_zookeeper()
+        worker.register()
+        self.assertTrue(worker.zkconn.exists('/workers'))
+        children = worker.zkconn.get_children('/workers')
+        self.assertEqual(len(children), 1)
+        # a second call to register neither fails nor adds a duplicate
+        worker.register()
+        children = worker.zkconn.get_children('/workers')
+        self.assertEqual(len(children), 1)
+
+    def test_unregister(self):
+        worker = self._make_one()
+        worker.setup_zookeeper()
+        worker.register()
+        self.assertTrue(worker.zkconn.exists('/workers'))
+        children = worker.zkconn.get_children('/workers')
+        self.assertEqual(len(children), 1)
+        self.assertEqual(children[0], worker.name)
+        worker.unregister()
+        self.assertTrue(worker.zkconn.handle is None)
+        self.assertEqual(
+            self.zkconn.get_children('/workers'), [])
+
     def test_work(self):
         worker = self._make_one()
 
@@ -121,44 +162,3 @@ class TestWorker(unittest.TestCase):
         worker.job = True
         worker.work()
         self.assertEqual(worker.shutdown, True)
-
-    def test_setup_zookeeper(self):
-        worker = self._make_one()
-        worker.setup_zookeeper()
-        children = worker.zkconn.get_children('/')
-        self.assertTrue('workers' in children, children)
-        self.assertTrue('queues' in children, children)
-        self.assertTrue('queue-locks' in children, children)
-
-    def test_register(self):
-        worker = self._make_one()
-        worker.setup_zookeeper()
-        worker.register()
-        self.assertTrue(worker.zkconn.exists('/workers'))
-        children = worker.zkconn.get_children('/workers')
-        self.assertEqual(len(children), 1)
-
-    def test_register_twice(self):
-        worker = self._make_one()
-        worker.setup_zookeeper()
-        worker.register()
-        self.assertTrue(worker.zkconn.exists('/workers'))
-        children = worker.zkconn.get_children('/workers')
-        self.assertEqual(len(children), 1)
-        # a second call to register neither fails nor adds a duplicate
-        worker.register()
-        children = worker.zkconn.get_children('/workers')
-        self.assertEqual(len(children), 1)
-
-    def test_unregister(self):
-        worker = self._make_one()
-        worker.setup_zookeeper()
-        worker.register()
-        self.assertTrue(worker.zkconn.exists('/workers'))
-        children = worker.zkconn.get_children('/workers')
-        self.assertEqual(len(children), 1)
-        self.assertEqual(children[0], worker.name)
-        worker.unregister()
-        self.assertTrue(worker.zkconn.handle is None)
-        self.assertEqual(
-            self.zkconn.get_children('/workers'), [])
