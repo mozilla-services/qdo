@@ -121,13 +121,13 @@ class Worker(object):
     def setup_zookeeper(self):
         """Setup global data structures in :term:`Zookeeper`."""
         self.zkconn = ZooKeeper(self.zk_root_url)
-        ZkNode(self.zkconn, "/workers")
-        ZkNode(self.zkconn, "/queues")
-        ZkNode(self.zkconn, "/queue-locks")
+        ZkNode(self.zkconn, u'/workers')
+        ZkNode(self.zkconn, u'/queues')
+        ZkNode(self.zkconn, u'/queue-locks')
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
-        self.zk_worker_node = ZkNode(self.zkconn, "/workers/" + self.name,
+        self.zk_worker_node = ZkNode(self.zkconn, u'/workers/' + self.name,
             create_mode=zookeeper.EPHEMERAL)
 
     def unregister(self):
