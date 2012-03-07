@@ -140,3 +140,11 @@ class TestQueueyConnection(unittest.TestCase):
         name = conn._create_queue()
         response = conn.delete(name)
         self.assertEqual(response.status_code, 200)
+
+    def test_post_messages(self):
+        conn = self._make_one()
+        name = conn._create_queue()
+        response = conn.post(name, data=['a', 'b', 'c'])
+        self.assertEqual(response.status_code, 201)
+        result = ujson.decode(response.text)
+        self.assertEqual(len(result[u'messages']), 3, result)
