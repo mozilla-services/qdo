@@ -108,6 +108,19 @@ class TestWorker(unittest.TestCase):
         self.assertEqual(
             self.zkconn.get_children('/workers'), [])
 
+    def test_work_no_job(self):
+        worker = self._make_one()
+        worker.work()
+        # without a job, we should reach this and not loop
+        self.assertTrue(True)
+
+    def test_work_shutdown(self):
+        worker = self._make_one()
+        worker.shutdown = True
+        worker.job = True
+        worker.work()
+        self.assertEqual(worker.shutdown, True)
+
     def test_work(self):
         worker = self._make_one()
 
@@ -149,16 +162,3 @@ class TestWorker(unittest.TestCase):
         self.assertEqual(set(names),
             set([u'zookeeper.get_value', u'queuey.get_queues',
                  u'queuey.get_messages', u'zookeeper.set_value']))
-
-    def test_work_no_job(self):
-        worker = self._make_one()
-        worker.work()
-        # without a job, we should reach this and not loop
-        self.assertTrue(True)
-
-    def test_work_shutdown(self):
-        worker = self._make_one()
-        worker.shutdown = True
-        worker.job = True
-        worker.work()
-        self.assertEqual(worker.shutdown, True)
