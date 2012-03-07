@@ -215,14 +215,11 @@ class TestWorker(unittest.TestCase):
         queuey_conn = worker.queuey_conn
         queue2 = queuey_conn._create_queue(partitions=3)
         self._post_message(['1', '2'])
-        # post a couple batches to fill multiple partitions
-        partitions = set()
-        for i in range(4):
-            response = self._post_message(
-                ['1', '2'], queue_name=queue2)
-            new = set([m[u'partition'] for m in
-                ujson.decode(response.text)[u'messages']])
-            partitions.update(new)
+        # post messages to fill multiple partitions
+        response = self._post_message(
+            ['%s' % i for i in xrange(8)], queue_name=queue2)
+        partitions = set([m[u'partition'] for m in
+            ujson.decode(response.text)[u'messages']])
         # messages ended up in different partitions
         self.assertTrue(len(partitions) > 1, partitions)
         processed = [0]
