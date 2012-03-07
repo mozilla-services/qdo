@@ -65,7 +65,7 @@ class TestWorker(unittest.TestCase):
 
     def _post_message(self, data, queue_name=None):
         queuey_conn = self.worker.queuey_conn
-        queuey_conn.post(
+        return queuey_conn.post(
             queue_name and queue_name or self.queue_name, data=data)
 
     def test_setup_zookeeper(self):
@@ -209,3 +209,33 @@ class TestWorker(unittest.TestCase):
         worker.job = stop
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 3)
+
+    def test_work_multiple_queues_and_partitions(self):
+        worker = self._make_one()
+        queuey_conn = worker.queuey_conn
+        queue2 = queuey_conn._create_queue(partitions=3)
+        self._post_message(['1', '2'])
+        # post a couple batches to fill multiple partitions
+        partitions = set()
+        for i in range(4):
+            response = self._post_message(
+                ['1', '2'], queue_name=queue2)
+            new = set([m[u'partition'] for m in
+                ujson.decode(response.text)[u'messages']])
+            partitions.update(new)
+        # messages ended up in different partitions
+        self.assertTrue(len(partitions) > 1, partitions)
+        processed = [0]
+
+        def stop(message, processed=processed):
+            # process the message
+            processed[0] += 1
+            if processed[0] == 10:
+                raise KeyboardInterrupt
+            elif processed[0] > 10:
+                raise ValueError
+            return
+
+        worker.job = stop
+        self.assertRaises(KeyboardInterrupt, worker.work)
+        self.assertEqual(processed[0], 10)
