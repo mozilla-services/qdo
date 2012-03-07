@@ -186,3 +186,26 @@ class TestWorker(unittest.TestCase):
         worker.job = stop
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 5)
+
+    def test_work_multiple_empty_queues(self):
+        worker = self._make_one()
+        self.worker.queuey_conn._create_queue()
+        self.worker.queuey_conn._create_queue()
+        queue2 = self.worker.queuey_conn._create_queue()
+        self._post_message(u'queue1-1')
+        self._post_message(u'queue1-2')
+        self._post_message(u'queue2-1', queue_name=queue2)
+        processed = [0]
+
+        def stop(message, processed=processed):
+            # process the message
+            processed[0] += 1
+            if processed[0] == 3:
+                raise KeyboardInterrupt
+            elif processed[0] > 3:
+                raise ValueError
+            return
+
+        worker.job = stop
+        self.assertRaises(KeyboardInterrupt, worker.work)
+        self.assertEqual(processed[0], 3)
