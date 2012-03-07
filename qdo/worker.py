@@ -10,6 +10,7 @@ import socket
 import ujson
 import zookeeper
 from zc.zk import ZooKeeper
+from zktools.locking import ZkWriteLock
 from zktools.node import ZkNode
 
 from qdo.queue import Queue
@@ -75,12 +76,15 @@ class Worker(object):
         with metlogger.timer('queuey.get_queues'):
             queue_names = self._get_queues()
         self.zk_queue_nodes = zk_queue_nodes = []
+        self.zk_queue_locks = zk_queue_locks = {}
         self.queues = queues = []
         for name in queue_names:
             node = ZkNode(self.zkconn, u'/queues/' + name, use_json=True)
             if node.value is None:
                 node.value = 0.0
             zk_queue_nodes.append(node)
+            zk_queue_locks[name] = ZkWriteLock(self.zkconn, name,
+                lock_root=u'/queue-locks')
             queues.append(Queue(self.queuey_conn, name))
 
         try:
