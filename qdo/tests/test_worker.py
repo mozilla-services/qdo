@@ -63,9 +63,10 @@ class TestWorker(unittest.TestCase):
         self.queue_name = self.worker.queuey_conn._create_queue()
         return self.worker
 
-    def _post_message(self, data):
+    def _post_message(self, data, queue_name=None):
         queuey_conn = self.worker.queuey_conn
-        queuey_conn.post(self.queue_name, data=data)
+        queuey_conn.post(
+            queue_name and queue_name or self.queue_name, data=data)
 
     def test_setup_zookeeper(self):
         worker = self._make_one()
@@ -162,3 +163,26 @@ class TestWorker(unittest.TestCase):
         self.assertEqual(set(names),
             set([u'zookeeper.get_value', u'queuey.get_queues',
                  u'queuey.get_messages', u'zookeeper.set_value']))
+
+    def test_work_multiple_queues(self):
+        worker = self._make_one()
+        queue2 = self.worker.queuey_conn._create_queue()
+        self._post_message(u'queue1-1')
+        self._post_message(u'queue1-2')
+        self._post_message(u'queue2-1', queue_name=queue2)
+        self._post_message(u'queue2-2', queue_name=queue2)
+        self._post_message(u'queue2-3', queue_name=queue2)
+        processed = [0]
+
+        def stop(message, processed=processed):
+            # process the message
+            processed[0] += 1
+            if processed[0] == 5:
+                raise KeyboardInterrupt
+            elif processed[0] > 5:
+                raise ValueError
+            return
+
+        worker.job = stop
+        self.assertRaises(KeyboardInterrupt, worker.work)
+        self.assertEqual(processed[0], 5)

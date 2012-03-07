@@ -83,27 +83,32 @@ class Worker(object):
             zk_queue_nodes.append(node)
             queues.append(Queue(self.queuey_conn, name))
 
-        zk_queue_node = self.zk_queue_nodes[0]
-        self.queue = queues[0]
         try:
             while 1:
                 if self.shutdown:
                     break
-                try:
-                    with metlogger.timer('zookeeper.get_value'):
-                        since = float(zk_queue_node.value)
-                    with metlogger.timer('queuey.get_messages'):
-                        messages = self.queue.get(since=since, limit=2)
-                    message = messages[u'messages'][0]
-                    timestamp = message[u'timestamp']
-                    if timestamp == since:
-                        # skip an exact match
-                        message = messages[u'messages'][1]
+                no_messages = 0
+                for num in xrange(len(queues)):
+                    zk_queue_node = zk_queue_nodes[num]
+                    queue = queues[num]
+                    try:
+                        with metlogger.timer('zookeeper.get_value'):
+                            since = float(zk_queue_node.value)
+                        with metlogger.timer('queuey.get_messages'):
+                            data = queue.get(since=since, limit=2)
+                        messages = data[u'messages']
+                        message = messages[0]
                         timestamp = message[u'timestamp']
-                    self.job(message)
-                    with metlogger.timer('zookeeper.set_value'):
-                        zk_queue_node.value = repr(timestamp)
-                except IndexError:
+                        if timestamp == since:
+                            # skip an exact match
+                            message = messages[1]
+                            timestamp = message[u'timestamp']
+                        self.job(message)
+                        with metlogger.timer('zookeeper.set_value'):
+                            zk_queue_node.value = repr(timestamp)
+                    except IndexError:
+                        no_messages += 1
+                if no_messages == len(queues):
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
         finally:
