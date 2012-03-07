@@ -131,7 +131,7 @@ class TestWorker(unittest.TestCase):
         self._post_message(u'Hello')
         self.assertRaises(KeyboardInterrupt, worker.work)
 
-    def test_work_multiple(self):
+    def test_work_multiple_messages(self):
         from qdo.utils import metlogger
         before = len(metlogger.sender.msgs)
         worker = self._make_one()
