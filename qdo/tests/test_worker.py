@@ -140,12 +140,12 @@ class TestWorker(unittest.TestCase):
         processed = [0]
 
         def stop(message, processed=processed):
-            if processed[0] > 4:
+            # process the message
+            processed[0] += 1
+            if processed[0] > 5:
                 raise ValueError
             if message[u'body'] == u'end':
                 raise KeyboardInterrupt
-            # process the message
-            processed[0] += 1
             return
 
         worker.job = stop
@@ -157,7 +157,7 @@ class TestWorker(unittest.TestCase):
         self._post_message(u'end')
 
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual(processed[0], 4)
+        self.assertEqual(processed[0], 5)
         log_messages = list(metlogger.sender.msgs)[before:]
         names = [ujson.decode(l)[u'fields'][u'name'] for l in log_messages]
         self.assertEqual(set(names),
