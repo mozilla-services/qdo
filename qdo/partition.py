@@ -37,7 +37,7 @@ class Partition(object):
         if self.zk_node.value is None:
             self.zk_node.value = 0.0
 
-    def get_messages(self, limit=100, order='ascending'):
+    def messages(self, limit=100, order='ascending'):
         """Returns messages for the partition, by default from oldest to
            newest.
 

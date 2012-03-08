@@ -110,7 +110,7 @@ class Worker(object):
                     partition = partitions[num]
                     # zk_partition_lock = zk_partition_locks[partition_name]
                     try:
-                        messages = partition.get_messages(limit=2)
+                        messages = partition.messages(limit=2)
                         message = messages[0]
                         timestamp = message[u'timestamp']
                         self.job(message)

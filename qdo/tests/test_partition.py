@@ -50,29 +50,28 @@ class TestQueue(unittest.TestCase):
         partition = self._make_one()
         self.assertTrue(partition.name.startswith(self.queue_name))
 
-    def test_get_messages(self):
+    def test_messages(self):
         partition = self._make_one()
-        test_message = u'Hello world!'
         # add test message
-        self.conn.post(url=self.queue_name, data=test_message)
+        self.conn.post(url=self.queue_name, data=u'Hello world!')
         # query
-        messages = partition.get_messages()
+        messages = partition.messages()
         bodies = [m[u'body'] for m in messages]
         self.assertTrue(u'Hello world!' in bodies)
 
-    def test_get_messages_since(self):
+    def test_messages_since(self):
         partition = self._make_one()
         # add test message
         self.conn.post(url=self.queue_name, data=u'Hello')
         # query messages in the future
         partition.timestamp = time.time() + 1000
-        messages = partition.get_messages()
+        messages = partition.messages()
         self.assertEqual(len(messages), 0)
 
-    def test_get_messages_error(self):
+    def test_messages_error(self):
         partition = self._make_one()
         try:
-            partition.get_messages(order='undefined')
+            partition.messages(order='undefined')
         except HTTPError, e:
             self.assertEqual(e.args[0], 400)
             messages = ujson.decode(e.args[1].text)[u'error_msg']
