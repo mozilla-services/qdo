@@ -60,6 +60,11 @@ class Worker(object):
                 queue_names.append(name + u'-%s' % i)
         return queue_names
 
+    def _get_workers(self):
+        # Get all active worker names registered in ZK
+        with metlogger.timer('zookeeper.get_workers'):
+            return self.zkconn.get_children(u'/workers')
+
     def work(self):
         """Work on jobs.
 

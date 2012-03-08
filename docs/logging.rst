@@ -41,3 +41,6 @@ zookeeper.get_value
 
 zookeeper.set_value
     Time to set a new :term:`Zookeeper` node value.
+
+zookeeper.get_workers
+    Time to get a list of all active workers.
