@@ -133,8 +133,6 @@ class TestWorker(unittest.TestCase):
         self.assertRaises(KeyboardInterrupt, worker.work)
 
     def test_work_multiple_messages(self):
-        from qdo.utils import metlogger
-        before = len(metlogger.sender.msgs)
         worker = self._make_one()
         # keep a runtime counter
         processed = [0]
@@ -158,11 +156,6 @@ class TestWorker(unittest.TestCase):
 
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 5)
-        log_messages = list(metlogger.sender.msgs)[before:]
-        names = [ujson.decode(l)[u'fields'][u'name'] for l in log_messages]
-        self.assertEqual(set(names),
-            set([u'zookeeper.get_value', u'queuey.get_queues',
-                 u'queuey.get_messages', u'zookeeper.set_value']))
 
     def test_work_multiple_queues(self):
         worker = self._make_one()
