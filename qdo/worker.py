@@ -68,6 +68,31 @@ class Worker(object):
         with metlogger.timer('zookeeper.get_workers'):
             return self.zkconn.get_children(u'/workers')
 
+    def _assign_queues(self):
+        # implement simplified Kafka re-balancing algorithm
+        # 1. let this worker be Wi
+        # 2. let P be all partitions
+        partitions = self._get_queues()
+        # 3. let W be all workers
+        workers = self._get_workers()
+        # 4. sort P
+        partitions = sorted(partitions)
+        # 5. sort W
+        workers = sorted(workers)
+        # 6. let i be the index position of Wi in W and
+        #    let N = size(P) / size(W)
+        i = workers.index(self.name)
+        N = len(partitions) / len(workers)
+        # 7. assign partitions from i*N to (i+1)*N - 1 to Wi
+        local_partitions = []
+        for num in xrange(i * N, (i + 1) * N):
+            local_partitions.append(partitions[num])
+        # 8. remove current entries owned by Wi from the partition owner registry
+        # 9. add newly assigned partitions to the partition owner registry
+        #    (we may need to re-try this until the original partition owner
+        #     releases its ownership)
+        return local_partitions
+
     def work(self):
         """Work on jobs.
 
@@ -81,7 +106,7 @@ class Worker(object):
         self.setup_zookeeper()
         self.register()
         # track queues
-        queue_names = self._get_queues()
+        queue_names = self._assign_queues()
         self.zk_queue_nodes = zk_queue_nodes = {}
         self.zk_queue_locks = zk_queue_locks = {}
         self.queues = queues = []
