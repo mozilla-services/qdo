@@ -65,3 +65,18 @@ class Partition(object):
             return ujson.decode(response.text)
         # failure
         raise qdo.exceptions.HTTPError(response.status_code, response)
+
+    @property
+    def timestamp(self):
+        """Returns the timestamp of the last processed message.
+        """
+        return float(self.zk_node.value)
+
+    @timestamp.setter
+    def timestamp(self, value):
+        """Sets the timestamp of the last processed message.
+
+        :param value: New timestamp value as a float or string.
+        :type value: float
+        """
+        self.zk_node.value = value

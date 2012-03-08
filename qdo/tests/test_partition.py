@@ -79,12 +79,11 @@ class TestQueue(unittest.TestCase):
         else:
             self.fail('HTTPError not raised')
 
-    def test_zk_node(self):
+    def test_timestamp_get(self):
         partition = self._make_one()
-        self.assertEqual(float(partition.zk_node.value), 0.0)
+        self.assertEqual(partition.timestamp, 0.0)
 
-    def test_zk_node_set_value(self):
+    def test_timestamp_set(self):
         partition = self._make_one()
-        node = partition.zk_node
-        node.value = 1331231353.762148
-        self.assertEqual(float(node.value), 1331231353.762148)
+        partition.timestamp = 1331231353.762148
+        self.assertEqual(partition.timestamp, 1331231353.762148)

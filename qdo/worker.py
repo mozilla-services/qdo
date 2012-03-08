@@ -108,11 +108,10 @@ class Worker(object):
                 no_messages = 0
                 for num in xrange(len(partitions)):
                     partition = partitions[num]
-                    zk_partition_node = partition.zk_node
                     # zk_partition_lock = zk_partition_locks[partition_name]
                     try:
                         with metlogger.timer('zookeeper.get_value'):
-                            since = float(zk_partition_node.value)
+                            since = partition.timestamp
                         with metlogger.timer('queuey.get_messages'):
                             data = partition.get_messages(
                                 since=since, limit=2)
@@ -125,7 +124,7 @@ class Worker(object):
                             timestamp = message[u'timestamp']
                         self.job(message)
                         with metlogger.timer('zookeeper.set_value'):
-                            zk_partition_node.value = repr(timestamp)
+                            partition.timestamp = repr(timestamp)
                     except IndexError:
                         no_messages += 1
                 if no_messages == len(partitions):
