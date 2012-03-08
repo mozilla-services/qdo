@@ -13,7 +13,7 @@ from zc.zk import ZooKeeper
 from zktools.locking import ZkWriteLock
 from zktools.node import ZkNode
 
-from qdo.queue import Queue
+from qdo.partition import Partition
 from qdo.queuey import QueueyConnection
 from qdo.utils import metlogger
 
@@ -48,31 +48,31 @@ class Worker(object):
             queuey_section['app_key'],
             connection=queuey_section['connection'])
 
-    def _get_queues(self):
-        # Prototype for listing all queues, in the final code queue names
-        # will be taken from ZK under /queues
+    def _get_partitions(self):
+        # Prototype for listing all partitions, in the final code partition
+        # names will be taken from ZK under /partitions
         # A helper method to populate ZK from Queuey might be nice
-        with metlogger.timer('queuey.get_queues'):
+        with metlogger.timer('queuey.get_partitions'):
             response = self.queuey_conn.get(params={'details': True})
         queues = ujson.decode(response.text)[u'queues']
-        queue_names = []
+        partitions = []
         for q in queues:
             name = q[u'queue_name']
             part = q[u'partitions']
             for i in xrange(1, part+1):
-                queue_names.append(name + u'-%s' % i)
-        return queue_names
+                partitions.append(name + u'-%s' % i)
+        return partitions
 
     def _get_workers(self):
         # Get all active worker names registered in ZK
         with metlogger.timer('zookeeper.get_workers'):
             return self.zkconn.get_children(u'/workers')
 
-    def _assign_queues(self):
+    def _assign_partitions(self):
         # implement simplified Kafka re-balancing algorithm
         # 1. let this worker be Wi
         # 2. let P be all partitions
-        partitions = self._get_queues()
+        partitions = self._get_partitions()
         # 3. let W be all workers
         workers = self._get_workers()
         # 4. sort P
@@ -105,35 +105,35 @@ class Worker(object):
         # Set up Zookeeper
         self.setup_zookeeper()
         self.register()
-        # track queues
-        queue_names = self._assign_queues()
-        self.zk_queue_nodes = zk_queue_nodes = {}
-        self.zk_queue_locks = zk_queue_locks = {}
-        self.queues = queues = []
-        for name in queue_names:
-            node = ZkNode(self.zkconn, u'/queues/' + name, use_json=True)
+        # track partitions
+        new_partitions = self._assign_partitions()
+        self.zk_partition_nodes = zk_partition_nodes = {}
+        self.zk_partition_locks = zk_partition_locks = {}
+        self.partitions = partitions = []
+        for name in new_partitions:
+            node = ZkNode(self.zkconn, u'/partitions/' + name, use_json=True)
             if node.value is None:
                 node.value = 0.0
-            zk_queue_nodes[name] = node
-            zk_queue_locks[name] = ZkWriteLock(self.zkconn, name,
-                lock_root=u'/queue-locks')
-            queues.append(Queue(self.queuey_conn, name))
+            zk_partition_nodes[name] = node
+            zk_partition_locks[name] = ZkWriteLock(self.zkconn, name,
+                lock_root=u'/partition-owners')
+            partitions.append(Partition(self.queuey_conn, name))
 
         try:
             while 1:
                 if self.shutdown:
                     break
                 no_messages = 0
-                for num in xrange(len(queues)):
-                    queue = queues[num]
-                    queue_name = queue.name
-                    zk_queue_node = zk_queue_nodes[queue_name]
-                    # zk_queue_lock = zk_queue_locks[queue_name]
+                for num in xrange(len(partitions)):
+                    partition = partitions[num]
+                    partition_name = partition.name
+                    zk_partition_node = zk_partition_nodes[partition_name]
+                    # zk_partition_lock = zk_partition_locks[partition_name]
                     try:
                         with metlogger.timer('zookeeper.get_value'):
-                            since = float(zk_queue_node.value)
+                            since = float(zk_partition_node.value)
                         with metlogger.timer('queuey.get_messages'):
-                            data = queue.get(since=since, limit=2)
+                            data = partition.get(since=since, limit=2)
                         messages = data[u'messages']
                         message = messages[0]
                         timestamp = message[u'timestamp']
@@ -143,10 +143,10 @@ class Worker(object):
                             timestamp = message[u'timestamp']
                         self.job(message)
                         with metlogger.timer('zookeeper.set_value'):
-                            zk_queue_node.value = repr(timestamp)
+                            zk_partition_node.value = repr(timestamp)
                     except IndexError:
                         no_messages += 1
-                if no_messages == len(queues):
+                if no_messages == len(partitions):
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
         finally:
@@ -156,15 +156,15 @@ class Worker(object):
         """Setup global data structures in :term:`Zookeeper`."""
         self.zkconn = ZooKeeper(self.zk_root_url)
         ZkNode(self.zkconn, u'/workers')
-        ZkNode(self.zkconn, u'/queues')
-        ZkNode(self.zkconn, u'/queue-locks')
+        ZkNode(self.zkconn, u'/partitions')
+        ZkNode(self.zkconn, u'/partition-owners')
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
         self.zk_worker_node = ZkNode(self.zkconn, u'/workers/' + self.name,
             create_mode=zookeeper.EPHEMERAL)
         # TODO: register a watch for /workers for changes
-        # TODO: register a watch for /queues for changes
+        # TODO: register a watch for /partitions for changes
 
     def unregister(self):
         """Unregister this worker from :term:`Zookeeper`."""

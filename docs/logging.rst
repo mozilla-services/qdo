@@ -30,11 +30,11 @@ Timer
 
 The following metrics are sent as timing data.
 
-queuey.get_queues
-    Time for each request getting the list of all queues and partitions.
-
 queuey.get_messages
     Time for each request getting any number of messages.
+
+queuey.get_partitions
+    Time for each request getting the list of all queues and partitions.
 
 zookeeper.get_value
     Time to read a :term:`Zookeeper` node value.

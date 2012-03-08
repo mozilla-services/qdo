@@ -73,8 +73,8 @@ class TestWorker(unittest.TestCase):
         worker.setup_zookeeper()
         children = worker.zkconn.get_children('/')
         self.assertTrue('workers' in children, children)
-        self.assertTrue('queues' in children, children)
-        self.assertTrue('queue-locks' in children, children)
+        self.assertTrue('partitions' in children, children)
+        self.assertTrue('partition-owners' in children, children)
 
     def test_register(self):
         worker = self._make_one()

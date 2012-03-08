@@ -7,6 +7,8 @@ Zookeeper
 
 Zookeeper is used to store information about queues, how far the queues have
 been processed, available workers and what worker handles which queues.
+Queues can be split into multiple partitions. We keep track of information for
+each specific partition in each queue.
 
 Data in Zookeeper is stored in a hierarchy. We use a namespace for all data,
 to allow multiple applications to use the same Zookeeper cluster. This also
@@ -38,7 +40,7 @@ On worker connect an `ephemeral node
 <http://zookeeper.apache.org/doc/current/api/org/apache/zookeeper/CreateMode.html#EPHEMERAL>`_
 is created for each worker. It is automatically removed on worker disconnect.
 It's name consists of the fully qualified domain name of the machine running
-the worker and the workers process id.
+the worker and the worker's process id. The node has no value.
 
 For example::
 
@@ -46,64 +48,48 @@ For example::
     /<qdo-ns>/workers/svc1.mozilla.com-1859
     /<qdo-ns>/workers/svc2.mozilla.com-2012
 
-Each worker node stores a JSON value, specifying which queue partitions it is
-currently handling:
+Partitions
+++++++++++
 
-.. code-block:: javascript
+Information about existing partitions is stored under::
 
-    '{"queues": []}'
+    /<qdo-ns>/partitions/
 
-For example:
-
-.. code-block:: javascript
-
-    '{"queues":
-      ["a4bb2fb6dcda4b68aad743a4746d7f58-1",
-       "958f8c0643484f13b7fb32f27a4a2a9f-2"]}'
-
-Queues
-++++++
-
-Information about existing queues is stored under::
-
-    /<qdo-ns>/queues/
-
-A persistent node is created for each queue id / partition combination. For
-example::
+A persistent node is created for each partition. For example::
 
     /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-1
     /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-2
     /<qdo-ns>/queues/958f8c0643484f13b7fb32f27a4a2a9f-1
 
-Each queue node stores a float value, specifying until when messages have been
-processed::
+Each partition node stores a float value, specifying until when messages have
+been processed::
 
 .. code-block:: javascript
 
     '1330365230.03807'
 
-Queue assignment
-++++++++++++++++
+Partition assignment
+++++++++++++++++++++
 
-The information on what worker is currently handling which queue is stored in
-a third hierarchy::
+The information on what worker is currently handling which partition is stored
+in a third hierarchy::
 
-    /<qdo-ns>/queue-locks/
+    /<qdo-ns>/partition-owners/
 
-The structure is the same as used for the queue tracking. For example::
+The structure is the same as used for the partition tracking. For example::
 
-    /<qdo-ns>/queue-locks/a4bb2fb6dcda4b68aad743a4746d7f58-1
+    /<qdo-ns>/partition-owners/a4bb2fb6dcda4b68aad743a4746d7f58-1
 
 These nodes are ephemeral nodes, constituting a lock as implemented via a
 `zktools.locking.ZkWriteLock <http://zktools.readthedocs.org/en/latest/api/locking.html>`_.
 
-If a rebalancing happens and a queue is assigned to a new worker, the new worker
-will wait until it can acquire a write lock on each queue before processing it.
-This ensures that no message is processed twice, both by the old and a new
-worker.
+If a re-balancing happens and a partition is assigned to a new worker, the new
+worker will wait until it can acquire a write lock on each partition before
+processing it. This ensures that no message is processed twice, both by the
+old and a new worker.
 
-Worker queue assignment and rebalancing
-+++++++++++++++++++++++++++++++++++++++
+Worker assignment and re-balancing
+++++++++++++++++++++++++++++++++++
 
 TODO
 

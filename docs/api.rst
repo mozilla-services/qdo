@@ -10,6 +10,6 @@ organized alphabetically by module name.
    :maxdepth: 1
 
    api/exceptions
-   api/queue
+   api/partition
    api/queuey
    api/worker

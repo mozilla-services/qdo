@@ -8,34 +8,32 @@ import ujson
 import qdo.exceptions
 
 
-class Queue(object):
-    """Represents a queue containing messages.
+class Partition(object):
+    """Represents a specific partition in a message queue.
 
     :param connection: A
         :py:class:`QueueyConnection <qdo.queue.QueueyConnection>` instance
     :type server_url: object
-    :param queue_name: The queue name (a uuid4 hash)
-    :type queue_name: str
+    :param name: The queue name (a uuid4 hash) or the combined queue name and
+        partition id, separated by a dash.
+    :type name: str
     """
 
-    def __init__(self, connection, queue_name):
+    def __init__(self, connection, name):
         self.connection = connection
-        if '-' in queue_name:
-            self.queue_name, self.partition = queue_name.split(u'-')
+        if '-' in name:
+            self.name = name
+            self.queue_name, self.partition = name.split(u'-')
         else:
-            self.queue_name = queue_name
-            self.partition = 1
-
-    @property
-    def name(self):
-        return self.queue_name + u'-' + unicode(self.partition)
+            self.name = name + u'-1'
+            self.queue_name, self.partition = (name, 1)
 
     def get(self, since=None, limit=100, order='ascending'):
-        """Returns messages for the queue, by default from oldest to newest.
+        """Returns messages for the partition, by default from oldest to
+           newest.
 
-        :param since: All messages newer than this timestamp or message id,
-            should be formatted as seconds since epoch in GMT, or the
-            hexadecimal message ID
+        :param since: All messages newer than this time stamp or message id,
+            should be formatted as seconds since epoch in GMT.
         :type since: str
         :param limit: Only return N number of messages, defaults to 100
         :type limit: int
