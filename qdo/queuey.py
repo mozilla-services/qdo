@@ -152,3 +152,18 @@ class QueueyConnection(object):
         # helper method to create a new queue and return its name
         response = self.post(data={u'partitions': partitions})
         return ujson.decode(response.text)[u'queue_name']
+
+    def _get_partitions(self):
+        # Prototype for listing all partitions, in the final code partition
+        # names will be taken from ZK under /partitions
+        # A helper method to populate ZK from Queuey might be nice
+        with metlogger.timer('queuey.get_partitions'):
+            response = self.get(params={'details': True})
+        queues = ujson.decode(response.text)[u'queues']
+        partitions = []
+        for q in queues:
+            name = q[u'queue_name']
+            part = q[u'partitions']
+            for i in xrange(1, part+1):
+                partitions.append(name + u'-%s' % i)
+        return partitions

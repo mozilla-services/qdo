@@ -48,21 +48,6 @@ class Worker(object):
             queuey_section['app_key'],
             connection=queuey_section['connection'])
 
-    def _get_partitions(self):
-        # Prototype for listing all partitions, in the final code partition
-        # names will be taken from ZK under /partitions
-        # A helper method to populate ZK from Queuey might be nice
-        with metlogger.timer('queuey.get_partitions'):
-            response = self.queuey_conn.get(params={'details': True})
-        queues = ujson.decode(response.text)[u'queues']
-        partitions = []
-        for q in queues:
-            name = q[u'queue_name']
-            part = q[u'partitions']
-            for i in xrange(1, part+1):
-                partitions.append(name + u'-%s' % i)
-        return partitions
-
     def _get_workers(self):
         # Get all active worker names registered in ZK
         with metlogger.timer('zookeeper.get_workers'):
@@ -72,7 +57,7 @@ class Worker(object):
         # implement simplified Kafka re-balancing algorithm
         # 1. let this worker be Wi
         # 2. let P be all partitions
-        partitions = self._get_partitions()
+        partitions = self.queuey_conn._get_partitions()
         # 3. let W be all workers
         workers = self._get_workers()
         # 4. sort P
