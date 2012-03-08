@@ -78,7 +78,7 @@ class Worker(object):
     def work(self):
         """Work on jobs.
 
-        This is the main method of the worker.
+        This is the main loop of the worker.
         """
         if not self.job:
             return
