@@ -28,6 +28,7 @@ class TestQueue(unittest.TestCase):
         ZkNode(cls.zk_conn, root)
         cls.zk_conn.close()
         cls.zk_conn = ZooKeeper('127.0.0.1:2181' + root, wait=True)
+        ZkNode(cls.zk_conn, u'/partitions')
 
     @classmethod
     def tearDownClass(cls):
@@ -77,3 +78,13 @@ class TestQueue(unittest.TestCase):
             self.assertTrue(u'order' in messages, messages)
         else:
             self.fail('HTTPError not raised')
+
+    def test_zk_node(self):
+        partition = self._make_one()
+        self.assertEqual(float(partition.zk_node.value), 0.0)
+
+    def test_zk_node_set_value(self):
+        partition = self._make_one()
+        node = partition.zk_node
+        node.value = 1331231353.762148
+        self.assertEqual(float(node.value), 1331231353.762148)

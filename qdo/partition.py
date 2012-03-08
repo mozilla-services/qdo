@@ -4,6 +4,7 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import ujson
+from zktools.node import ZkNode
 
 import qdo.exceptions
 
@@ -30,6 +31,10 @@ class Partition(object):
         else:
             self.name = name + u'-1'
             self.queue_name, self.partition = (name, 1)
+
+        self.zk_node = ZkNode(zk_conn, u'/partitions/' + name, use_json=True)
+        if self.zk_node.value is None:
+            self.zk_node.value = 0.0
 
     def get(self, since=None, limit=100, order='ascending'):
         """Returns messages for the partition, by default from oldest to
