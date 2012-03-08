@@ -9,7 +9,6 @@ import socket
 
 import zookeeper
 from zc.zk import ZooKeeper
-from zktools.locking import ZkWriteLock
 from zktools.node import ZkNode
 
 from qdo.partition import Partition
