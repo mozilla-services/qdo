@@ -138,6 +138,8 @@ class Worker(object):
         """Register this worker with :term:`Zookeeper`."""
         self.zk_worker_node = ZkNode(self.zkconn, u'/workers/' + self.name,
             create_mode=zookeeper.EPHEMERAL)
+        # TODO: register a watch for /workers for changes
+        # TODO: register a watch for /queues for changes
 
     def unregister(self):
         """Unregister this worker from :term:`Zookeeper`."""
