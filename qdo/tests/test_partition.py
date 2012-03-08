@@ -63,8 +63,11 @@ class TestQueue(unittest.TestCase):
 
     def test_get_messages_since(self):
         partition = self._make_one()
+        # add test message
+        self.conn.post(url=self.queue_name, data=u'Hello')
         # query messages in the future
-        result = partition.get_messages(since=time.time() + 1000)
+        partition.timestamp = time.time() + 1000
+        result = partition.get_messages()
         self.assertTrue(u'messages' in result)
         self.assertEqual(len(result[u'messages']), 0)
 

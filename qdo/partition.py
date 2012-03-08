@@ -36,13 +36,10 @@ class Partition(object):
         if self.zk_node.value is None:
             self.zk_node.value = 0.0
 
-    def get_messages(self, since=None, limit=100, order='ascending'):
+    def get_messages(self, limit=100, order='ascending'):
         """Returns messages for the partition, by default from oldest to
            newest.
 
-        :param since: All messages newer than this time stamp or message id,
-            should be formatted as seconds since epoch in GMT.
-        :type since: str
         :param limit: Only return N number of messages, defaults to 100
         :type limit: int
         :param order: 'descending' or 'ascending', defaults to ascending
@@ -54,12 +51,10 @@ class Partition(object):
             'limit': limit,
             'order': order,
             'partitions': self.partition,
-        }
-        if since is not None:
             # use the repr, to avoid a float getting clobbered by implicit
             # str() calls in the URL generation
-            params['since'] = repr(since)
-
+            'since': repr(self.timestamp),
+        }
         response = self.queuey_conn.get(self.queue_name, params=params)
         if response.ok:
             return ujson.decode(response.text)
