@@ -48,18 +48,21 @@ class Partition(object):
         :raises: :py:exc:`qdo.exceptions.HTTPError`
         :rtype: list
         """
+        since = self.timestamp
         params = {
             'limit': limit,
             'order': order,
             'partitions': self.partition,
             # use the repr, to avoid a float getting clobbered by implicit
             # str() calls in the URL generation
-            'since': repr(self.timestamp),
+            'since': repr(since),
         }
         with metlogger.timer('queuey.get_messages'):
             response = self.queuey_conn.get(self.queue_name, params=params)
         if response.ok:
-            return ujson.decode(response.text)[u'messages']
+            messages = ujson.decode(response.text)[u'messages']
+            # filter out exact timestamp matches
+            return [m for m in messages if m[u'timestamp'] > since]
         # failure
         raise qdo.exceptions.HTTPError(response.status_code, response)
 

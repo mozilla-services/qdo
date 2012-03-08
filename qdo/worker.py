@@ -110,14 +110,9 @@ class Worker(object):
                     partition = partitions[num]
                     # zk_partition_lock = zk_partition_locks[partition_name]
                     try:
-                        since = partition.timestamp
                         messages = partition.get_messages(limit=2)
                         message = messages[0]
                         timestamp = message[u'timestamp']
-                        if timestamp == since:
-                            # skip an exact match
-                            message = messages[1]
-                            timestamp = message[u'timestamp']
                         self.job(message)
                         partition.timestamp = timestamp
                     except IndexError:
