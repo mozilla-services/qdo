@@ -5,8 +5,16 @@ Development
 Development of qdo takes place on github at:
 https://github.com/mozilla-services/qdo
 
-Here's a list of useful docs and descriptions of some of the parts qdo is
-based on:
+Helpers
+=======
+
+To check for new releases of all Python dependencies, run::
+
+    bin/checkversions
+
+or if you only want bug-fix (level 2 in 0.1.2) releases::
+
+    bin/checkversions -l 2
 
 Zookeeper
 =========
