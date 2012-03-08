@@ -29,7 +29,7 @@ class Worker(object):
         self.settings = settings
         self.shutdown = False
         self.name = "%s-%s" % (socket.getfqdn(), os.getpid())
-        self.zkconn = None
+        self.zk_conn = None
         self.zk_worker_node = None
         self.configure()
         self.job = None
@@ -51,7 +51,7 @@ class Worker(object):
     def _get_workers(self):
         # Get all active worker names registered in ZK
         with metlogger.timer('zookeeper.get_workers'):
-            return self.zkconn.get_children(u'/workers')
+            return self.zk_conn.get_children(u'/workers')
 
     def _assign_partitions(self):
         # implement simplified Kafka re-balancing algorithm
@@ -96,13 +96,13 @@ class Worker(object):
         self.zk_partition_locks = zk_partition_locks = {}
         self.partitions = partitions = []
         for name in new_partitions:
-            node = ZkNode(self.zkconn, u'/partitions/' + name, use_json=True)
+            node = ZkNode(self.zk_conn, u'/partitions/' + name, use_json=True)
             if node.value is None:
                 node.value = 0.0
             zk_partition_nodes[name] = node
-            zk_partition_locks[name] = ZkWriteLock(self.zkconn, name,
+            zk_partition_locks[name] = ZkWriteLock(self.zk_conn, name,
                 lock_root=u'/partition-owners')
-            partitions.append(Partition(self.queuey_conn, self.zkconn, name))
+            partitions.append(Partition(self.queuey_conn, self.zk_conn, name))
 
         try:
             while 1:
@@ -139,21 +139,21 @@ class Worker(object):
 
     def setup_zookeeper(self):
         """Setup global data structures in :term:`Zookeeper`."""
-        self.zkconn = ZooKeeper(self.zk_root_url)
-        ZkNode(self.zkconn, u'/workers')
-        ZkNode(self.zkconn, u'/partitions')
-        ZkNode(self.zkconn, u'/partition-owners')
+        self.zk_conn = ZooKeeper(self.zk_root_url)
+        ZkNode(self.zk_conn, u'/workers')
+        ZkNode(self.zk_conn, u'/partitions')
+        ZkNode(self.zk_conn, u'/partition-owners')
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
-        self.zk_worker_node = ZkNode(self.zkconn, u'/workers/' + self.name,
+        self.zk_worker_node = ZkNode(self.zk_conn, u'/workers/' + self.name,
             create_mode=zookeeper.EPHEMERAL)
         # TODO: register a watch for /workers for changes
         # TODO: register a watch for /partitions for changes
 
     def unregister(self):
         """Unregister this worker from :term:`Zookeeper`."""
-        self.zkconn.close()
+        self.zk_conn.close()
 
 
 def run(settings):  # pragma: no cover

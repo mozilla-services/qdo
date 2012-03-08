@@ -22,27 +22,27 @@ class TestWorker(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         root = '/' + ZOO_DEFAULT_NS
-        cls.zkconn = ZooKeeper('127.0.0.1:2181', wait=True)
-        if cls.zkconn.exists(root):
-            cls.zkconn.delete_recursive(root)
-        ZkNode(cls.zkconn, root)
-        cls.zkconn.close()
-        cls.zkconn = ZooKeeper('127.0.0.1:2181' + root, wait=True)
+        cls.zk_conn = ZooKeeper('127.0.0.1:2181', wait=True)
+        if cls.zk_conn.exists(root):
+            cls.zk_conn.delete_recursive(root)
+        ZkNode(cls.zk_conn, root)
+        cls.zk_conn.close()
+        cls.zk_conn = ZooKeeper('127.0.0.1:2181' + root, wait=True)
 
     @classmethod
     def tearDownClass(cls):
-        cls.zkconn.close()
+        cls.zk_conn.close()
 
     def setUp(self):
-        for child in self.zkconn.get_children('/'):
-            self.zkconn.delete_recursive('/' + child)
+        for child in self.zk_conn.get_children('/'):
+            self.zk_conn.delete_recursive('/' + child)
 
     def tearDown(self):
         # clean up zookeeper
-        if (self.worker.zkconn and
-            self.worker.zkconn.handle is not None):
+        if (self.worker.zk_conn and
+            self.worker.zk_conn.handle is not None):
 
-            self.worker.zkconn.close()
+            self.worker.zk_conn.close()
         # clean up queuey
         queuey_conn = self.worker.queuey_conn
         response = queuey_conn.get()
@@ -71,7 +71,7 @@ class TestWorker(unittest.TestCase):
     def test_setup_zookeeper(self):
         worker = self._make_one()
         worker.setup_zookeeper()
-        children = worker.zkconn.get_children('/')
+        children = worker.zk_conn.get_children('/')
         self.assertTrue('workers' in children, children)
         self.assertTrue('partitions' in children, children)
         self.assertTrue('partition-owners' in children, children)
@@ -80,34 +80,34 @@ class TestWorker(unittest.TestCase):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zkconn.exists('/workers'))
-        children = worker.zkconn.get_children('/workers')
+        self.assertTrue(worker.zk_conn.exists('/workers'))
+        children = worker.zk_conn.get_children('/workers')
         self.assertEqual(len(children), 1)
 
     def test_register_twice(self):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zkconn.exists('/workers'))
-        children = worker.zkconn.get_children('/workers')
+        self.assertTrue(worker.zk_conn.exists('/workers'))
+        children = worker.zk_conn.get_children('/workers')
         self.assertEqual(len(children), 1)
         # a second call to register neither fails nor adds a duplicate
         worker.register()
-        children = worker.zkconn.get_children('/workers')
+        children = worker.zk_conn.get_children('/workers')
         self.assertEqual(len(children), 1)
 
     def test_unregister(self):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zkconn.exists('/workers'))
-        children = worker.zkconn.get_children('/workers')
+        self.assertTrue(worker.zk_conn.exists('/workers'))
+        children = worker.zk_conn.get_children('/workers')
         self.assertEqual(len(children), 1)
         self.assertEqual(children[0], worker.name)
         worker.unregister()
-        self.assertTrue(worker.zkconn.handle is None)
+        self.assertTrue(worker.zk_conn.handle is None)
         self.assertEqual(
-            self.zkconn.get_children('/workers'), [])
+            self.zk_conn.get_children('/workers'), [])
 
     def test_work_no_job(self):
         worker = self._make_one()
