@@ -100,14 +100,14 @@ class Worker(object):
                     break
                 no_messages = 0
                 for partition in partitions:
-                    try:
-                        messages = partition.messages(limit=2)
-                        message = messages[0]
-                        timestamp = message[u'timestamp']
-                        self.job(message)
-                        partition.timestamp = timestamp
-                    except IndexError:
+                    messages = partition.messages(limit=2)
+                    if not messages:
                         no_messages += 1
+                        continue
+                    message = messages[0]
+                    timestamp = message[u'timestamp']
+                    self.job(message)
+                    partition.timestamp = timestamp
                 if no_messages == len(partitions):
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
