@@ -7,7 +7,6 @@ import os
 import time
 import socket
 
-import ujson
 import zookeeper
 from zc.zk import ZooKeeper
 from zktools.locking import ZkWriteLock
