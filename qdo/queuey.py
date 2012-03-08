@@ -56,16 +56,18 @@ class QueueyConnection(object):
         Either a single full URL to the Queuey app or multiple comma
         separated URLs.
     :type connection: str
+    :param retries: Number of retries on connection timeouts
+    :type retries: int
+    :param timeout: Connection timeout in seconds
+    :type timeout: float
     """
 
-    #: Number of retries on connection timeouts
-    retries = 3
-    #: Connection timeout in seconds
-    timeout = 2.0
-
     def __init__(self, app_key,
-                 connection='https://127.0.0.1:5001/v1/queuey/'):
+                 connection='https://127.0.0.1:5001/v1/queuey/',
+                 retries=3, timeout=2.0):
         self.app_key = app_key
+        self.retries = retries
+        self.timeout = timeout
         self.connection = [c.strip() for c in connection.split(',')]
         self.app_url = self.connection[0]
         self.fallback_urls = self.connection[1:]
