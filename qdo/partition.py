@@ -11,7 +11,7 @@ import qdo.exceptions
 class Partition(object):
     """Represents a specific partition in a message queue.
 
-    :param connection: A
+    :param queuey_conn: A
         :py:class:`QueueyConnection <qdo.queue.QueueyConnection>` instance
     :type server_url: object
     :param name: The queue name (a uuid4 hash) or the combined queue name and
@@ -19,8 +19,8 @@ class Partition(object):
     :type name: str
     """
 
-    def __init__(self, connection, name):
-        self.connection = connection
+    def __init__(self, queuey_conn, name):
+        self.queuey_conn = queuey_conn
         if '-' in name:
             self.name = name
             self.queue_name, self.partition = name.split(u'-')
@@ -52,7 +52,7 @@ class Partition(object):
             # str() calls in the URL generation
             params['since'] = repr(since)
 
-        response = self.connection.get(self.queue_name, params=params)
+        response = self.queuey_conn.get(self.queue_name, params=params)
         if response.ok:
             return ujson.decode(response.text)
         # failure
