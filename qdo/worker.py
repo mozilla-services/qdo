@@ -49,8 +49,11 @@ class Worker(object):
             connection=queuey_section['connection'])
 
     def _get_queues(self):
-        # Prototype for listing all queues
-        response = self.queuey_conn.get(params={'details': True})
+        # Prototype for listing all queues, in the final code queue names
+        # will be taken from ZK under /queues
+        # A helper method to populate ZK from Queuey might be nice
+        with metlogger.timer('queuey.get_queues'):
+            response = self.queuey_conn.get(params={'details': True})
         queues = ujson.decode(response.text)[u'queues']
         queue_names = []
         for q in queues:
@@ -78,8 +81,7 @@ class Worker(object):
         self.setup_zookeeper()
         self.register()
         # track queues
-        with metlogger.timer('queuey.get_queues'):
-            queue_names = self._get_queues()
+        queue_names = self._get_queues()
         self.zk_queue_nodes = zk_queue_nodes = {}
         self.zk_queue_locks = zk_queue_locks = {}
         self.queues = queues = []
