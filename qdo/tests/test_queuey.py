@@ -165,9 +165,9 @@ class TestQueueyConnection(unittest.TestCase):
         info = [q for q in queues if q[u'queue_name'] == name][0]
         self.assertEqual(info[u'partitions'], 3)
 
-    def test_get_partitions(self):
+    def test_partitions(self):
         conn = self._make_one()
         queue_name = conn._create_queue(partitions=3)
-        partitions = conn._get_partitions()
+        partitions = conn._partitions()
         expected = [queue_name + u'-' + unicode(i) for i in range(1, 4)]
         self.assertTrue(set(expected).issubset(set(partitions)))

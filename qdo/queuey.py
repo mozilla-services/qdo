@@ -153,7 +153,7 @@ class QueueyConnection(object):
         response = self.post(data={u'partitions': partitions})
         return ujson.decode(response.text)[u'queue_name']
 
-    def _get_partitions(self):
+    def _partitions(self):
         # Prototype for listing all partitions, in the final code partition
         # names will be taken from ZK under /partitions
         # A helper method to populate ZK from Queuey might be nice

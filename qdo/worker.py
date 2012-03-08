@@ -47,7 +47,7 @@ class Worker(object):
             queuey_section['app_key'],
             connection=queuey_section['connection'])
 
-    def _get_workers(self):
+    def _workers(self):
         # Get all active worker names registered in ZK
         with metlogger.timer('zookeeper.get_workers'):
             return self.zk_conn.get_children(u'/workers')
@@ -56,9 +56,9 @@ class Worker(object):
         # implement simplified Kafka re-balancing algorithm
         # 1. let this worker be Wi
         # 2. let P be all partitions
-        partitions = self.queuey_conn._get_partitions()
+        partitions = self.queuey_conn._partitions()
         # 3. let W be all workers
-        workers = self._get_workers()
+        workers = self._workers()
         # 4. sort P
         partitions = sorted(partitions)
         # 5. sort W
