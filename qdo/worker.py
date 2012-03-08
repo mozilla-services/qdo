@@ -99,8 +99,7 @@ class Worker(object):
                 if self.shutdown:
                     break
                 no_messages = 0
-                for num in xrange(len(partitions)):
-                    partition = partitions[num]
+                for partition in partitions:
                     try:
                         messages = partition.messages(limit=2)
                         message = messages[0]
