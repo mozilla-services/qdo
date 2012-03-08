@@ -7,6 +7,7 @@ import ujson
 from zktools.node import ZkNode
 
 import qdo.exceptions
+from qdo.utils import metlogger
 
 
 class Partition(object):
@@ -45,7 +46,7 @@ class Partition(object):
         :param order: 'descending' or 'ascending', defaults to ascending
         :type order: str
         :raises: :py:exc:`qdo.exceptions.HTTPError`
-        :rtype: dict
+        :rtype: list
         """
         params = {
             'limit': limit,
@@ -55,9 +56,10 @@ class Partition(object):
             # str() calls in the URL generation
             'since': repr(self.timestamp),
         }
-        response = self.queuey_conn.get(self.queue_name, params=params)
+        with metlogger.timer('queuey.get_messages'):
+            response = self.queuey_conn.get(self.queue_name, params=params)
         if response.ok:
-            return ujson.decode(response.text)
+            return ujson.decode(response.text)[u'messages']
         # failure
         raise qdo.exceptions.HTTPError(response.status_code, response)
 
@@ -65,13 +67,15 @@ class Partition(object):
     def timestamp(self):
         """Returns the timestamp of the last processed message.
         """
-        return float(self.zk_node.value)
+        with metlogger.timer('zookeeper.get_value'):
+            return float(self.zk_node.value)
 
     @timestamp.setter
     def timestamp(self, value):
         """Sets the timestamp of the last processed message.
 
-        :param value: New timestamp value as a float or string.
+        :param value: New timestamp value as a float.
         :type value: float
         """
-        self.zk_node.value = value
+        with metlogger.timer('zookeeper.set_value'):
+            self.zk_node.value = repr(value)

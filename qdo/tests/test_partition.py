@@ -56,9 +56,8 @@ class TestQueue(unittest.TestCase):
         # add test message
         self.conn.post(url=self.queue_name, data=test_message)
         # query
-        result = partition.get_messages()
-        self.assertTrue(u'messages' in result)
-        bodies = [m[u'body'] for m in result[u'messages']]
+        messages = partition.get_messages()
+        bodies = [m[u'body'] for m in messages]
         self.assertTrue(u'Hello world!' in bodies)
 
     def test_get_messages_since(self):
@@ -67,9 +66,8 @@ class TestQueue(unittest.TestCase):
         self.conn.post(url=self.queue_name, data=u'Hello')
         # query messages in the future
         partition.timestamp = time.time() + 1000
-        result = partition.get_messages()
-        self.assertTrue(u'messages' in result)
-        self.assertEqual(len(result[u'messages']), 0)
+        messages = partition.get_messages()
+        self.assertEqual(len(messages), 0)
 
     def test_get_messages_error(self):
         partition = self._make_one()
