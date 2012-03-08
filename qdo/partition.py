@@ -14,9 +14,9 @@ class Partition(object):
     """Represents a specific partition in a message queue.
 
     :param queuey_conn: A
-        :py:class:`QueueyConnection <qdo.queue.QueueyConnection>` instance
-    :type server_url: object
-    :param zk_conn: A :term:`Zookeeper` connection
+        :py:class:`QueueyConnection <qdo.queue.QueueyConnection>` instance.
+    :type queuey_conn: object
+    :param zk_conn: A :term:`Zookeeper` connection instance.
     :type zk_conn: object
     :param name: The queue name (a uuid4 hash) or the combined queue name and
         partition id, separated by a dash.
@@ -68,7 +68,7 @@ class Partition(object):
 
     @property
     def timestamp(self):
-        """Returns the timestamp of the last processed message.
+        """Property for the timestamp of the last processed message.
         """
         with metlogger.timer('zookeeper.get_value'):
             return float(self.zk_node.value)
