@@ -91,14 +91,12 @@ class Worker(object):
         self.register()
         # track partitions
         new_partitions = self._assign_partitions()
-        self.zk_partition_nodes = zk_partition_nodes = {}
         self.zk_partition_locks = zk_partition_locks = {}
         self.partitions = partitions = []
         for name in new_partitions:
             node = ZkNode(self.zk_conn, u'/partitions/' + name, use_json=True)
             if node.value is None:
                 node.value = 0.0
-            zk_partition_nodes[name] = node
             zk_partition_locks[name] = ZkWriteLock(self.zk_conn, name,
                 lock_root=u'/partition-owners')
             partitions.append(Partition(self.queuey_conn, self.zk_conn, name))
@@ -110,8 +108,7 @@ class Worker(object):
                 no_messages = 0
                 for num in xrange(len(partitions)):
                     partition = partitions[num]
-                    partition_name = partition.name
-                    zk_partition_node = zk_partition_nodes[partition_name]
+                    zk_partition_node = partition.zk_node
                     # zk_partition_lock = zk_partition_locks[partition_name]
                     try:
                         with metlogger.timer('zookeeper.get_value'):
