@@ -75,7 +75,7 @@ class QueueyConnection(object):
         # requests/urllib3 will always create maxsize connections and then
         # cycle through them one after the other. internally it's a queue
         self.session = session(headers=headers, timeout=self.timeout,
-            config={'pool_maxsize': 1, 'keep_alive': True})
+            config={'pool_maxsize': 1, 'keep_alive': True}, prefetch=True)
 
     @fallback
     @retry
@@ -85,7 +85,7 @@ class QueueyConnection(object):
         """
         parts = urlsplit(self.app_url)
         url = parts.scheme + '://' + parts.netloc + '/__heartbeat__'
-        return self.session.head(url, prefetch=True)
+        return self.session.head(url)
 
     @fallback
     @retry
@@ -101,7 +101,7 @@ class QueueyConnection(object):
         """
         url = urljoin(self.app_url, url)
         return self.session.get(url,
-            params=params, timeout=self.timeout, prefetch=True)
+            params=params, timeout=self.timeout)
 
     @fallback
     @retry
@@ -130,7 +130,7 @@ class QueueyConnection(object):
             data = ujson.encode({'messages': messages})
             headers = {'content-type': 'application/json'}
         return self.session.post(url, headers=headers,
-            params=params, timeout=self.timeout, data=data, prefetch=True)
+            params=params, timeout=self.timeout, data=data)
 
     @fallback
     @retry
@@ -146,7 +146,7 @@ class QueueyConnection(object):
         """
         url = urljoin(self.app_url, url)
         return self.session.delete(url,
-            params=params, timeout=self.timeout, prefetch=True)
+            params=params, timeout=self.timeout)
 
     def _create_queue(self, partitions=1):
         # helper method to create a new queue and return its name
