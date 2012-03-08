@@ -114,7 +114,8 @@ class Worker(object):
                         with metlogger.timer('zookeeper.get_value'):
                             since = float(zk_partition_node.value)
                         with metlogger.timer('queuey.get_messages'):
-                            data = partition.get(since=since, limit=2)
+                            data = partition.get_messages(
+                                since=since, limit=2)
                         messages = data[u'messages']
                         message = messages[0]
                         timestamp = message[u'timestamp']
