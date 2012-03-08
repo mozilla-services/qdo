@@ -106,7 +106,7 @@ class Worker(object):
                     timestamp = message[u'timestamp']
                     self.job(message)
                     partition.timestamp = timestamp
-                if no_messages == len(partitions):
+                if no_messages == len(partitions):  # pragma: no cover
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
         finally:
