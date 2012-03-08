@@ -28,7 +28,7 @@ class Worker(object):
         self.shutdown = False
         self.name = "%s-%s" % (socket.getfqdn(), os.getpid())
         self.zk_conn = None
-        self.zk_worker_node = None
+        self.zk_node = None
         self.configure()
         self.job = None
 
@@ -38,9 +38,8 @@ class Worker(object):
         qdo_section = self.settings.getsection('qdo-worker')
         self.wait_interval = qdo_section['wait_interval']
         zk_section = self.settings.getsection('zookeeper')
-        zkhost = zk_section['connection']
-        zkns = zk_section['namespace']
-        self.zk_root_url = zkhost + '/' + zkns
+        self.zk_root_url = zk_section['connection'] + '/' + \
+            zk_section['namespace']
         queuey_section = self.settings.getsection('queuey')
         self.queuey_conn = QueueyConnection(
             queuey_section['app_key'],
@@ -122,7 +121,7 @@ class Worker(object):
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
-        self.zk_worker_node = ZkNode(self.zk_conn, u'/workers/' + self.name,
+        self.zk_node = ZkNode(self.zk_conn, u'/workers/' + self.name,
             create_mode=zookeeper.EPHEMERAL)
         # TODO: register a watch for /workers for changes
         # TODO: register a watch for /partitions for changes
