@@ -14,13 +14,16 @@ class Partition(object):
     :param queuey_conn: A
         :py:class:`QueueyConnection <qdo.queue.QueueyConnection>` instance
     :type server_url: object
+    :param zk_conn: A :term:`Zookeeper` connection
+    :type zk_conn: object
     :param name: The queue name (a uuid4 hash) or the combined queue name and
         partition id, separated by a dash.
     :type name: str
     """
 
-    def __init__(self, queuey_conn, name):
+    def __init__(self, queuey_conn, zk_conn, name):
         self.queuey_conn = queuey_conn
+        self.zk_conn = zk_conn
         if '-' in name:
             self.name = name
             self.queue_name, self.partition = name.split(u'-')

@@ -102,7 +102,7 @@ class Worker(object):
             zk_partition_nodes[name] = node
             zk_partition_locks[name] = ZkWriteLock(self.zkconn, name,
                 lock_root=u'/partition-owners')
-            partitions.append(Partition(self.queuey_conn, name))
+            partitions.append(Partition(self.queuey_conn, self.zkconn, name))
 
         try:
             while 1:
