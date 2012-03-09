@@ -60,4 +60,4 @@ zope.event==3.5.1
 zope.interface==3.8.0
 
 -e git://github.com/mozilla-services/pyramid_ipauth.git#egg=pyramid_ipauth
--e git://github.com/mozilla-services/queuey.git@feature/api_redesign#egg=queuey-dev
+-e git://github.com/mozilla-services/queuey.git#egg=queuey
