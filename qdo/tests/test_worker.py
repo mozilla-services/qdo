@@ -8,7 +8,6 @@ import unittest
 
 import ujson
 from zc.zk import ZooKeeper
-from zktools.node import ZkNode
 
 from qdo.config import QdoSettings
 from qdo.config import ZOO_DEFAULT_NS
@@ -21,13 +20,7 @@ class TestWorker(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        root = '/' + ZOO_DEFAULT_NS
-        cls.zk_conn = ZooKeeper('127.0.0.1:2181', wait=True)
-        if cls.zk_conn.exists(root):
-            cls.zk_conn.delete_recursive(root)
-        ZkNode(cls.zk_conn, root)
-        cls.zk_conn.close()
-        cls.zk_conn = ZooKeeper('127.0.0.1:2181' + root, wait=True)
+        cls.zk_conn = ZooKeeper('127.0.0.1:2181/' + ZOO_DEFAULT_NS, wait=True)
 
     @classmethod
     def tearDownClass(cls):
