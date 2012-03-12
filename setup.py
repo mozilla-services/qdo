@@ -52,6 +52,7 @@ setup(name='qdo',
       install_requires=reqs,
       tests_require=[
           'nose',
+          'supervisor',
           ],
       test_suite='nose.collector',
       entry_points="""

@@ -3,10 +3,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import xmlrpclib
+
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
 from qdo.config import ZOO_DEFAULT_NS
+
+processes = {}
 
 
 def cleanup_zookeeper():
@@ -19,8 +23,24 @@ def cleanup_zookeeper():
     zk_conn.close()
 
 
+def ensure_zookeeper():
+    srpc = processes['supervisor']
+    if srpc.getProcessInfo('zookeeper')['statename'] != 'RUNNING':
+        print(u'Starting Zookeeper!\n')
+        srpc.startProcess('zookeeper')
+    if srpc.getProcessInfo('zookeeper')['statename'] != 'RUNNING':
+        raise RuntimeError('Zookeeper not running')
+
+
+def setup_supervisor():
+    processes['supervisor'] = xmlrpclib.ServerProxy(
+        'http://127.0.0.1:4999').supervisor
+
+
 def setup():
     """Shared one-time test setup."""
+    setup_supervisor()
+    ensure_zookeeper()
     cleanup_zookeeper()
 
 
