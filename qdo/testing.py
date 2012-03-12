@@ -23,13 +23,13 @@ def cleanup_zookeeper():
     zk_conn.close()
 
 
-def ensure_zookeeper():
+def ensure_process(name):
     srpc = processes['supervisor']
-    if srpc.getProcessInfo('zookeeper')['statename'] != 'RUNNING':
-        print(u'Starting Zookeeper!\n')
-        srpc.startProcess('zookeeper')
-    if srpc.getProcessInfo('zookeeper')['statename'] != 'RUNNING':
-        raise RuntimeError('Zookeeper not running')
+    if srpc.getProcessInfo(name)['statename'] != 'RUNNING':
+        print(u'Starting %s!\n' % name)
+        srpc.startProcess(name)
+    if srpc.getProcessInfo(name)['statename'] != 'RUNNING':
+        raise RuntimeError('%s not running' % name)
 
 
 def setup_supervisor():
@@ -40,7 +40,7 @@ def setup_supervisor():
 def setup():
     """Shared one-time test setup."""
     setup_supervisor()
-    ensure_zookeeper()
+    ensure_process('zookeeper')
     cleanup_zookeeper()
 
 
