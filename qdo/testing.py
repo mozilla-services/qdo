@@ -51,7 +51,9 @@ def setup():
     setup_supervisor()
     ensure_process('zookeeper')
     cleanup_zookeeper()
+    ensure_process('cassandra')
     ensure_process('queuey')
+    ensure_process('nginx')
 
 
 def teardown():
