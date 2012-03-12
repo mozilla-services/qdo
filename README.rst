@@ -82,3 +82,13 @@ in which case it won't be stopped at the end of the test run. Do this if you
 want to run the tests multiple times. Also note, that the tests use the
 Cassandra and Zookeeper instances and will recursively delete any data in them
 as part of the test tear down.
+
+There's a good number of services being started during the tests. Currently
+those are hard-coded to the following ports (on 127.0.0.1):
+
+    - 2181 Zookeeper
+    - 4999 Supervisor
+    - 5000 Queuey
+    - 5001-5003 Nginx
+    - 7000 Cassandra
+    - 9160 Cassandra
