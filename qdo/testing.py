@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import time
 import xmlrpclib
 
 from zc.zk import ZooKeeper
@@ -25,9 +26,17 @@ def cleanup_zookeeper():
 
 def ensure_process(name):
     srpc = processes['supervisor']
-    if srpc.getProcessInfo(name)['statename'] != 'RUNNING':
+    if srpc.getProcessInfo(name)['statename'] in ('STOPPED', 'EXITED'):
         print(u'Starting %s!\n' % name)
         srpc.startProcess(name)
+    # wait for startup to succeed
+    for i in range(1, 11):
+        state = srpc.getProcessInfo(name)['statename']
+        if state == 'RUNNING':
+            break
+        elif state != 'RUNNING':
+            print(u'Waiting on %s for %s seconds.' % (name, i * 0.1))
+            time.sleep(i * 0.1)
     if srpc.getProcessInfo(name)['statename'] != 'RUNNING':
         raise RuntimeError('%s not running' % name)
 
@@ -42,6 +51,7 @@ def setup():
     setup_supervisor()
     ensure_process('zookeeper')
     cleanup_zookeeper()
+    ensure_process('queuey')
 
 
 def teardown():
