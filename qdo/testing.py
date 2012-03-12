@@ -38,12 +38,12 @@ def setup_supervisor():
 
 
 def setup():
-    """Shared one-time test setup."""
+    """Shared one-time test setup, called from tests/__init__.py"""
     setup_supervisor()
     ensure_process('zookeeper')
     cleanup_zookeeper()
 
 
 def teardown():
-    """Shared one-time test tear down."""
+    """Shared one-time test tear down, called from tests/__init__.py"""
     cleanup_zookeeper()
