@@ -5,6 +5,7 @@
 
 import sys
 
+from metlog.config import client_from_dict_config
 from metlog.client import MetlogClient
 from metlog import senders
 
@@ -16,3 +17,8 @@ else:  # pragma: no cover
     metsender = senders.StdOutSender()
 
 metlogger = MetlogClient(metsender, logger='qdo-worker')
+
+
+def configure_metlog(settings):
+    global metlogger
+    metlogger = client_from_dict_config(settings)

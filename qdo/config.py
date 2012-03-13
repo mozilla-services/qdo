@@ -26,3 +26,7 @@ class QdoSettings(SettingsDict):
         self['zookeeper.connection'] = \
             '127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'
         self['zookeeper.namespace'] = ZOO_DEFAULT_NS
+
+        self['metlog.logger'] = 'qdo-worker'
+        self['metlog.sender'] = {}
+        self['metlog.sender']['class'] = 'metlog.senders.StdOutSender'

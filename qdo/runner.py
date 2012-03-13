@@ -13,6 +13,7 @@ from mozsvc.config import load_into_settings
 
 from qdo import worker
 from qdo.config import QdoSettings
+from qdo.utils import configure_metlog
 
 DEFAULT_CONFIGFILE = os.path.join(os.curdir, 'etc', 'qdo-worker.conf')
 
@@ -49,6 +50,7 @@ def parse_config(filename, settings):
         ca_bundle = _nicepath(ca_bundle)
         if ca_bundle is not None:
             os.environ['REQUESTS_CA_BUNDLE'] = ca_bundle
+    configure_metlog(settings.getsection('metlog'))
     return config
 
 
