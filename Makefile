@@ -78,7 +78,7 @@ $(NGINX):
 	curl --silent http://nginx.org/download/nginx-1.1.15.tar.gz | tar -zvx
 	mv bin/nginx-1.1.15 bin/nginx
 	cd bin/nginx && \
-	./configure --prefix=/opt/mozilla/qdo/bin/nginx --with-http_ssl_module \
+	./configure --prefix=$(HERE)/bin/nginx --with-http_ssl_module \
 	--conf-path=../../etc/nginx/nginx.conf --pid-path=../../var/nginx.pid \
 	--lock-path=../../var/nginx.lock --error-log-path=../../var/log/nginx-error.log \
 	--http-log-path=../../var/log/nginx-access.log && \
