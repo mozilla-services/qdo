@@ -99,7 +99,6 @@ $(ZOOKEEPER):
 	mv build.xml old_build.xml && \
 	cat old_build.xml | sed 's|executable="python"|executable="../../../../../bin/python"|g' > build.xml && \
 	ant install
-	cp etc/zoo.cfg bin/zookeeper/conf/
 	cd bin/zookeeper/bin && \
 	mv zkServer.sh old_zkServer.sh && \
 	cat old_zkServer.sh | sed 's|    $$JAVA "-Dzoo|    exec $$JAVA "-Dzoo|g' > zkServer.sh && \
