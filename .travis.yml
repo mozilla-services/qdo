@@ -3,3 +3,7 @@ python:
 - "2.6"
 install: make build
 script: make test
+
+notifications:
+  email:
+    - hschlichting@mozilla.com
