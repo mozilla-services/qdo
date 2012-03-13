@@ -32,10 +32,9 @@ class TestWorker(unittest.TestCase):
 
     def tearDown(self):
         # clean up zookeeper
-        if (self.worker.zk_conn and
-            self.worker.zk_conn.handle is not None):
-
-            self.worker.zk_conn.close()
+        zk_conn = self.worker.zk_conn
+        if (zk_conn and zk_conn.handle is not None):
+            zk_conn.close()
         # clean up queuey
         queuey_conn = self.worker.queuey_conn
         response = queuey_conn.get()
@@ -97,10 +96,16 @@ class TestWorker(unittest.TestCase):
         children = worker.zk_conn.get_children('/workers')
         self.assertEqual(len(children), 1)
         self.assertEqual(children[0], worker.name)
+        before_version = worker.zk_conn.get(u'/workers')[1]['cversion']
         worker.unregister()
         self.assertTrue(worker.zk_conn.handle is None)
-        self.assertEqual(
-            self.zk_conn.get_children('/workers'), [])
+        # wait for changes to propagate
+        for i in xrange(0, 10):
+            if self.zk_conn.get(u'/workers')[1]['cversion'] != before_version:
+                break
+            else:
+                time.sleep(i * 0.1)
+        self.assertEqual(self.zk_conn.get_children('/workers'), [])
 
     def test_work_no_job(self):
         worker = self._make_one()

@@ -23,7 +23,8 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(queuey_section['connection'],
             'https://127.0.0.1:5001/v1/queuey/')
         zk_section = settings.getsection('zookeeper')
-        self.assertEqual(zk_section['connection'], '127.0.0.1:2181')
+        self.assertEqual(zk_section['connection'],
+            '127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187')
 
     def test_configure(self):
         extra = {

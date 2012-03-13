@@ -23,5 +23,6 @@ class QdoSettings(SettingsDict):
         self['queuey.connection'] = 'https://127.0.0.1:5001/v1/queuey/'
         self['queuey.app_key'] = None
 
-        self['zookeeper.connection'] = '127.0.0.1:2181'
+        self['zookeeper.connection'] = \
+            '127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'
         self['zookeeper.namespace'] = ZOO_DEFAULT_NS

@@ -17,7 +17,7 @@ processes = {}
 def cleanup_zookeeper():
     """Opens a connection to Zookeeper and removes all nodes from it."""
     root = '/' + ZOO_DEFAULT_NS
-    zk_conn = ZooKeeper('127.0.0.1:2181', wait=True)
+    zk_conn = ZooKeeper('127.0.0.1:2187', wait=True)
     if zk_conn.exists(root):
         zk_conn.delete_recursive(root)
     ZkNode(zk_conn, root)

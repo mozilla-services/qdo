@@ -15,7 +15,7 @@ class TestZookeeper(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.zk_conn = ZooKeeper('127.0.0.1:2181', wait=True)
+        cls.zk_conn = ZooKeeper('127.0.0.1:2187', wait=True)
         if cls.zk_conn.exists(u'/test'):
             cls.zk_conn.delete_recursive(u'/test')
         ZkNode(cls.zk_conn, u'/test')
@@ -27,7 +27,7 @@ class TestZookeeper(unittest.TestCase):
         cls.zk_conn.close()
 
     def tearDown(self):
-        self.srpc.startProcessGroup('zookeeper')
+        self.supervisor.startProcessGroup('zookeeper')
 
     def test_add_node_cluster_visibility(self):
         ZkNode(self.zk_conn, u'/test/node1')
