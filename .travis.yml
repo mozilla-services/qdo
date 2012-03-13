@@ -13,4 +13,5 @@ notifications:
     - hschlichting@mozilla.com
 
 before_install:
-    - sudo apt-get install libevent-dev libzmq-dev
+    - sudo apt-get update
+    - sudo apt-get install libevent-dev
