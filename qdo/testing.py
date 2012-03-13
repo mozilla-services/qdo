@@ -49,7 +49,9 @@ def setup_supervisor():
 def setup():
     """Shared one-time test setup, called from tests/__init__.py"""
     setup_supervisor()
-    ensure_process('zookeeper')
+    ensure_process('zookeeper:zk1')
+    ensure_process('zookeeper:zk2')
+    ensure_process('zookeeper:zk3')
     cleanup_zookeeper()
     ensure_process('cassandra')
     ensure_process('queuey')

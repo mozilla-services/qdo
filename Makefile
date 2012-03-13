@@ -104,6 +104,9 @@ $(ZOOKEEPER):
 	mv zkServer.sh old_zkServer.sh && \
 	cat old_zkServer.sh | sed 's|    $$JAVA "-Dzoo|    exec $$JAVA "-Dzoo|g' > zkServer.sh && \
 	chmod a+x zkServer.sh
+	mkdir -p zookeeper/server1/data && echo "1" > zookeeper/server1/data/myid
+	mkdir -p zookeeper/server2/data && echo "2" > zookeeper/server2/data/myid
+	mkdir -p zookeeper/server3/data && echo "3" > zookeeper/server3/data/myid
 
 zookeeper: $(ZOOKEEPER)
 
