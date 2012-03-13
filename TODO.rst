@@ -22,7 +22,6 @@ zookeeper
 ---------
 
 - factor zookeeper handling out of worker
-- ensure / document how fail-over to multiple hosts works
 - implement event handling / queue distribution
 
 general
