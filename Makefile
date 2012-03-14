@@ -49,6 +49,7 @@ BUILD_DIRS = bin build deps include lib lib64 man
 
 
 .PHONY: all build test build_rpms mach
+.SILENT: lib python pip $(CASSANDRA) cassandra $(NGINX) nginx $(ZOOKEEPER) zookeeper
 
 all:	build
 
@@ -66,7 +67,7 @@ lib: $(BIN)/pip
 
 $(CASSANDRA):
 	@echo "Installing Cassandra"
-	@mkdir -p bin
+	mkdir -p bin
 	cd bin && \
 	curl --silent http://archive.apache.org/dist/cassandra/$(CASSANDRA_VERSION)/apache-cassandra-$(CASSANDRA_VERSION)-bin.tar.gz | tar -zvx >/dev/null 2>&1
 	mv bin/apache-cassandra-$(CASSANDRA_VERSION) bin/cassandra
@@ -80,7 +81,7 @@ cassandra: $(CASSANDRA)
 
 $(NGINX):
 	@echo "Installing Nginx"
-	@mkdir -p bin
+	mkdir -p bin
 	cd bin && \
 	curl --silent http://nginx.org/download/nginx-1.1.15.tar.gz | tar -zvx >/dev/null 2>&1
 	mv bin/nginx-1.1.15 bin/nginx
@@ -96,7 +97,7 @@ nginx: $(NGINX)
 
 $(ZOOKEEPER):
 	@echo "Installing Zookeeper"
-	@mkdir -p bin
+	mkdir -p bin
 	cd bin && \
 	curl --silent http://mirrors.ibiblio.org/apache//zookeeper/stable/zookeeper-3.3.4.tar.gz | tar -zvx >/dev/null 2>&1
 	mv bin/zookeeper-3.3.4 bin/zookeeper
