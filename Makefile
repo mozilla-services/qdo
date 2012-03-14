@@ -21,6 +21,7 @@ endif
 INSTALL = $(HERE)/bin/pip install
 PIP_DOWNLOAD_CACHE ?= /tmp/pip_cache
 INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) --use-mirrors
+CASSANDRA_VERSION = 1.0.8
 
 ifdef PYPIEXTRAS
 	PYPIOPTIONS += -e $(PYPIEXTRAS)
@@ -67,8 +68,8 @@ $(CASSANDRA):
 	echo "Installing Cassandra"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://archive.apache.org/dist/cassandra/1.0.8/apache-cassandra-1.0.8-bin.tar.gz | tar -zvx >/dev/null 2>&1
-	mv bin/apache-cassandra-1.0.6 bin/cassandra
+	curl --silent http://archive.apache.org/dist/cassandra/$(CASSANDRA_VERSION)/apache-cassandra-$(CASSANDRA_VERSION)-bin.tar.gz | tar -zvx >/dev/null 2>&1
+	mv bin/apache-cassandra-$(CASSANDRA_VERSION) bin/cassandra
 	cp etc/cassandra/cassandra.yaml bin/cassandra/conf/cassandra.yaml
 	cp etc/cassandra/log4j-server.properties bin/cassandra/conf/log4j-server.properties
 	cd bin/cassandra/lib && \

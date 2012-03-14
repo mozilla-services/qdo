@@ -11,14 +11,14 @@ notifications:
     - hschlichting@mozilla.com
 
 before_install:
-    - sudo apt-get -q update
+    - sudo apt-get -q update >/dev/null 2>&1
     - sudo apt-get -q install libevent-dev libpcre3-dev libzookeeper-dev
 
 install:
-    - make --silent build
-    - make --silent cassandra
-    - make --silent nginx
-    - make --silent zookeeper
+    - make build
+    - make cassandra
+    - make nginx
+    - make zookeeper
 
 before_script:
     - bin/supervisord
