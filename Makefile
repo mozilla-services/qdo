@@ -101,7 +101,7 @@ $(ZOOKEEPER):
 	cd bin && \
 	curl --silent http://mirrors.ibiblio.org/apache//zookeeper/stable/zookeeper-3.3.4.tar.gz | tar -zvx >/dev/null 2>&1
 	mv bin/zookeeper-3.3.4 bin/zookeeper
-	cd bin/zookeeper && ant compile
+	cd bin/zookeeper && ant compile >/dev/null 2>&1
 	cd bin/zookeeper/src/c && \
 	./configure >/dev/null 2>&1 && \
 	make >/dev/null 2>&1
