@@ -149,11 +149,14 @@ class TestWorker(unittest.TestCase):
         self._post_message(u'work')
         self._post_message(u'work')
         time.sleep(0.02)
-        self._post_message(u'work')
+        last = self._post_message(u'work')
         self._post_message(u'end')
+        last_timestamp = float(str(ujson.decode(
+            last.text)[u'messages'][0][u'timestamp']))
 
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 5)
+        self.assertEqual(self.worker.partitions[0].timestamp, last_timestamp)
 
     def test_work_multiple_queues(self):
         worker = self._make_one()
