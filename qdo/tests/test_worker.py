@@ -11,6 +11,7 @@ from zc.zk import ZooKeeper
 
 from qdo.config import QdoSettings
 from qdo.config import ZOO_DEFAULT_NS
+from qdo import testing
 
 # as specified in the queuey-dev.ini
 TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
@@ -21,6 +22,7 @@ class TestWorker(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.zk_conn = ZooKeeper('127.0.0.1:2181/' + ZOO_DEFAULT_NS, wait=True)
+        cls.supervisor = testing.processes['supervisor']
 
     @classmethod
     def tearDownClass(cls):
@@ -35,6 +37,7 @@ class TestWorker(unittest.TestCase):
         zk_conn = self.worker.zk_conn
         if (zk_conn and zk_conn.handle is not None):
             zk_conn.close()
+        self.supervisor.startProcessGroup('zookeeper')
         # clean up queuey
         queuey_conn = self.worker.queuey_conn
         response = queuey_conn.get()
@@ -230,3 +233,29 @@ class TestWorker(unittest.TestCase):
         worker.job = stop
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 10)
+
+    def test_work_lost_zookeeper(self):
+        worker = self._make_one()
+        # keep a runtime counter
+        processed = [0]
+
+        def stop(message, processed=processed):
+            # process the message
+            processed[0] += 1
+            if processed[0] == 1:
+                # shut down the current zk server
+                pass # self.supervisor.stopProcess('zookeeper:zk1')
+            if message[u'body'] == u'end':
+                raise KeyboardInterrupt
+            return
+
+        worker.job = stop
+        self._post_message(u'work')
+        last = self._post_message(u'work')
+        self._post_message(u'end')
+        last_timestamp = float(ujson.decode(
+            last.text)[u'messages'][0][u'timestamp'])
+
+        self.assertRaises(KeyboardInterrupt, worker.work)
+        self.assertEqual(processed[0], 3)
+        self.assertEqual(self.worker.partitions[0].timestamp, last_timestamp)
