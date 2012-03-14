@@ -52,6 +52,7 @@ setup(name='qdo',
       install_requires=reqs,
       tests_require=[
           'nose',
+          'pycassa',
           'supervisor',
           ],
       test_suite='nose.collector',

@@ -3,9 +3,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import os
 import time
 import xmlrpclib
 
+import pycassa
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
@@ -24,13 +26,29 @@ def cleanup_zookeeper():
     zk_conn.close()
 
 
-def ensure_process(name):
+def setup_cassandra_schema():
+    hosts = ['127.0.0.1:9160']
+    while 1:
+        try:
+            pycassa.ConnectionPool(keyspace='MessageStore', server_list=hosts)
+            break
+        except pycassa.InvalidRequestException as e:
+            if 'Keyspace MessageStore does not exist' in e.why:
+                lhost = hosts[0].split(':')[0]
+                os.system('bin/cassandra/bin/cassandra-cli -host %s --file etc/cassandra/message_schema.txt' % lhost)
+                os.system('bin/cassandra/bin/cassandra-cli -host %s --file etc/cassandra/metadata_schema.txt' % lhost)
+            break
+        except pycassa.AllServersUnavailable:
+            time.sleep(1)
+
+
+def ensure_process(name, timeout=10):
     srpc = processes['supervisor']
     if srpc.getProcessInfo(name)['statename'] in ('STOPPED', 'EXITED'):
         print(u'Starting %s!\n' % name)
         srpc.startProcess(name)
     # wait for startup to succeed
-    for i in range(1, 11):
+    for i in xrange(1, timeout):
         state = srpc.getProcessInfo(name)['statename']
         if state == 'RUNNING':
             break
@@ -49,11 +67,12 @@ def setup_supervisor():
 def setup():
     """Shared one-time test setup, called from tests/__init__.py"""
     setup_supervisor()
+    ensure_process('cassandra')
+    setup_cassandra_schema()
     ensure_process('zookeeper:zk1')
     ensure_process('zookeeper:zk2')
     ensure_process('zookeeper:zk3')
     cleanup_zookeeper()
-    ensure_process('cassandra')
     ensure_process('queuey')
     ensure_process('nginx')
 
