@@ -62,7 +62,7 @@ class Partition(object):
         if response.ok:
             messages = ujson.decode(response.text)[u'messages']
             # filter out exact timestamp matches
-            return [m for m in messages if m[u'timestamp'] > since]
+            return [m for m in messages if float(str(m[u'timestamp'])) > since]
         # failure
         raise qdo.exceptions.HTTPError(response.status_code, response)
 
@@ -81,4 +81,6 @@ class Partition(object):
         :type value: float
         """
         with metlogger.timer('zookeeper.set_value'):
+            if isinstance(value, basestring):
+                value = float(str(value))
             self.zk_node.value = repr(value)

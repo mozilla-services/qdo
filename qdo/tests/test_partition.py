@@ -81,3 +81,13 @@ class TestQueue(unittest.TestCase):
         partition = self._make_one()
         partition.timestamp = 1331231353.762148
         self.assertEqual(partition.timestamp, 1331231353.762148)
+
+    def test_timestamp_set_string(self):
+        partition = self._make_one()
+        partition.timestamp = '1331231353.762148'
+        self.assertEqual(partition.timestamp, 1331231353.762148)
+
+    def test_timestamp_set_unicode(self):
+        partition = self._make_one()
+        partition.timestamp = u'1331231353.762148'
+        self.assertEqual(partition.timestamp, 1331231353.762148)
