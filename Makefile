@@ -52,49 +52,57 @@ BUILD_DIRS = bin build deps include lib lib64 man
 all:	build
 
 $(BIN)/python:
-	python2.6 $(SW)/virtualenv.py --no-site-packages --distribute .
+	python2.6 $(SW)/virtualenv.py --no-site-packages --distribute . >/dev/null 2>&1
 	rm distribute-0.6.24.tar.gz
 
 $(BIN)/pip: $(BIN)/python
 
 lib: $(BIN)/pip
-	$(INSTALL) -r dev-reqs.txt
+	echo "Installing package pre-requisites..."
+	$(INSTALL) -r dev-reqs.txt >/dev/null 2>&1
+	echo "Running setup.py develop"
+	$(PYTHON) setup.py develop >/dev/null 2>&1
 
 $(CASSANDRA):
+	echo "Installing Cassandra"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://archive.apache.org/dist/cassandra/1.0.6/apache-cassandra-1.0.6-bin.tar.gz | tar -zvx
+	curl --silent http://archive.apache.org/dist/cassandra/1.0.8/apache-cassandra-1.0.8-bin.tar.gz | tar -zvx >/dev/null 2>&1
 	mv bin/apache-cassandra-1.0.6 bin/cassandra
 	cp etc/cassandra/cassandra.yaml bin/cassandra/conf/cassandra.yaml
 	cp etc/cassandra/log4j-server.properties bin/cassandra/conf/log4j-server.properties
 	cd bin/cassandra/lib && \
-	curl --silent -O http://java.net/projects/jna/sources/svn/content/trunk/jnalib/dist/jna.jar
+	curl --silent -O http://java.net/projects/jna/sources/svn/content/trunk/jnalib/dist/jna.jar >/dev/null 2>&1
+	echo "Finished installing Cassandra"
 
 cassandra: $(CASSANDRA)
 
 $(NGINX):
+	echo "Installing Nginx"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://nginx.org/download/nginx-1.1.15.tar.gz | tar -zvx
+	curl --silent http://nginx.org/download/nginx-1.1.15.tar.gz | tar -zvx >/dev/null 2>&1
 	mv bin/nginx-1.1.15 bin/nginx
 	cd bin/nginx && \
 	./configure --prefix=$(HERE)/bin/nginx --with-http_ssl_module \
 	--conf-path=../../etc/nginx/nginx.conf --pid-path=../../var/nginx.pid \
 	--lock-path=../../var/nginx.lock --error-log-path=../../var/log/nginx-error.log \
 	--http-log-path=../../var/log/nginx-access.log && \
-	make && make install
+	make && make install >/dev/null 2>&1
+	echo "Finished installing Nginx"
 
 nginx: $(NGINX)
 
 $(ZOOKEEPER):
+	echo "Installing Zookeeper"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://mirrors.ibiblio.org/apache//zookeeper/stable/zookeeper-3.3.4.tar.gz | tar -zvx
+	curl --silent http://mirrors.ibiblio.org/apache//zookeeper/stable/zookeeper-3.3.4.tar.gz | tar -zvx >/dev/null 2>&1
 	mv bin/zookeeper-3.3.4 bin/zookeeper
 	cd bin/zookeeper && ant compile
 	cd bin/zookeeper/src/c && \
 	./configure && \
-	make
+	make >/dev/null 2>&1
 	cd bin/zookeeper/src/contrib/zkpython && \
 	mv build.xml old_build.xml && \
 	cat old_build.xml | sed 's|executable="python"|executable="../../../../../bin/python"|g' > build.xml && \
@@ -106,6 +114,7 @@ $(ZOOKEEPER):
 	mkdir -p zookeeper/server1/data && echo "1" > zookeeper/server1/data/myid
 	mkdir -p zookeeper/server2/data && echo "2" > zookeeper/server2/data/myid
 	mkdir -p zookeeper/server3/data && echo "3" > zookeeper/server3/data/myid
+	echo "Finished installing Zookeeper"
 
 zookeeper: $(ZOOKEEPER)
 
@@ -124,7 +133,6 @@ clean-zookeeper:
 clean: clean-env
 
 build: lib
-	$(PYTHON) setup.py develop
 	$(BUILDAPP) -c $(CHANNEL) $(PYPIOPTIONS) $(DEPS)
 
 html:
