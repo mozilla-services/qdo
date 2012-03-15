@@ -16,6 +16,14 @@ from qdo.config import ZOO_DEFAULT_NS
 processes = {}
 
 
+def live_job(message):
+    body = message[u'body']
+    if body == u'stop':
+       raise KeyboardInterrupt
+    elif body == u'wait':
+        time.sleep(0.01)
+
+
 def cleanup_zookeeper():
     """Opens a connection to Zookeeper and removes all nodes from it."""
     root = '/' + ZOO_DEFAULT_NS
