@@ -29,14 +29,18 @@ class Worker(object):
         self.name = "%s-%s" % (socket.getfqdn(), os.getpid())
         self.zk_conn = None
         self.zk_node = None
-        self.configure()
         self.job = None
+        self.configure()
 
     def configure(self):
         """Configure the worker based on the configuration settings.
         """
         qdo_section = self.settings.getsection('qdo-worker')
         self.wait_interval = qdo_section['wait_interval']
+        if qdo_section['job']:
+            mod, fun = qdo_section['job'].split(':')
+            result = __import__(mod, globals(), locals(), fun)
+            self.job = getattr(result, fun)
         zk_section = self.settings.getsection('zookeeper')
         self.zk_root_url = zk_section['connection'] + '/' + \
             zk_section['namespace']

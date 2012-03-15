@@ -26,6 +26,10 @@ ca_bundle
     Path to a private certificate used for SSL connections, in addition to all
     officially signed ones.
 
+job
+    The resource specification for the Python job function. For example:
+    `qdo.testing:live_job`
+
 [queuey]
 --------
 
