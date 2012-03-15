@@ -142,10 +142,13 @@ html:
 
 test:
 	@echo "Running tests..."
+	rm -f $(HERE)/.coverage*
 	$(PYTHON) runtests.py
+	$(HERE)/bin/coverage combine
+	$(HERE)/bin/coverage report --omit="qdo/test*"
 	@echo "Finished running tests"
 
 test-python:
-	$(NOSE) --with-coverage --cover-package=$(APPNAME) --cover-erase \
+	$(NOSE) --with-coverage --cover-package=$(APPNAME) \
 	--cover-inclusive $(APPNAME) \
 	--set-env-variables="{'REQUESTS_CA_BUNDLE': '$(HERE)/etc/ssl/localhost.crt'}"
