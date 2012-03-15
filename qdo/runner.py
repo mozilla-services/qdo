@@ -61,5 +61,5 @@ def run(args=sys.argv[1:]):
     if config is None:
         print('Configuration file not found or cannot be read.')
         sys.exit(1)
-    worker.run(settings)  # pragma: no cover
+    worker.run(settings)
     sys.exit(0)  # pragma: no cover

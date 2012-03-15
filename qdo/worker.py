@@ -110,7 +110,7 @@ class Worker(object):
                     timestamp = message[u'timestamp']
                     self.job(message)
                     partition.timestamp = timestamp
-                if no_messages == len(partitions):  # pragma: no cover
+                if no_messages == len(partitions):
                     metlogger.incr('worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
         finally:
@@ -135,6 +135,6 @@ class Worker(object):
         self.zk_conn.close()
 
 
-def run(settings):  # pragma: no cover
+def run(settings):
     worker = Worker(settings)
     worker.work()

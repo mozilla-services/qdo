@@ -259,3 +259,27 @@ class TestWorker(unittest.TestCase):
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 3)
         self.assertEqual(self.worker.partitions[0].timestamp, last_timestamp)
+
+
+class TestRealWorker(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.zk_conn = ZooKeeper('127.0.0.1:2181/' + ZOO_DEFAULT_NS, wait=True)
+        cls.supervisor = testing.processes['supervisor']
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.zk_conn.close()
+
+    def setUp(self):
+        for child in self.zk_conn.get_children('/'):
+            self.zk_conn.delete_recursive('/' + child)
+
+    def tearDown(self):
+        # clean up zookeeper
+        self.supervisor.startProcessGroup('zookeeper')
+
+    def test_work_real_process(self):
+        self.supervisor.startProcess('qdo:qdo1')
+        self.supervisor.stopProcess('qdo:qdo1')
