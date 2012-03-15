@@ -145,7 +145,7 @@ test:
 	rm -f $(HERE)/.coverage*
 	$(PYTHON) runtests.py
 	$(HERE)/bin/coverage combine
-	$(HERE)/bin/coverage report --omit="qdo/test*"
+	$(HERE)/bin/coverage report -m --omit="qdo/test*"
 	@echo "Finished running tests"
 
 test-python:
