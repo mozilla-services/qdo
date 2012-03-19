@@ -50,10 +50,11 @@ def setup_cassandra_schema():
             time.sleep(1)
 
 
-def ensure_process(name, timeout=10):
+def ensure_process(name, timeout=10, noisy=True):
     srpc = processes['supervisor']
     if srpc.getProcessInfo(name)['statename'] in ('STOPPED', 'EXITED'):
-        print(u'Starting %s!\n' % name)
+        if noisy:
+            print(u'Starting %s!\n' % name)
         srpc.startProcess(name)
     # wait for startup to succeed
     for i in xrange(1, timeout):
@@ -61,7 +62,8 @@ def ensure_process(name, timeout=10):
         if state == 'RUNNING':
             break
         elif state != 'RUNNING':
-            print(u'Waiting on %s for %s seconds.' % (name, i * 0.1))
+            if noisy:
+                print(u'Waiting on %s for %s seconds.' % (name, i * 0.1))
             time.sleep(i * 0.1)
     if srpc.getProcessInfo(name)['statename'] != 'RUNNING':
         raise RuntimeError('%s not running' % name)
