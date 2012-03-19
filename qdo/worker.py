@@ -26,7 +26,7 @@ class Worker(object):
     def __init__(self, settings):
         self.settings = settings
         self.shutdown = False
-        self.name = "%s-%s" % (socket.getfqdn(), os.getpid())
+        self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
         self.zk_conn = None
         self.zk_node = None
         self.job = None
@@ -35,23 +35,23 @@ class Worker(object):
     def configure(self):
         """Configure the worker based on the configuration settings.
         """
-        qdo_section = self.settings.getsection('qdo-worker')
-        self.wait_interval = qdo_section['wait_interval']
-        if qdo_section['job']:
-            mod, fun = qdo_section['job'].split(':')
+        qdo_section = self.settings.getsection(u'qdo-worker')
+        self.wait_interval = qdo_section[u'wait_interval']
+        if qdo_section[u'job']:
+            mod, fun = qdo_section[u'job'].split(u':')
             result = __import__(mod, globals(), locals(), fun)
             self.job = getattr(result, fun)
-        zk_section = self.settings.getsection('zookeeper')
-        self.zk_root_url = zk_section['connection'] + '/' + \
-            zk_section['namespace']
-        queuey_section = self.settings.getsection('queuey')
+        zk_section = self.settings.getsection(u'zookeeper')
+        self.zk_root_url = zk_section[u'connection'] + u'/' + \
+            zk_section[u'namespace']
+        queuey_section = self.settings.getsection(u'queuey')
         self.queuey_conn = QueueyConnection(
-            queuey_section['app_key'],
-            connection=queuey_section['connection'])
+            queuey_section[u'app_key'],
+            connection=queuey_section[u'connection'])
 
     def _workers(self):
         # Get all active worker names registered in ZK
-        with metlogger.timer('zookeeper.get_workers'):
+        with metlogger.timer(u'zookeeper.get_workers'):
             return self.zk_conn.get_children(u'/workers')
 
     def _assign_partitions(self):
@@ -111,7 +111,7 @@ class Worker(object):
                     self.job(message)
                     partition.timestamp = timestamp
                 if no_messages == len(partitions):
-                    metlogger.incr('worker.wait_for_jobs')
+                    metlogger.incr(u'worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
         finally:
             self.unregister()

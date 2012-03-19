@@ -13,7 +13,7 @@ from zktools.node import ZkNode
 from qdo.tests.base import ZKBase
 
 # as specified in the queuey-dev.ini
-TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
+TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
 
 
 class TestQueue(unittest.TestCase, ZKBase):
@@ -69,13 +69,13 @@ class TestQueue(unittest.TestCase, ZKBase):
     def test_messages_error(self):
         partition = self._make_one()
         try:
-            partition.messages(order='undefined')
+            partition.messages(order=u'undefined')
         except HTTPError, e:
             self.assertEqual(e.args[0], 400)
             messages = ujson.decode(e.args[1].text)[u'error_msg']
             self.assertTrue(u'order' in messages, messages)
         else:
-            self.fail('HTTPError not raised')
+            self.fail(u'HTTPError not raised')
 
     def test_timestamp_get(self):
         partition = self._make_one()
@@ -88,7 +88,7 @@ class TestQueue(unittest.TestCase, ZKBase):
 
     def test_timestamp_set_string(self):
         partition = self._make_one()
-        partition.timestamp = '1331231353.762148'
+        partition.timestamp = u'1331231353.762148'.encode(u'utf-8')
         self.assertEqual(partition.timestamp, 1331231353.762148)
 
     def test_timestamp_set_unicode(self):

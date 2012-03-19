@@ -22,7 +22,7 @@ def retry(func):
             try:
                 return func(self, *args, **kwargs)
             except Timeout:
-                metlogger.incr('queuey.conn_timeout')
+                metlogger.incr(u'queuey.conn_timeout')
         # raise timeout after all
         raise
     return wrapped
@@ -35,9 +35,9 @@ def fallback(func):
             return func(self, *args, **kwargs)
         except (SSLError, ConnectionError) as e:
             if isinstance(e, SSLError):
-                metlogger.incr('queuey.conn_ssl_error')
+                metlogger.incr(u'queuey.conn_ssl_error')
             else:
-                metlogger.incr('queuey.conn_error')
+                metlogger.incr(u'queuey.conn_error')
             if self.fallback_urls:
                 self.failed_urls.append(self.app_url)
                 self.app_url = self.fallback_urls.pop()
@@ -63,7 +63,7 @@ class QueueyConnection(object):
     """
 
     def __init__(self, app_key,
-                 connection='https://127.0.0.1:5001/v1/queuey/',
+                 connection=u'https://127.0.0.1:5001/v1/queuey/',
                  retries=3, timeout=2.0):
         self.app_key = app_key
         self.retries = retries
@@ -72,12 +72,12 @@ class QueueyConnection(object):
         self.app_url = self.connection[0]
         self.fallback_urls = self.connection[1:]
         self.failed_urls = []
-        headers = {'Authorization': 'Application %s' % app_key}
+        headers = {u'Authorization': u'Application %s' % app_key}
         # setting pool_maxsize to 1 ensures we re-use the same connection
         # requests/urllib3 will always create maxsize connections and then
         # cycle through them one after the other. internally it's a queue
         self.session = session(headers=headers, timeout=self.timeout,
-            config={'pool_maxsize': 1, 'keep_alive': True}, prefetch=True)
+            config={u'pool_maxsize': 1, u'keep_alive': True}, prefetch=True)
 
     @fallback
     @retry
@@ -86,7 +86,7 @@ class QueueyConnection(object):
         up to :py:attr:`retries` times on connection timeout.
         """
         parts = urlsplit(self.app_url)
-        url = parts.scheme + '://' + parts.netloc + '/__heartbeat__'
+        url = parts.scheme + u'://' + parts.netloc + u'/__heartbeat__'
         return self.session.head(url)
 
     @fallback
@@ -128,9 +128,9 @@ class QueueyConnection(object):
             # support message batches
             messages = []
             for d in data:
-                messages.append({'body': d, 'ttl': 3600})
-            data = ujson.encode({'messages': messages})
-            headers = {'content-type': 'application/json'}
+                messages.append({u'body': d, u'ttl': 3600})
+            data = ujson.encode({u'messages': messages})
+            headers = {u'content-type': u'application/json'}
         return self.session.post(url, headers=headers,
             params=params, timeout=self.timeout, data=data)
 
@@ -159,13 +159,13 @@ class QueueyConnection(object):
         # Prototype for listing all partitions, in the final code partition
         # names will be taken from ZK under /partitions
         # A helper method to populate ZK from Queuey might be nice
-        with metlogger.timer('queuey.get_partitions'):
-            response = self.get(params={'details': True})
+        with metlogger.timer(u'queuey.get_partitions'):
+            response = self.get(params={u'details': True})
         queues = ujson.decode(response.text)[u'queues']
         partitions = []
         for q in queues:
             name = q[u'queue_name']
             part = q[u'partitions']
             for i in xrange(1, part+1):
-                partitions.append(name + u'-%s' % i)
+                partitions.append(u'%s-%s' % (name, i))
         return partitions

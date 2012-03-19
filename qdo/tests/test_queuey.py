@@ -13,7 +13,7 @@ import ujson
 from qdo import utils
 
 # as specified in the queuey-dev.ini
-TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
+TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
 
 
 class TestQueueyConnection(unittest.TestCase):
@@ -31,7 +31,7 @@ class TestQueueyConnection(unittest.TestCase):
             except ConnectionError:
                 pass
 
-    def _make_one(self, connection='https://127.0.0.1:5001/v1/queuey/'):
+    def _make_one(self, connection=u'https://127.0.0.1:5001/v1/queuey/'):
         from qdo.queuey import QueueyConnection
         self.conn = QueueyConnection(TEST_APP_KEY, connection=connection)
         return self.conn
@@ -42,33 +42,33 @@ class TestQueueyConnection(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_connect_fail(self):
-        conn = self._make_one(connection='https://127.0.0.1:9/')
+        conn = self._make_one(connection=u'https://127.0.0.1:9/')
         self.assertRaises(ConnectionError, conn.connect)
 
     def test_connect_timeout(self):
         conn = self._make_one()
         before = len(utils.metsender.msgs)
-        with mock.patch('requests.sessions.Session.head') as head_mock:
+        with mock.patch(u'requests.sessions.Session.head') as head_mock:
             head_mock.side_effect = Timeout
             self.assertRaises(Timeout, conn.connect)
             self.assertEqual(len(head_mock.mock_calls), conn.retries)
         self.assertEqual(len(utils.metsender.msgs), before + 3)
 
     def test_connect_multiple(self):
-        conn = self._make_one(connection='https://127.0.0.1:5001/v1/queuey/,'
-            'https://127.0.0.1:5002/v1/queuey/')
+        conn = self._make_one(connection=u'https://127.0.0.1:5001/v1/queuey/,'
+            u'https://127.0.0.1:5002/v1/queuey/')
         response = conn.connect()
         self.assertEqual(response.status_code, 200)
 
     def test_connect_multiple_first_unreachable(self):
-        conn = self._make_one(connection='https://127.0.0.1:9/,'
-            'https://127.0.0.1:5002/v1/queuey/')
+        conn = self._make_one(connection=u'https://127.0.0.1:9/,'
+            u'https://127.0.0.1:5002/v1/queuey/')
         response = conn.connect()
         self.assertEqual(response.status_code, 200)
 
     def test_connect_multiple_first_invalid_ssl(self):
-        conn = self._make_one(connection='https://127.0.0.1:5003/v1/queuey/,'
-            'https://127.0.0.1:5001/v1/queuey/')
+        conn = self._make_one(connection=u'https://127.0.0.1:5003/v1/queuey/,'
+            u'https://127.0.0.1:5001/v1/queuey/')
         response = conn.connect()
         self.assertEqual(response.status_code, 200)
 
@@ -76,20 +76,20 @@ class TestQueueyConnection(unittest.TestCase):
         conn = self._make_one()
         response = conn.get()
         self.assertEqual(response.status_code, 200)
-        self.assertTrue('queues' in response.text, response.text)
+        self.assertTrue(u'queues' in response.text, response.text)
 
     def test_get_timeout(self):
         conn = self._make_one()
         before = len(utils.metsender.msgs)
-        with mock.patch('requests.sessions.Session.get') as get_mock:
+        with mock.patch(u'requests.sessions.Session.get') as get_mock:
             get_mock.side_effect = Timeout
             self.assertRaises(Timeout, conn.get)
             self.assertEqual(len(get_mock.mock_calls), conn.retries)
         self.assertEqual(len(utils.metsender.msgs), before + 3)
 
     def test_get_multiple_first_unreachable(self):
-        conn = self._make_one(connection='https://127.0.0.1:9/,'
-            'https://127.0.0.1:5002/v1/queuey/')
+        conn = self._make_one(connection=u'https://127.0.0.1:9/,'
+            u'https://127.0.0.1:5002/v1/queuey/')
         response = conn.get()
         self.assertEqual(response.status_code, 200)
 
@@ -103,15 +103,15 @@ class TestQueueyConnection(unittest.TestCase):
     def test_post_timeout(self):
         conn = self._make_one()
         before = len(utils.metsender.msgs)
-        with mock.patch('requests.sessions.Session.post') as post_mock:
+        with mock.patch(u'requests.sessions.Session.post') as post_mock:
             post_mock.side_effect = Timeout
             self.assertRaises(Timeout, conn.post)
             self.assertEqual(len(post_mock.mock_calls), conn.retries)
         self.assertEqual(len(utils.metsender.msgs), before + 3)
 
     def test_post_multiple_first_unreachable(self):
-        conn = self._make_one(connection='https://127.0.0.1:9/,'
-            'https://127.0.0.1:5002/v1/queuey/')
+        conn = self._make_one(connection=u'https://127.0.0.1:9/,'
+            u'https://127.0.0.1:5002/v1/queuey/')
         response = conn.post()
         self.assertEqual(response.status_code, 201)
 
@@ -128,15 +128,15 @@ class TestQueueyConnection(unittest.TestCase):
         conn = self._make_one()
         name = conn._create_queue()
         before = len(utils.metsender.msgs)
-        with mock.patch('requests.sessions.Session.delete') as delete_mock:
+        with mock.patch(u'requests.sessions.Session.delete') as delete_mock:
             delete_mock.side_effect = Timeout
             self.assertRaises(Timeout, conn.delete, name)
             self.assertEqual(len(delete_mock.mock_calls), conn.retries)
         self.assertEqual(len(utils.metsender.msgs), before + 3)
 
     def test_delete_multiple_first_unreachable(self):
-        conn = self._make_one(connection='https://127.0.0.1:9/,'
-            'https://127.0.0.1:5002/v1/queuey/')
+        conn = self._make_one(connection=u'https://127.0.0.1:9/,'
+            u'https://127.0.0.1:5002/v1/queuey/')
         name = conn._create_queue()
         response = conn.delete(name)
         self.assertEqual(response.status_code, 200)
@@ -144,7 +144,7 @@ class TestQueueyConnection(unittest.TestCase):
     def test_post_messages(self):
         conn = self._make_one()
         name = conn._create_queue()
-        response = conn.post(name, data=['a', 'b', 'c'])
+        response = conn.post(name, data=[u'a', u'b', u'c'])
         self.assertEqual(response.status_code, 201)
         result = ujson.decode(response.text)
         self.assertEqual(len(result[u'messages']), 3, result)
@@ -152,7 +152,7 @@ class TestQueueyConnection(unittest.TestCase):
     def test_create_queue(self):
         conn = self._make_one()
         name = conn._create_queue()
-        response = ujson.decode(conn.get(params={'details': True}).text)
+        response = ujson.decode(conn.get(params={u'details': True}).text)
         queues = response[u'queues']
         info = [q for q in queues if q[u'queue_name'] == name][0]
         self.assertEqual(info[u'partitions'], 1)
@@ -160,7 +160,7 @@ class TestQueueyConnection(unittest.TestCase):
     def test_create_queue_partitions(self):
         conn = self._make_one()
         name = conn._create_queue(partitions=3)
-        response = ujson.decode(conn.get(params={'details': True}).text)
+        response = ujson.decode(conn.get(params={u'details': True}).text)
         queues = response[u'queues']
         info = [q for q in queues if q[u'queue_name'] == name][0]
         self.assertEqual(info[u'partitions'], 3)

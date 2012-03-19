@@ -18,10 +18,10 @@ class ZKBase(object):
     @classmethod
     def setUpClass(cls):
         global connections
-        conn = connections.get('zk_root', None)
+        conn = connections.get(u'zk_root', None)
         if conn is None:
-            connections['zk_root'] = conn = ZooKeeper(
-                '127.0.0.1:2187', wait=True)
+            connections[u'zk_root'] = conn = ZooKeeper(
+                u'127.0.0.1:2187', wait=True)
         if conn.exists(cls.zk_root):
             conn.delete_recursive(cls.zk_root)
         ZkNode(conn, cls.zk_root)
@@ -29,18 +29,18 @@ class ZKBase(object):
     @classmethod
     def tearDownClass(cls):
         global connections
-        conn = connections.get('zk_root', None)
+        conn = connections.get(u'zk_root', None)
         if conn is not None:
             conn.delete_recursive(cls.zk_root)
             conn.close()
-            del connections['zk_root']
+            del connections[u'zk_root']
 
     @classmethod
     def _make_zk_conn(cls):
-        return ZooKeeper('127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187' +
+        return ZooKeeper(u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187' +
             cls.zk_root, wait=True)
 
     @classmethod
     def _clean_zk(cls, conn):
-        for child in conn.get_children('/'):
-            conn.delete_recursive('/' + child)
+        for child in conn.get_children(u'/'):
+            conn.delete_recursive(u'/' + child)

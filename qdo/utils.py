@@ -11,12 +11,12 @@ from metlog import senders
 
 
 # TODO: configure real sender
-if 'nosetests' in sys.argv[0]:
+if u'nosetests' in sys.argv[0]:
     metsender = senders.DebugCaptureSender()
 else:  # pragma: no cover
     metsender = senders.StdOutSender()
 
-metlogger = MetlogClient(metsender, logger='qdo-worker')
+metlogger = MetlogClient(metsender, logger=u'qdo-worker')
 
 
 def configure_metlog(settings):

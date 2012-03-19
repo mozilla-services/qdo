@@ -50,14 +50,14 @@ class Partition(object):
         """
         since = self.timestamp
         params = {
-            'limit': limit,
-            'order': order,
-            'partitions': self.partition,
+            u'limit': limit,
+            u'order': order,
+            u'partitions': self.partition,
             # use the repr, to avoid a float getting clobbered by implicit
             # str() calls in the URL generation
-            'since': repr(since),
+            u'since': repr(since),
         }
-        with metlogger.timer('queuey.get_messages'):
+        with metlogger.timer(u'queuey.get_messages'):
             response = self.queuey_conn.get(self.queue_name, params=params)
         if response.ok:
             messages = ujson.decode(response.text)[u'messages']
@@ -70,7 +70,7 @@ class Partition(object):
     def timestamp(self):
         """Property for the timestamp of the last processed message.
         """
-        with metlogger.timer('zookeeper.get_value'):
+        with metlogger.timer(u'zookeeper.get_value'):
             return float(self.zk_node.value)
 
     @timestamp.setter
@@ -80,7 +80,7 @@ class Partition(object):
         :param value: New timestamp value as a float.
         :type value: float
         """
-        with metlogger.timer('zookeeper.set_value'):
+        with metlogger.timer(u'zookeeper.set_value'):
             if isinstance(value, basestring):
                 value = float(str(value))
             self.zk_node.value = repr(value)

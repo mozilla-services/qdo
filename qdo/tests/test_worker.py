@@ -13,7 +13,7 @@ from qdo import testing
 from qdo.tests.base import ZKBase
 
 # as specified in the queuey-dev.ini
-TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
+TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
 
 
 class TestWorker(unittest.TestCase, ZKBase):
@@ -22,7 +22,7 @@ class TestWorker(unittest.TestCase, ZKBase):
     def setUpClass(cls):
         ZKBase.setUpClass()
         cls.zk_conn = cls._make_zk_conn()
-        cls.supervisor = testing.processes['supervisor']
+        cls.supervisor = testing.processes[u'supervisor']
 
     @classmethod
     def tearDownClass(cls):
@@ -37,7 +37,7 @@ class TestWorker(unittest.TestCase, ZKBase):
         zk_conn = self.worker.zk_conn
         if (zk_conn and zk_conn.handle is not None):
             zk_conn.close()
-        testing.ensure_process('zookeeper:zk1', noisy=False)
+        testing.ensure_process(u'zookeeper:zk1', noisy=False)
         # clean up queuey
         queuey_conn = self.worker.queuey_conn
         response = queuey_conn.get()
@@ -51,7 +51,7 @@ class TestWorker(unittest.TestCase, ZKBase):
     def _make_one(self, extra=None):
         from qdo.worker import Worker
         settings = QdoSettings()
-        settings['queuey.app_key'] = TEST_APP_KEY
+        settings[u'queuey.app_key'] = TEST_APP_KEY
         if extra is not None:
             settings.update(extra)
         self.worker = Worker(settings)
@@ -66,49 +66,50 @@ class TestWorker(unittest.TestCase, ZKBase):
     def test_setup_zookeeper(self):
         worker = self._make_one()
         worker.setup_zookeeper()
-        children = worker.zk_conn.get_children('/')
-        self.assertTrue('workers' in children, children)
-        self.assertTrue('partitions' in children, children)
-        self.assertTrue('partition-owners' in children, children)
+        children = worker.zk_conn.get_children(u'/')
+        self.assertTrue(u'workers' in children, children)
+        self.assertTrue(u'partitions' in children, children)
+        self.assertTrue(u'partition-owners' in children, children)
 
     def test_register(self):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zk_conn.exists('/workers'))
-        children = worker.zk_conn.get_children('/workers')
+        self.assertTrue(worker.zk_conn.exists(u'/workers'))
+        children = worker.zk_conn.get_children(u'/workers')
         self.assertEqual(len(children), 1)
 
     def test_register_twice(self):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zk_conn.exists('/workers'))
-        children = worker.zk_conn.get_children('/workers')
+        self.assertTrue(worker.zk_conn.exists(u'/workers'))
+        children = worker.zk_conn.get_children(u'/workers')
         self.assertEqual(len(children), 1)
         # a second call to register neither fails nor adds a duplicate
         worker.register()
-        children = worker.zk_conn.get_children('/workers')
+        children = worker.zk_conn.get_children(u'/workers')
         self.assertEqual(len(children), 1)
 
     def test_unregister(self):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zk_conn.exists('/workers'))
-        children = worker.zk_conn.get_children('/workers')
+        self.assertTrue(worker.zk_conn.exists(u'/workers'))
+        children = worker.zk_conn.get_children(u'/workers')
         self.assertEqual(len(children), 1)
         self.assertEqual(children[0], worker.name)
-        before_version = worker.zk_conn.get(u'/workers')[1]['cversion']
+        before_version = worker.zk_conn.get(u'/workers')[1][u'cversion']
         worker.unregister()
         self.assertTrue(worker.zk_conn.handle is None)
         # wait for changes to propagate
         for i in xrange(0, 10):
-            if self.zk_conn.get(u'/workers')[1]['cversion'] != before_version:
+            if (self.zk_conn.get(
+                u'/workers')[1][u'cversion'] != before_version):
                 break
             else:
                 time.sleep(i * 0.1)
-        self.assertEqual(self.zk_conn.get_children('/workers'), [])
+        self.assertEqual(self.zk_conn.get_children(u'/workers'), [])
 
     def test_work_no_job(self):
         worker = self._make_one()
@@ -211,7 +212,7 @@ class TestWorker(unittest.TestCase, ZKBase):
         worker = self._make_one()
         queuey_conn = worker.queuey_conn
         queue2 = queuey_conn._create_queue(partitions=3)
-        self._post_message(['1', '2'])
+        self._post_message([u'1', u'2'])
         # post messages to fill multiple partitions
         response = self._post_message(
             ['%s' % i for i in xrange(8)], queue_name=queue2)
@@ -244,7 +245,7 @@ class TestWorker(unittest.TestCase, ZKBase):
             processed[0] += 1
             if processed[0] == 1:
                 # shut down the current zk server
-                self.supervisor.stopProcess('zookeeper:zk1')
+                self.supervisor.stopProcess(u'zookeeper:zk1')
             if message[u'body'] == u'end':
                 raise KeyboardInterrupt
             return
@@ -267,7 +268,7 @@ class TestRealWorker(unittest.TestCase, ZKBase):
     def setUpClass(cls):
         ZKBase.setUpClass()
         cls.zk_conn = cls._make_zk_conn()
-        cls.supervisor = testing.processes['supervisor']
+        cls.supervisor = testing.processes[u'supervisor']
 
     @classmethod
     def tearDownClass(cls):
@@ -278,6 +279,6 @@ class TestRealWorker(unittest.TestCase, ZKBase):
         ZKBase._clean_zk(self.zk_conn)
 
     def test_work_real_process(self):
-        self.supervisor.startProcess('qdo:qdo1')
+        self.supervisor.startProcess(u'qdo:qdo1')
         time.sleep(0.1)
-        self.supervisor.stopProcess('qdo:qdo1')
+        self.supervisor.stopProcess(u'qdo:qdo1')

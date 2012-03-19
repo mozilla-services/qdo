@@ -27,7 +27,7 @@ def live_job(message):
 def cleanup_zookeeper():
     """Opens a connection to Zookeeper and removes all nodes from it."""
     root = ZOO_DEFAULT_ROOT
-    zk_conn = ZooKeeper('127.0.0.1:2187', wait=True)
+    zk_conn = ZooKeeper(u'127.0.0.1:2187', wait=True)
     if zk_conn.exists(root):
         zk_conn.delete_recursive(root)
     ZkNode(zk_conn, root)
@@ -38,53 +38,55 @@ def setup_cassandra_schema():
     hosts = ['127.0.0.1:9160']
     while 1:
         try:
-            pycassa.ConnectionPool(keyspace='MessageStore', server_list=hosts)
+            pycassa.ConnectionPool(keyspace=u'MessageStore', server_list=hosts)
             break
         except pycassa.InvalidRequestException as e:
-            if 'Keyspace MessageStore does not exist' in e.why:
-                lhost = hosts[0].split(':')[0]
-                os.system('bin/cassandra/bin/cassandra-cli -host %s --file etc/cassandra/message_schema.txt' % lhost)
-                os.system('bin/cassandra/bin/cassandra-cli -host %s --file etc/cassandra/metadata_schema.txt' % lhost)
+            if u'Keyspace MessageStore does not exist' in e.why:
+                lhost = hosts[0].split(u':')[0]
+                os.system(u'bin/cassandra/bin/cassandra-cli -host %s '
+                    u'--file etc/cassandra/message_schema.txt' % lhost)
+                os.system(u'bin/cassandra/bin/cassandra-cli -host %s '
+                    u'--file etc/cassandra/metadata_schema.txt' % lhost)
             break
         except pycassa.AllServersUnavailable:
             time.sleep(1)
 
 
 def ensure_process(name, timeout=10, noisy=True):
-    srpc = processes['supervisor']
-    if srpc.getProcessInfo(name)['statename'] in ('STOPPED', 'EXITED'):
+    srpc = processes[u'supervisor']
+    if srpc.getProcessInfo(name)[u'statename'] in (u'STOPPED', u'EXITED'):
         if noisy:
             print(u'Starting %s!\n' % name)
         srpc.startProcess(name)
     # wait for startup to succeed
     for i in xrange(1, timeout):
-        state = srpc.getProcessInfo(name)['statename']
-        if state == 'RUNNING':
+        state = srpc.getProcessInfo(name)[u'statename']
+        if state == u'RUNNING':
             break
-        elif state != 'RUNNING':
+        elif state != u'RUNNING':
             if noisy:
                 print(u'Waiting on %s for %s seconds.' % (name, i * 0.1))
             time.sleep(i * 0.1)
-    if srpc.getProcessInfo(name)['statename'] != 'RUNNING':
-        raise RuntimeError('%s not running' % name)
+    if srpc.getProcessInfo(name)[u'statename'] != u'RUNNING':
+        raise RuntimeError(u'%s not running' % name)
 
 
 def setup_supervisor():
-    processes['supervisor'] = xmlrpclib.ServerProxy(
-        'http://127.0.0.1:4999').supervisor
+    processes[u'supervisor'] = xmlrpclib.ServerProxy(
+        u'http://127.0.0.1:4999').supervisor
 
 
 def setup():
     """Shared one-time test setup, called from tests/__init__.py"""
     setup_supervisor()
-    ensure_process('cassandra')
+    ensure_process(u'cassandra')
     setup_cassandra_schema()
-    ensure_process('zookeeper:zk1')
-    ensure_process('zookeeper:zk2')
-    ensure_process('zookeeper:zk3')
+    ensure_process(u'zookeeper:zk1')
+    ensure_process(u'zookeeper:zk2')
+    ensure_process(u'zookeeper:zk3')
     cleanup_zookeeper()
-    ensure_process('queuey')
-    ensure_process('nginx')
+    ensure_process(u'queuey')
+    ensure_process(u'nginx')
 
 
 def teardown():

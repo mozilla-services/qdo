@@ -17,25 +17,25 @@ class TestConfig(unittest.TestCase):
 
     def test_defaults(self):
         settings = self._make_one()
-        qdo_section = settings.getsection('qdo-worker')
-        self.assertEqual(qdo_section['wait_interval'], 5)
-        queuey_section = settings.getsection('queuey')
-        self.assertEqual(queuey_section['connection'],
-            'https://127.0.0.1:5001/v1/queuey/')
-        zk_section = settings.getsection('zookeeper')
-        self.assertEqual(zk_section['connection'],
-            '127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187')
+        qdo_section = settings.getsection(u'qdo-worker')
+        self.assertEqual(qdo_section[u'wait_interval'], 5)
+        queuey_section = settings.getsection(u'queuey')
+        self.assertEqual(queuey_section[u'connection'],
+            u'https://127.0.0.1:5001/v1/queuey/')
+        zk_section = settings.getsection(u'zookeeper')
+        self.assertEqual(zk_section[u'connection'],
+            u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187')
 
     def test_configure(self):
         extra = {
-            'qdo-worker.wait_interval': 30,
-            'queuey.url': 'https://10.0.0.1:2345',
-            'zookeeper.connection': '10.0.0.2:3456',
+            u'qdo-worker.wait_interval': 30,
+            u'queuey.url': u'https://10.0.0.1:2345',
+            u'zookeeper.connection': u'10.0.0.2:3456',
             }
         settings = self._make_one(extra)
-        qdo_section = settings.getsection('qdo-worker')
-        self.assertEqual(qdo_section['wait_interval'], 30)
-        queuey_section = settings.getsection('queuey')
-        self.assertEqual(queuey_section['url'], 'https://10.0.0.1:2345')
-        zk_section = settings.getsection('zookeeper')
-        self.assertEqual(zk_section['connection'], '10.0.0.2:3456')
+        qdo_section = settings.getsection(u'qdo-worker')
+        self.assertEqual(qdo_section[u'wait_interval'], 30)
+        queuey_section = settings.getsection(u'queuey')
+        self.assertEqual(queuey_section[u'url'], u'https://10.0.0.1:2345')
+        zk_section = settings.getsection(u'zookeeper')
+        self.assertEqual(zk_section[u'connection'], u'10.0.0.2:3456')

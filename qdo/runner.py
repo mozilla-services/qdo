@@ -15,7 +15,7 @@ from qdo import worker
 from qdo.config import QdoSettings
 from qdo.utils import configure_metlog
 
-DEFAULT_CONFIGFILE = os.path.join(os.curdir, 'etc', 'qdo-worker.conf')
+DEFAULT_CONFIGFILE = os.path.join(os.curdir, u'etc', u'qdo-worker.conf')
 
 
 def _nicepath(filename):
@@ -27,14 +27,14 @@ def _nicepath(filename):
 
 
 def parse_args(args):
-    version = pkg_resources.get_distribution('qdo').version
-    parser = argparse.ArgumentParser(description='qdo worker')
-    parser.add_argument('-v', '--version', action='version',
+    version = pkg_resources.get_distribution(u'qdo').version
+    parser = argparse.ArgumentParser(description=u'qdo worker')
+    parser.add_argument(u'-v', u'--version', action=u'version',
                         version='%(prog)s ' + version)
-    parser.add_argument('-c', '--config', action='store',
-                        dest='configfile', default=DEFAULT_CONFIGFILE,
-                        help='specify configuration file, defaults to '
-                             '%s' % DEFAULT_CONFIGFILE)
+    parser.add_argument(u'-c', u'--config', action=u'store',
+                        dest=u'configfile', default=DEFAULT_CONFIGFILE,
+                        help=u'specify configuration file, defaults to '
+                             u'%s' % DEFAULT_CONFIGFILE)
     return parser.parse_args(args=args)
 
 
@@ -45,12 +45,12 @@ def parse_config(filename, settings):
     # side effect, populates settings dictionary
     config = load_into_settings(filename, settings)
     # handle ca_bundle
-    ca_bundle = settings['qdo-worker.ca_bundle']
+    ca_bundle = settings[u'qdo-worker.ca_bundle']
     if ca_bundle:
         ca_bundle = _nicepath(ca_bundle)
         if ca_bundle is not None:
-            os.environ['REQUESTS_CA_BUNDLE'] = ca_bundle
-    configure_metlog(settings.getsection('metlog'))
+            os.environ[u'REQUESTS_CA_BUNDLE'] = ca_bundle
+    configure_metlog(settings.getsection(u'metlog'))
     return config
 
 
@@ -59,7 +59,7 @@ def run(args=sys.argv[1:]):
     settings = QdoSettings()
     config = parse_config(arguments.configfile, settings)
     if config is None:
-        print('Configuration file not found or cannot be read.')
+        print(u'Configuration file not found or cannot be read.')
         sys.exit(1)
     worker.run(settings)
     sys.exit(0)  # pragma: no cover
