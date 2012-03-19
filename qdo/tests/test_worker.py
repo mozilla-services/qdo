@@ -7,26 +7,27 @@ import time
 import unittest
 
 import ujson
-from zc.zk import ZooKeeper
 
 from qdo.config import QdoSettings
-from qdo.config import ZOO_DEFAULT_NS
 from qdo import testing
+from qdo.tests.base import ZKBase
 
 # as specified in the queuey-dev.ini
 TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
 
 
-class TestWorker(unittest.TestCase):
+class TestWorker(unittest.TestCase, ZKBase):
 
     @classmethod
     def setUpClass(cls):
-        cls.zk_conn = ZooKeeper('127.0.0.1:2181/' + ZOO_DEFAULT_NS, wait=True)
+        ZKBase.setUpClass()
+        cls.zk_conn = cls._make_zk_conn()
         cls.supervisor = testing.processes['supervisor']
 
     @classmethod
     def tearDownClass(cls):
         cls.zk_conn.close()
+        ZKBase.tearDownClass()
 
     def setUp(self):
         for child in self.zk_conn.get_children('/'):
@@ -261,16 +262,18 @@ class TestWorker(unittest.TestCase):
         self.assertEqual(self.worker.partitions[0].timestamp, last_timestamp)
 
 
-class TestRealWorker(unittest.TestCase):
+class TestRealWorker(unittest.TestCase, ZKBase):
 
     @classmethod
     def setUpClass(cls):
-        cls.zk_conn = ZooKeeper('127.0.0.1:2181/' + ZOO_DEFAULT_NS, wait=True)
+        ZKBase.setUpClass()
+        cls.zk_conn = cls._make_zk_conn()
         cls.supervisor = testing.processes['supervisor']
 
     @classmethod
     def tearDownClass(cls):
         cls.zk_conn.close()
+        ZKBase.tearDownClass()
 
     def setUp(self):
         for child in self.zk_conn.get_children('/'):

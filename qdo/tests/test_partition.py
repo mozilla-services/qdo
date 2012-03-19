@@ -8,25 +8,26 @@ import time
 from requests.exceptions import HTTPError
 import ujson
 import unittest2 as unittest
-from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
-from qdo.config import ZOO_DEFAULT_NS
+from qdo.tests.base import ZKBase
 
 # as specified in the queuey-dev.ini
 TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
 
 
-class TestQueue(unittest.TestCase):
+class TestQueue(unittest.TestCase, ZKBase):
 
     @classmethod
     def setUpClass(cls):
-        cls.zk_conn = ZooKeeper('127.0.0.1:2181/' + ZOO_DEFAULT_NS, wait=True)
+        ZKBase.setUpClass()
+        cls.zk_conn = cls._make_zk_conn()
         ZkNode(cls.zk_conn, u'/partitions')
 
     @classmethod
     def tearDownClass(cls):
         cls.zk_conn.close()
+        ZKBase.tearDownClass()
 
     def tearDown(self):
         del self.partition

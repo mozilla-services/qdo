@@ -16,10 +16,16 @@ class ZKBase(object):
     zk_root = u'/' + ZOO_DEFAULT_NS
 
     @classmethod
+    def _make_zk_conn(cls):
+        return ZooKeeper('127.0.0.1:2181' + cls.zk_root, wait=True)
+
+    @classmethod
     def setUpClass(cls):
         global connections
-        if 'zk' not in connections:
-            connections['zk'] = conn = ZooKeeper('127.0.0.1:2187', wait=True)
+        conn = connections.get('zk_root', None)
+        if conn is None:
+            connections['zk_root'] = conn = ZooKeeper(
+                '127.0.0.1:2187', wait=True)
         if conn.exists(cls.zk_root):
             conn.delete_recursive(cls.zk_root)
         ZkNode(conn, cls.zk_root)
@@ -27,7 +33,8 @@ class ZKBase(object):
     @classmethod
     def tearDownClass(cls):
         global connections
-        if 'zk' in connections:
-            conn = connections['zk']
+        conn = connections.get('zk_root', None)
+        if conn is not None:
             conn.delete_recursive(cls.zk_root)
             conn.close()
+            del connections['zk_root']
