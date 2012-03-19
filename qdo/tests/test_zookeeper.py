@@ -28,19 +28,21 @@ class TestZookeeper(unittest.TestCase, ZKBase):
 
     def test_add_node_cluster_visibility(self):
         conn = ZooKeeper('127.0.0.1:2181', wait=True)
-        ZkNode(conn, u'/test/node1')
+        node_path = self.zk_root + u'/node1'
+        ZkNode(conn, node_path)
         conn.close()
         conn2 = ZooKeeper('127.0.0.1:2184', wait=True)
-        self.assertTrue(conn2.exists(u'/test/node1'))
+        self.assertTrue(conn2.exists(node_path))
         conn2.close()
         conn3 = ZooKeeper('127.0.0.1:2187', wait=True)
-        self.assertTrue(conn3.exists(u'/test/node1'))
+        self.assertTrue(conn3.exists(node_path))
         conn3.close()
 
     def test_cluster_connection(self):
         conn = ZooKeeper(
             '127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187', wait=True)
-        node = ZkNode(conn, u'/test/node2')
+        node_path = self.zk_root + u'/node2'
+        node = ZkNode(conn, node_path)
         node.value = 1
         # shut down the current zk server
         self.supervisor.stopProcess('zookeeper:zk1')
@@ -49,7 +51,7 @@ class TestZookeeper(unittest.TestCase, ZKBase):
         # open a new connection and ensure the value has been set in
         # Zookeeper
         conn2 = ZooKeeper('127.0.0.1:2184', wait=True)
-        self.assertTrue(conn2.exists(u'/test/node2'))
-        node2 = ZkNode(conn2, u'/test/node2')
+        self.assertTrue(conn2.exists(node_path))
+        node2 = ZkNode(conn2, node_path)
         self.assertEqual(node2.value, 2)
         conn2.close()
