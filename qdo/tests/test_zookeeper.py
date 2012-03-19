@@ -9,28 +9,27 @@ from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
 from qdo import testing
+from qdo.tests.base import ZKBase
 
 
-class TestZookeeper(unittest.TestCase):
+class TestZookeeper(unittest.TestCase, ZKBase):
 
     @classmethod
     def setUpClass(cls):
-        cls.zk_conn = ZooKeeper('127.0.0.1:2187', wait=True)
-        if cls.zk_conn.exists(u'/test'):
-            cls.zk_conn.delete_recursive(u'/test')
-        ZkNode(cls.zk_conn, u'/test')
+        ZKBase.setUpClass()
         cls.supervisor = testing.processes['supervisor']
 
     @classmethod
     def tearDownClass(cls):
-        cls.zk_conn.delete_recursive(u'/test')
-        cls.zk_conn.close()
+        ZKBase.tearDownClass()
 
     def tearDown(self):
         self.supervisor.startProcessGroup('zookeeper')
 
     def test_add_node_cluster_visibility(self):
-        ZkNode(self.zk_conn, u'/test/node1')
+        conn = ZooKeeper('127.0.0.1:2181', wait=True)
+        ZkNode(conn, u'/test/node1')
+        conn.close()
         conn2 = ZooKeeper('127.0.0.1:2184', wait=True)
         self.assertTrue(conn2.exists(u'/test/node1'))
         conn2.close()
