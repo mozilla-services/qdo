@@ -282,4 +282,5 @@ class TestRealWorker(unittest.TestCase):
 
     def test_work_real_process(self):
         self.supervisor.startProcess('qdo:qdo1')
+        time.sleep(0.1)
         self.supervisor.stopProcess('qdo:qdo1')
