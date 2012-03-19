@@ -11,7 +11,7 @@ import pycassa
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
-from qdo.config import ZOO_DEFAULT_NS
+from qdo.config import ZOO_DEFAULT_ROOT
 
 processes = {}
 
@@ -26,7 +26,7 @@ def live_job(message):
 
 def cleanup_zookeeper():
     """Opens a connection to Zookeeper and removes all nodes from it."""
-    root = '/' + ZOO_DEFAULT_NS
+    root = ZOO_DEFAULT_ROOT
     zk_conn = ZooKeeper('127.0.0.1:2187', wait=True)
     if zk_conn.exists(root):
         zk_conn.delete_recursive(root)

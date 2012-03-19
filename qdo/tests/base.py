@@ -6,14 +6,14 @@
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
-from qdo.config import ZOO_DEFAULT_NS
+from qdo.config import ZOO_DEFAULT_ROOT
 
 connections = {}
 
 
 class ZKBase(object):
 
-    zk_root = u'/' + ZOO_DEFAULT_NS
+    zk_root = ZOO_DEFAULT_ROOT
 
     @classmethod
     def setUpClass(cls):

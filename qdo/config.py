@@ -6,6 +6,7 @@
 from mozsvc.config import SettingsDict
 
 ZOO_DEFAULT_NS = u'mozilla-qdo'
+ZOO_DEFAULT_ROOT = u'/mozilla-qdo'
 
 
 class QdoSettings(SettingsDict):
