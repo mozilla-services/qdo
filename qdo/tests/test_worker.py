@@ -37,7 +37,7 @@ class TestWorker(unittest.TestCase, ZKBase):
         zk_conn = self.worker.zk_conn
         if (zk_conn and zk_conn.handle is not None):
             zk_conn.close()
-        self.supervisor.startProcessGroup('zookeeper')
+        testing.ensure_process('zookeeper:zk1', noisy=False)
         # clean up queuey
         queuey_conn = self.worker.queuey_conn
         response = queuey_conn.get()
