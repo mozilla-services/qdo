@@ -5,7 +5,7 @@
 
 from mozsvc.config import SettingsDict
 
-ZOO_DEFAULT_NS = 'mozilla-qdo'
+ZOO_DEFAULT_NS = u'mozilla-qdo'
 
 
 class QdoSettings(SettingsDict):
@@ -17,17 +17,17 @@ class QdoSettings(SettingsDict):
 
     def load_defaults(self):
         """Populate settings with default values"""
-        self['qdo-worker.wait_interval'] = 5
-        self['qdo-worker.ca_bundle'] = None
-        self['qdo-worker.job'] = None
+        self[u'qdo-worker.wait_interval'] = 5
+        self[u'qdo-worker.ca_bundle'] = None
+        self[u'qdo-worker.job'] = None
 
-        self['queuey.connection'] = 'https://127.0.0.1:5001/v1/queuey/'
-        self['queuey.app_key'] = None
+        self[u'queuey.connection'] = u'https://127.0.0.1:5001/v1/queuey/'
+        self[u'queuey.app_key'] = None
 
-        self['zookeeper.connection'] = \
-            '127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'
-        self['zookeeper.namespace'] = ZOO_DEFAULT_NS
+        self[u'zookeeper.connection'] = \
+            u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'
+        self[u'zookeeper.namespace'] = ZOO_DEFAULT_NS
 
-        self['metlog.logger'] = 'qdo-worker'
-        self['metlog.sender'] = {}
-        self['metlog.sender']['class'] = 'metlog.senders.StdOutSender'
+        self[u'metlog.logger'] = u'qdo-worker'
+        self[u'metlog.sender'] = {}
+        self[u'metlog.sender'][u'class'] = u'metlog.senders.StdOutSender'
