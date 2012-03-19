@@ -38,3 +38,8 @@ class ZKBase(object):
     @classmethod
     def _make_zk_conn(cls):
         return ZooKeeper('127.0.0.1:2181' + cls.zk_root, wait=True)
+
+    @classmethod
+    def _clean_zk(cls, conn):
+        for child in conn.get_children('/'):
+            conn.delete_recursive('/' + child)

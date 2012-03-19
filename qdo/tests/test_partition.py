@@ -22,12 +22,15 @@ class TestQueue(unittest.TestCase, ZKBase):
     def setUpClass(cls):
         ZKBase.setUpClass()
         cls.zk_conn = cls._make_zk_conn()
-        ZkNode(cls.zk_conn, u'/partitions')
 
     @classmethod
     def tearDownClass(cls):
         cls.zk_conn.close()
         ZKBase.tearDownClass()
+
+    def setUp(self):
+        ZKBase._clean_zk(self.zk_conn)
+        ZkNode(self.zk_conn, u'/partitions')
 
     def tearDown(self):
         del self.partition

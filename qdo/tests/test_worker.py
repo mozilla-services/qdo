@@ -30,8 +30,7 @@ class TestWorker(unittest.TestCase, ZKBase):
         ZKBase.tearDownClass()
 
     def setUp(self):
-        for child in self.zk_conn.get_children('/'):
-            self.zk_conn.delete_recursive('/' + child)
+        ZKBase._clean_zk(self.zk_conn)
 
     def tearDown(self):
         # clean up zookeeper
@@ -276,8 +275,7 @@ class TestRealWorker(unittest.TestCase, ZKBase):
         ZKBase.tearDownClass()
 
     def setUp(self):
-        for child in self.zk_conn.get_children('/'):
-            self.zk_conn.delete_recursive('/' + child)
+        ZKBase._clean_zk(self.zk_conn)
 
     def tearDown(self):
         # clean up zookeeper
