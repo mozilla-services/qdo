@@ -277,10 +277,6 @@ class TestRealWorker(unittest.TestCase, ZKBase):
     def setUp(self):
         ZKBase._clean_zk(self.zk_conn)
 
-    def tearDown(self):
-        # clean up zookeeper
-        self.supervisor.startProcessGroup('zookeeper')
-
     def test_work_real_process(self):
         self.supervisor.startProcess('qdo:qdo1')
         time.sleep(0.1)
