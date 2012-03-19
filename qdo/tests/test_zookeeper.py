@@ -42,15 +42,13 @@ class TestZookeeper(unittest.TestCase, ZKBase):
         conn3.close()
 
     def test_cluster_connection(self):
-        conn = ZooKeeper('127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187' +
-            self.zk_root, wait=True)
+        conn = self.zk_conn
         node_path = u'/node2'
         node = ZkNode(conn, node_path)
         node.value = 1
         # shut down the current zk server
         self.supervisor.stopProcess('zookeeper:zk1')
         node.value = 2
-        conn.close()
         # open a new connection and ensure the value has been set in
         # Zookeeper
         conn2 = ZooKeeper('127.0.0.1:2184' + self.zk_root, wait=True)

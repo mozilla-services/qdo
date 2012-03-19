@@ -37,7 +37,8 @@ class ZKBase(object):
 
     @classmethod
     def _make_zk_conn(cls):
-        return ZooKeeper('127.0.0.1:2181' + cls.zk_root, wait=True)
+        return ZooKeeper('127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187' +
+            cls.zk_root, wait=True)
 
     @classmethod
     def _clean_zk(cls, conn):
