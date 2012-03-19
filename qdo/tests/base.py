@@ -16,10 +16,6 @@ class ZKBase(object):
     zk_root = u'/' + ZOO_DEFAULT_NS
 
     @classmethod
-    def _make_zk_conn(cls):
-        return ZooKeeper('127.0.0.1:2181' + cls.zk_root, wait=True)
-
-    @classmethod
     def setUpClass(cls):
         global connections
         conn = connections.get('zk_root', None)
@@ -38,3 +34,7 @@ class ZKBase(object):
             conn.delete_recursive(cls.zk_root)
             conn.close()
             del connections['zk_root']
+
+    @classmethod
+    def _make_zk_conn(cls):
+        return ZooKeeper('127.0.0.1:2181' + cls.zk_root, wait=True)
