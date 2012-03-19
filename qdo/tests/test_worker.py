@@ -244,7 +244,7 @@ class TestWorker(unittest.TestCase, ZKBase):
             processed[0] += 1
             if processed[0] == 1:
                 # shut down the current zk server
-                pass # self.supervisor.stopProcess('zookeeper:zk1')
+                self.supervisor.stopProcess('zookeeper:zk1')
             if message[u'body'] == u'end':
                 raise KeyboardInterrupt
             return
