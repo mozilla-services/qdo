@@ -11,29 +11,19 @@ from requests.exceptions import Timeout
 import ujson
 
 from qdo.log import get_logger
-
-# as specified in the queuey-dev.ini
-TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
+from qdo.tests.base import QueueyBase
 
 
-class TestQueueyConnection(unittest.TestCase):
+class TestQueueyConnection(unittest.TestCase, QueueyBase):
 
     conn = None
 
     def tearDown(self):
         if self.conn:
-            try:
-                response = self.conn.get()
-                queues = ujson.decode(response.text)[u'queues']
-                names = [q[u'queue_name'] for q in queues]
-                for n in names:
-                    self.conn.delete(n)
-            except ConnectionError:
-                pass
+            self._clean_queuey(self.conn)
 
     def _make_one(self, connection=u'https://127.0.0.1:5001/v1/queuey/'):
-        from qdo.queuey import QueueyConnection
-        self.conn = QueueyConnection(TEST_APP_KEY, connection=connection)
+        self.conn = self._make_queuey_conn(connection=connection)
         return self.conn
 
     def test_connect(self):

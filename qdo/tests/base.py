@@ -3,11 +3,16 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from requests.exceptions import ConnectionError
+from ujson import decode as ujson_decode
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
 from qdo.config import ZOO_DEFAULT_ROOT
+from qdo.queuey import QueueyConnection
 
+# as specified in the queuey-dev.ini
+TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
 connections = {}
 
 
@@ -44,3 +49,22 @@ class ZKBase(object):
     def _clean_zk(cls, conn):
         for child in conn.get_children(u'/'):
             conn.delete_recursive(u'/' + child)
+
+
+class QueueyBase(object):
+
+    @classmethod
+    def _make_queuey_conn(cls,
+            connection=u'https://127.0.0.1:5001/v1/queuey/'):
+        return QueueyConnection(TEST_APP_KEY, connection=connection)
+
+    @classmethod
+    def _clean_queuey(cls, conn):
+        try:
+            response = conn.get()
+            queues = ujson_decode(response.text)[u'queues']
+            names = [q[u'queue_name'] for q in queues]
+            for n in names:
+                conn.delete(n)
+        except ConnectionError:
+            pass
