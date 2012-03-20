@@ -13,7 +13,6 @@ from qdo.queuey import QueueyConnection
 
 # as specified in the queuey-dev.ini
 TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
-connections = {}
 
 
 class ZKBase(object):
@@ -22,31 +21,26 @@ class ZKBase(object):
 
     @classmethod
     def setUpClass(cls):
-        global connections
-        conn = connections.get(u'zk_root', None)
-        if conn is None:
-            connections[u'zk_root'] = conn = ZooKeeper(
-                u'127.0.0.1:2187', wait=True)
-        if conn.exists(cls.zk_root):
-            conn.delete_recursive(cls.zk_root)
-        ZkNode(conn, cls.zk_root)
+        root_conn = ZooKeeper(u'127.0.0.1:2181', wait=True)
+        if not root_conn.exists(cls.zk_root):
+            ZkNode(root_conn, cls.zk_root)
+        root_conn.close()
+        cls._zk_conn = cls._make_zk_conn()
 
     @classmethod
     def tearDownClass(cls):
-        global connections
-        conn = connections.get(u'zk_root', None)
-        if conn is not None:
-            conn.delete_recursive(cls.zk_root)
-            conn.close()
-            del connections[u'zk_root']
+        cls._clean_zk()
+        cls._zk_conn.close()
+        del cls._zk_conn
 
     @classmethod
-    def _make_zk_conn(cls):
-        return ZooKeeper(u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187' +
-            cls.zk_root, wait=True)
+    def _make_zk_conn(cls,
+            hosts=u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'):
+        return ZooKeeper(hosts + cls.zk_root, wait=True)
 
     @classmethod
-    def _clean_zk(cls, conn):
+    def _clean_zk(cls):
+        conn = cls._zk_conn
         for child in conn.get_children(u'/'):
             conn.delete_recursive(u'/' + child)
 

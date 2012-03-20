@@ -30,7 +30,7 @@ class TestWorker(unittest.TestCase, ZKBase):
         ZKBase.tearDownClass()
 
     def setUp(self):
-        ZKBase._clean_zk(self.zk_conn)
+        ZKBase._clean_zk()
 
     def tearDown(self):
         # clean up zookeeper
@@ -276,7 +276,7 @@ class TestRealWorker(unittest.TestCase, ZKBase):
         ZKBase.tearDownClass()
 
     def setUp(self):
-        ZKBase._clean_zk(self.zk_conn)
+        ZKBase._clean_zk()
 
     def test_work_real_process(self):
         try:

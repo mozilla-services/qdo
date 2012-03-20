@@ -29,7 +29,7 @@ class TestQueue(unittest.TestCase, ZKBase):
         ZKBase.tearDownClass()
 
     def setUp(self):
-        ZKBase._clean_zk(self.zk_conn)
+        ZKBase._clean_zk()
         ZkNode(self.zk_conn, u'/partitions')
 
     def tearDown(self):
