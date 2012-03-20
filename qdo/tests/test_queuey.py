@@ -16,15 +16,19 @@ from qdo.tests.base import QueueyBase
 
 class TestQueueyConnection(unittest.TestCase, QueueyBase):
 
-    conn = None
+    @classmethod
+    def setUpClass(cls):
+        QueueyBase.setUpClass()
 
-    def tearDown(self):
-        if self.conn:
-            self._clean_queuey(self.conn)
+    @classmethod
+    def tearDownClass(cls):
+        QueueyBase.tearDownClass()
+
+    def setUp(self):
+        self._clean_queuey()
 
     def _make_one(self, connection=u'https://127.0.0.1:5001/v1/queuey/'):
-        self.conn = self._make_queuey_conn(connection=connection)
-        return self.conn
+        return self._make_queuey_conn(connection=connection)
 
     def test_connect(self):
         conn = self._make_one()

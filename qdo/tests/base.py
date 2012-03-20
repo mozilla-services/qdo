@@ -54,12 +54,22 @@ class ZKBase(object):
 class QueueyBase(object):
 
     @classmethod
+    def setUpClass(cls):
+        cls._queuey_conn = cls._make_queuey_conn()
+        cls._clean_queuey()
+
+    @classmethod
+    def tearDownClass(cls):
+        del cls._queuey_conn
+
+    @classmethod
     def _make_queuey_conn(cls,
             connection=u'https://127.0.0.1:5001/v1/queuey/'):
         return QueueyConnection(TEST_APP_KEY, connection=connection)
 
     @classmethod
-    def _clean_queuey(cls, conn):
+    def _clean_queuey(cls):
+        conn = cls._queuey_conn
         try:
             response = conn.get()
             queues = ujson_decode(response.text)[u'queues']
