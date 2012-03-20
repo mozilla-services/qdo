@@ -22,7 +22,6 @@ zookeeper
 general
 -------
 
-- Be explicit about unicode / bytes
 - change zktools node last_modified time to use the ZK time instead of local
   process time
 
