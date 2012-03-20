@@ -27,6 +27,7 @@ class TestQueue(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
         ZkNode(self.zk_conn, u'/partitions')
+        ZkNode(self.zk_conn, u'/partition-owners')
 
     def tearDown(self):
         del self.partition

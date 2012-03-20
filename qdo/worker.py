@@ -77,6 +77,11 @@ class Worker(object):
         # 9. add newly assigned partitions to the partition owner registry
         #    (we may need to re-try this until the original partition owner
         #     releases its ownership)
+
+        # TODO: This is wrong, needs to be a lock
+        for partition in local_partitions:
+            zk_lock = ZkNode(self.zk_conn, u'/partition-owners/' + partition)
+            zk_lock.value = self.name
         return local_partitions
 
     def work(self):

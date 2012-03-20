@@ -293,7 +293,19 @@ class TestRealWorker(BaseTestCase):
             self.assertEqual(len(zk_conn.get_children(u'/workers')), 3)
             partitions = zk_conn.get_children(u'/partitions')
             self.assertEqual(len(partitions), 6)
+            owners = {}
             for partition in partitions:
+                # each partition was processed
                 value = zk_conn.get(u'/partitions/' + partition)[0]
                 self.assertNotEqual(value, u'0.0')
+                # keep track of ownership
+                owner = zk_conn.get(u'/partition-owners/' + partition)[0]
+                if owner not in owners:
+                    owners[owner] = [partition]
+                else:
+                    owners[owner].append(partition)
+            # every worker did something
+            self.assertEqual(len(owners), 3)
+            for partitions in owners.values():
+                self.assertTrue(len(partitions) > 0)
             self.supervisor.stopProcessGroup(u'qdo')
