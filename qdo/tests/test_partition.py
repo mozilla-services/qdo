@@ -7,29 +7,25 @@ import time
 
 from requests.exceptions import HTTPError
 import ujson
-import unittest2 as unittest
 from zktools.node import ZkNode
 
-from qdo.tests.base import QueueyBase, ZKBase
+from qdo.tests.base import BaseTestCase
 
 
-class TestQueue(unittest.TestCase, QueueyBase, ZKBase):
+class TestQueue(BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        ZKBase.setUpClass()
-        QueueyBase.setUpClass()
+        BaseTestCase.setUpClass()
         cls.zk_conn = cls._make_zk_conn()
 
     @classmethod
     def tearDownClass(cls):
         cls.zk_conn.close()
-        ZKBase.tearDownClass()
-        QueueyBase.tearDownClass()
+        BaseTestCase.tearDownClass()
 
     def setUp(self):
-        QueueyBase._clean_queuey()
-        ZKBase._clean_zk()
+        BaseTestCase.setUp(self)
         ZkNode(self.zk_conn, u'/partitions')
 
     def tearDown(self):

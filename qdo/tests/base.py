@@ -3,8 +3,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+
 from requests.exceptions import ConnectionError
 from ujson import decode as ujson_decode
+from unittest2 import TestCase
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
@@ -74,3 +76,20 @@ class QueueyBase(object):
                 conn.delete(n)
         except ConnectionError:
             pass
+
+
+class BaseTestCase(TestCase, QueueyBase, ZKBase):
+
+    @classmethod
+    def setUpClass(cls):
+        ZKBase.setUpClass()
+        QueueyBase.setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        ZKBase.tearDownClass()
+        QueueyBase.tearDownClass()
+
+    def setUp(self):
+        QueueyBase._clean_queuey()
+        ZKBase._clean_zk()

@@ -4,33 +4,26 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import time
-import unittest
 
 import ujson
 
 from qdo.config import QdoSettings
 from qdo import testing
-from qdo.tests.base import QueueyBase, ZKBase
+from qdo.tests.base import BaseTestCase
 
 
-class TestWorker(unittest.TestCase, QueueyBase, ZKBase):
+class TestWorker(BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        QueueyBase.setUpClass()
-        ZKBase.setUpClass()
+        BaseTestCase.setUpClass()
         cls.zk_conn = cls._make_zk_conn()
         cls.supervisor = testing.processes[u'supervisor']
 
     @classmethod
     def tearDownClass(cls):
         cls.zk_conn.close()
-        ZKBase.tearDownClass()
-        QueueyBase.tearDownClass()
-
-    def setUp(self):
-        QueueyBase._clean_queuey()
-        ZKBase._clean_zk()
+        BaseTestCase.tearDownClass()
 
     def tearDown(self):
         # clean up zookeeper
@@ -262,24 +255,18 @@ class TestWorker(unittest.TestCase, QueueyBase, ZKBase):
         self.assertEqual(self.worker.partitions[0].timestamp, last_timestamp)
 
 
-class TestRealWorker(unittest.TestCase, QueueyBase, ZKBase):
+class TestRealWorker(BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        QueueyBase.setUpClass()
-        ZKBase.setUpClass()
+        BaseTestCase.setUpClass()
         cls.zk_conn = cls._make_zk_conn()
         cls.supervisor = testing.processes[u'supervisor']
 
     @classmethod
     def tearDownClass(cls):
         cls.zk_conn.close()
-        ZKBase.tearDownClass()
-        QueueyBase.tearDownClass()
-
-    def setUp(self):
-        QueueyBase._clean_queuey()
-        ZKBase._clean_zk()
+        BaseTestCase.tearDownClass()
 
     def test_work_real_process(self):
         try:
