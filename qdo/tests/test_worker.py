@@ -274,3 +274,26 @@ class TestRealWorker(BaseTestCase):
             time.sleep(0.1)
         finally:
             self.supervisor.stopProcess(u'qdo:qdo1')
+
+    def test_work_real_processes(self):
+        queuey_conn = self._queuey_conn
+        zk_conn = self._zk_conn
+        queue1 = queuey_conn._create_queue(partitions=1)
+        queue2 = queuey_conn._create_queue(partitions=2)
+        queue3 = queuey_conn._create_queue(partitions=3)
+        data = [u'%s' % i for i in xrange(9)]
+        for name in (queue1, queue2, queue3):
+            queuey_conn.post(name, data=data)
+        try:
+            testing.ensure_process(u'qdo:qdo1', noisy=False)
+            testing.ensure_process(u'qdo:qdo2', noisy=False)
+            testing.ensure_process(u'qdo:qdo3', noisy=False)
+        finally:
+            time.sleep(0.1)
+            self.assertEqual(len(zk_conn.get_children(u'/workers')), 3)
+            partitions = zk_conn.get_children(u'/partitions')
+            self.assertEqual(len(partitions), 6)
+            for partition in partitions:
+                value = zk_conn.get(u'/partitions/' + partition)[0]
+                self.assertNotEqual(value, u'0.0')
+            self.supervisor.stopProcessGroup(u'qdo')
