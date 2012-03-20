@@ -299,7 +299,7 @@ class TestRealWorker(BaseTestCase):
             testing.ensure_process(u'qdo:qdo3', noisy=False)
             self.assertEqual(len(zk_conn.get_children(u'/workers')), 3)
             # stop second worker
-            self.supervisor.stopProcess(u'qdo:qdo1')
+            self.supervisor.stopProcess(u'qdo:qdo2')
             time.sleep(0.1)
             # second worker has unregistered itself
             self.assertEqual(len(zk_conn.get_children(u'/workers')), 2)
