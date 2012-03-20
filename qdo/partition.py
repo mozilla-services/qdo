@@ -36,6 +36,7 @@ class Partition(object):
         self.zk_node = ZkNode(zk_conn, u'/partitions/' + name, use_json=True)
         if self.zk_node.value is None:
             self.zk_node.value = 0.0
+        self.timer = get_logger().timer
 
     def messages(self, limit=100, order='ascending'):
         """Returns messages for the partition, by default from oldest to
@@ -57,7 +58,7 @@ class Partition(object):
             # str() calls in the URL generation
             u'since': repr(since),
         }
-        with get_logger().timer(u'queuey.get_messages'):
+        with self.timer(u'queuey.get_messages'):
             response = self.queuey_conn.get(self.queue_name, params=params)
         if response.ok:
             messages = ujson.decode(response.text)[u'messages']
@@ -70,7 +71,7 @@ class Partition(object):
     def timestamp(self):
         """Property for the timestamp of the last processed message.
         """
-        with get_logger().timer(u'zookeeper.get_value'):
+        with self.timer(u'zookeeper.get_value'):
             return float(self.zk_node.value)
 
     @timestamp.setter
@@ -80,7 +81,7 @@ class Partition(object):
         :param value: New timestamp value as a float.
         :type value: float
         """
-        with get_logger().timer(u'zookeeper.set_value'):
+        with self.timer(u'zookeeper.set_value'):
             if isinstance(value, basestring):
                 value = float(str(value))
             self.zk_node.value = repr(value)
