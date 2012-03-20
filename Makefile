@@ -99,7 +99,7 @@ $(ZOOKEEPER):
 	@echo "Installing Zookeeper"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://mirrors.ibiblio.org/apache//zookeeper/stable/zookeeper-3.3.4.tar.gz | tar -zx
+	curl --silent http://mirrors.ibiblio.org/apache/zookeeper/zookeeper-3.3.4/zookeeper-3.3.4.tar.gz | tar -zx
 	mv bin/zookeeper-3.3.4 bin/zookeeper
 	cd bin/zookeeper && ant compile >/dev/null 2>&1
 	cd bin/zookeeper/src/c && \
