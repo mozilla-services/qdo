@@ -73,9 +73,9 @@ class QueueyConnection(object):
         self.fallback_urls = self.connection[1:]
         self.failed_urls = []
         headers = {u'Authorization': u'Application %s' % app_key}
-        # setting pool_maxsize to 1 ensures we re-use the same connection
+        # Setting pool_maxsize to 1 ensures we re-use the same connection.
         # requests/urllib3 will always create maxsize connections and then
-        # cycle through them one after the other. internally it's a queue
+        # cycle through them one after the other
         self.session = session(headers=headers, timeout=self.timeout,
             config={u'pool_maxsize': 1, u'keep_alive': True}, prefetch=True)
 
