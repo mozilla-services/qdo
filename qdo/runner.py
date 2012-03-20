@@ -13,7 +13,7 @@ from mozsvc.config import load_into_settings
 
 from qdo import worker
 from qdo.config import QdoSettings
-from qdo.utils import configure_metlog
+from qdo.log import configure_metlog
 
 DEFAULT_CONFIGFILE = os.path.join(os.curdir, u'etc', u'qdo-worker.conf')
 

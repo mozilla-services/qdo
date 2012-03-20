@@ -7,7 +7,7 @@ import ujson
 from zktools.node import ZkNode
 
 import qdo.exceptions
-from qdo.utils import get_logger
+from qdo.log import get_logger
 
 
 class Partition(object):

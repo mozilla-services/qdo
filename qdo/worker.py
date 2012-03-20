@@ -13,7 +13,7 @@ from zktools.node import ZkNode
 
 from qdo.partition import Partition
 from qdo.queuey import QueueyConnection
-from qdo.utils import get_logger
+from qdo.log import get_logger
 
 
 class Worker(object):

@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError
 from requests.exceptions import Timeout
 import ujson
 
-from qdo.utils import get_logger
+from qdo.log import get_logger
 
 # as specified in the queuey-dev.ini
 TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'

@@ -12,7 +12,7 @@ from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
 from qdo.config import ZOO_DEFAULT_ROOT
-from qdo.utils import setup_debug_logging
+from qdo.log import setup_debug_logging
 
 processes = {}
 

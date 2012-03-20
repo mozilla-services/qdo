@@ -12,7 +12,7 @@ from requests.exceptions import SSLError
 from requests.exceptions import Timeout
 import ujson
 
-from qdo.utils import get_logger
+from qdo.log import get_logger
 
 
 def retry(func):
