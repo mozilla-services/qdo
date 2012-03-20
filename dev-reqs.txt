@@ -19,7 +19,7 @@ clint==0.2.5
 colander==0.9.6
 cornice==0.6
 coverage==3.5.1
-distribute==0.6.24
+distribute==0.6.25
 docutils==0.8.1
 flake8==1.1
 gevent==0.13.6
