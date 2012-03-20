@@ -279,6 +279,8 @@ class TestRealWorker(unittest.TestCase, ZKBase):
         ZKBase._clean_zk(self.zk_conn)
 
     def test_work_real_process(self):
-        self.supervisor.startProcess(u'qdo:qdo1')
-        time.sleep(0.1)
-        self.supervisor.stopProcess(u'qdo:qdo1')
+        try:
+            self.supervisor.startProcess(u'qdo:qdo1')
+            time.sleep(0.1)
+        finally:
+            self.supervisor.stopProcess(u'qdo:qdo1')
