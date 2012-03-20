@@ -12,7 +12,7 @@ from requests.exceptions import SSLError
 from requests.exceptions import Timeout
 import ujson
 
-from qdo.utils import metlogger
+from qdo.utils import get_logger
 
 
 def retry(func):
@@ -22,7 +22,7 @@ def retry(func):
             try:
                 return func(self, *args, **kwargs)
             except Timeout:
-                metlogger.incr(u'queuey.conn_timeout')
+                get_logger().incr(u'queuey.conn_timeout')
         # raise timeout after all
         raise
     return wrapped
@@ -35,9 +35,9 @@ def fallback(func):
             return func(self, *args, **kwargs)
         except (SSLError, ConnectionError) as e:
             if isinstance(e, SSLError):
-                metlogger.incr(u'queuey.conn_ssl_error')
+                get_logger().incr(u'queuey.conn_ssl_error')
             else:
-                metlogger.incr(u'queuey.conn_error')
+                get_logger().incr(u'queuey.conn_error')
             if self.fallback_urls:
                 self.failed_urls.append(self.app_url)
                 self.app_url = self.fallback_urls.pop()
@@ -159,7 +159,7 @@ class QueueyConnection(object):
         # Prototype for listing all partitions, in the final code partition
         # names will be taken from ZK under /partitions
         # A helper method to populate ZK from Queuey might be nice
-        with metlogger.timer(u'queuey.get_partitions'):
+        with get_logger().timer(u'queuey.get_partitions'):
             response = self.get(params={u'details': True})
         queues = ujson.decode(response.text)[u'queues']
         partitions = []

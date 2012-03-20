@@ -7,7 +7,7 @@ import ujson
 from zktools.node import ZkNode
 
 import qdo.exceptions
-from qdo.utils import metlogger
+from qdo.utils import get_logger
 
 
 class Partition(object):
@@ -57,7 +57,7 @@ class Partition(object):
             # str() calls in the URL generation
             u'since': repr(since),
         }
-        with metlogger.timer(u'queuey.get_messages'):
+        with get_logger().timer(u'queuey.get_messages'):
             response = self.queuey_conn.get(self.queue_name, params=params)
         if response.ok:
             messages = ujson.decode(response.text)[u'messages']
@@ -70,7 +70,7 @@ class Partition(object):
     def timestamp(self):
         """Property for the timestamp of the last processed message.
         """
-        with metlogger.timer(u'zookeeper.get_value'):
+        with get_logger().timer(u'zookeeper.get_value'):
             return float(self.zk_node.value)
 
     @timestamp.setter
@@ -80,7 +80,7 @@ class Partition(object):
         :param value: New timestamp value as a float.
         :type value: float
         """
-        with metlogger.timer(u'zookeeper.set_value'):
+        with get_logger().timer(u'zookeeper.set_value'):
             if isinstance(value, basestring):
                 value = float(str(value))
             self.zk_node.value = repr(value)

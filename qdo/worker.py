@@ -13,7 +13,7 @@ from zktools.node import ZkNode
 
 from qdo.partition import Partition
 from qdo.queuey import QueueyConnection
-from qdo.utils import metlogger
+from qdo.utils import get_logger
 
 
 class Worker(object):
@@ -51,7 +51,7 @@ class Worker(object):
 
     def _workers(self):
         # Get all active worker names registered in ZK
-        with metlogger.timer(u'zookeeper.get_workers'):
+        with get_logger().timer(u'zookeeper.get_workers'):
             return self.zk_conn.get_children(u'/workers')
 
     def _assign_partitions(self):
@@ -111,7 +111,7 @@ class Worker(object):
                     self.job(message)
                     partition.timestamp = timestamp
                 if no_messages == len(partitions):
-                    metlogger.incr(u'worker.wait_for_jobs')
+                    get_logger().incr(u'worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
         finally:
             self.unregister()

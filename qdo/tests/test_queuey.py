@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError
 from requests.exceptions import Timeout
 import ujson
 
-from qdo import utils
+from qdo.utils import get_logger
 
 # as specified in the queuey-dev.ini
 TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
@@ -47,12 +47,13 @@ class TestQueueyConnection(unittest.TestCase):
 
     def test_connect_timeout(self):
         conn = self._make_one()
-        before = len(utils.metsender.msgs)
+        metlog = get_logger()
+        before = len(metlog.sender.msgs)
         with mock.patch(u'requests.sessions.Session.head') as head_mock:
             head_mock.side_effect = Timeout
             self.assertRaises(Timeout, conn.connect)
             self.assertEqual(len(head_mock.mock_calls), conn.retries)
-        self.assertEqual(len(utils.metsender.msgs), before + 3)
+        self.assertEqual(len(metlog.sender.msgs), before + 3)
 
     def test_connect_multiple(self):
         conn = self._make_one(connection=u'https://127.0.0.1:5001/v1/queuey/,'
@@ -80,12 +81,13 @@ class TestQueueyConnection(unittest.TestCase):
 
     def test_get_timeout(self):
         conn = self._make_one()
-        before = len(utils.metsender.msgs)
+        metlog = get_logger()
+        before = len(metlog.sender.msgs)
         with mock.patch(u'requests.sessions.Session.get') as get_mock:
             get_mock.side_effect = Timeout
             self.assertRaises(Timeout, conn.get)
             self.assertEqual(len(get_mock.mock_calls), conn.retries)
-        self.assertEqual(len(utils.metsender.msgs), before + 3)
+        self.assertEqual(len(metlog.sender.msgs), before + 3)
 
     def test_get_multiple_first_unreachable(self):
         conn = self._make_one(connection=u'https://127.0.0.1:9/,'
@@ -102,12 +104,13 @@ class TestQueueyConnection(unittest.TestCase):
 
     def test_post_timeout(self):
         conn = self._make_one()
-        before = len(utils.metsender.msgs)
+        metlog = get_logger()
+        before = len(metlog.sender.msgs)
         with mock.patch(u'requests.sessions.Session.post') as post_mock:
             post_mock.side_effect = Timeout
             self.assertRaises(Timeout, conn.post)
             self.assertEqual(len(post_mock.mock_calls), conn.retries)
-        self.assertEqual(len(utils.metsender.msgs), before + 3)
+        self.assertEqual(len(metlog.sender.msgs), before + 3)
 
     def test_post_multiple_first_unreachable(self):
         conn = self._make_one(connection=u'https://127.0.0.1:9/,'
@@ -127,12 +130,13 @@ class TestQueueyConnection(unittest.TestCase):
     def test_delete_timeout(self):
         conn = self._make_one()
         name = conn._create_queue()
-        before = len(utils.metsender.msgs)
+        metlog = get_logger()
+        before = len(metlog.sender.msgs)
         with mock.patch(u'requests.sessions.Session.delete') as delete_mock:
             delete_mock.side_effect = Timeout
             self.assertRaises(Timeout, conn.delete, name)
             self.assertEqual(len(delete_mock.mock_calls), conn.retries)
-        self.assertEqual(len(utils.metsender.msgs), before + 3)
+        self.assertEqual(len(metlog.sender.msgs), before + 3)
 
     def test_delete_multiple_first_unreachable(self):
         conn = self._make_one(connection=u'https://127.0.0.1:9/,'

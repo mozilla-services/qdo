@@ -6,11 +6,6 @@ queue
 
 - How to handle multiple queues? Only some partitions of one queue?
 
-utils
------
-
-- Make metlog sender configurable via ini file
-
 worker
 ------
 
