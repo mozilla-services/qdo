@@ -10,25 +10,25 @@ import ujson
 import unittest2 as unittest
 from zktools.node import ZkNode
 
-from qdo.tests.base import ZKBase
-
-# as specified in the queuey-dev.ini
-TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
+from qdo.tests.base import QueueyBase, ZKBase
 
 
-class TestQueue(unittest.TestCase, ZKBase):
+class TestQueue(unittest.TestCase, QueueyBase, ZKBase):
 
     @classmethod
     def setUpClass(cls):
         ZKBase.setUpClass()
+        QueueyBase.setUpClass()
         cls.zk_conn = cls._make_zk_conn()
 
     @classmethod
     def tearDownClass(cls):
         cls.zk_conn.close()
         ZKBase.tearDownClass()
+        QueueyBase.tearDownClass()
 
     def setUp(self):
+        QueueyBase._clean_queuey()
         ZKBase._clean_zk()
         ZkNode(self.zk_conn, u'/partitions')
 
@@ -38,8 +38,7 @@ class TestQueue(unittest.TestCase, ZKBase):
 
     def _make_one(self):
         from qdo.partition import Partition
-        from qdo.queuey import QueueyConnection
-        self.conn = QueueyConnection(TEST_APP_KEY)
+        self.conn = self._make_queuey_conn()
         self.queue_name = self.conn._create_queue()
         self.partition = Partition(self.conn, self.zk_conn, self.queue_name)
         return self.partition

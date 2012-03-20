@@ -47,6 +47,8 @@ class ZKBase(object):
 
 class QueueyBase(object):
 
+    queuey_app_key = TEST_APP_KEY
+
     @classmethod
     def setUpClass(cls):
         cls._queuey_conn = cls._make_queuey_conn()
@@ -59,7 +61,7 @@ class QueueyBase(object):
     @classmethod
     def _make_queuey_conn(cls,
             connection=u'https://127.0.0.1:5001/v1/queuey/'):
-        return QueueyConnection(TEST_APP_KEY, connection=connection)
+        return QueueyConnection(cls.queuey_app_key, connection=connection)
 
     @classmethod
     def _clean_queuey(cls):

@@ -10,16 +10,14 @@ import ujson
 
 from qdo.config import QdoSettings
 from qdo import testing
-from qdo.tests.base import ZKBase
-
-# as specified in the queuey-dev.ini
-TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
+from qdo.tests.base import QueueyBase, ZKBase
 
 
-class TestWorker(unittest.TestCase, ZKBase):
+class TestWorker(unittest.TestCase, QueueyBase, ZKBase):
 
     @classmethod
     def setUpClass(cls):
+        QueueyBase.setUpClass()
         ZKBase.setUpClass()
         cls.zk_conn = cls._make_zk_conn()
         cls.supervisor = testing.processes[u'supervisor']
@@ -28,8 +26,10 @@ class TestWorker(unittest.TestCase, ZKBase):
     def tearDownClass(cls):
         cls.zk_conn.close()
         ZKBase.tearDownClass()
+        QueueyBase.tearDownClass()
 
     def setUp(self):
+        QueueyBase._clean_queuey()
         ZKBase._clean_zk()
 
     def tearDown(self):
@@ -51,7 +51,7 @@ class TestWorker(unittest.TestCase, ZKBase):
     def _make_one(self, extra=None):
         from qdo.worker import Worker
         settings = QdoSettings()
-        settings[u'queuey.app_key'] = TEST_APP_KEY
+        settings[u'queuey.app_key'] = self.queuey_app_key
         if extra is not None:
             settings.update(extra)
         self.worker = Worker(settings)
@@ -262,10 +262,11 @@ class TestWorker(unittest.TestCase, ZKBase):
         self.assertEqual(self.worker.partitions[0].timestamp, last_timestamp)
 
 
-class TestRealWorker(unittest.TestCase, ZKBase):
+class TestRealWorker(unittest.TestCase, QueueyBase, ZKBase):
 
     @classmethod
     def setUpClass(cls):
+        QueueyBase.setUpClass()
         ZKBase.setUpClass()
         cls.zk_conn = cls._make_zk_conn()
         cls.supervisor = testing.processes[u'supervisor']
@@ -274,8 +275,10 @@ class TestRealWorker(unittest.TestCase, ZKBase):
     def tearDownClass(cls):
         cls.zk_conn.close()
         ZKBase.tearDownClass()
+        QueueyBase.tearDownClass()
 
     def setUp(self):
+        QueueyBase._clean_queuey()
         ZKBase._clean_zk()
 
     def test_work_real_process(self):
