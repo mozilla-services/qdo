@@ -69,7 +69,7 @@ $(CASSANDRA):
 	@echo "Installing Cassandra"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://archive.apache.org/dist/cassandra/$(CASSANDRA_VERSION)/apache-cassandra-$(CASSANDRA_VERSION)-bin.tar.gz | tar -zvx >/dev/null 2>&1
+	curl --silent http://archive.apache.org/dist/cassandra/$(CASSANDRA_VERSION)/apache-cassandra-$(CASSANDRA_VERSION)-bin.tar.gz | tar -zx
 	mv bin/apache-cassandra-$(CASSANDRA_VERSION) bin/cassandra
 	cp etc/cassandra/cassandra.yaml bin/cassandra/conf/cassandra.yaml
 	cp etc/cassandra/log4j-server.properties bin/cassandra/conf/log4j-server.properties
@@ -83,7 +83,7 @@ $(NGINX):
 	@echo "Installing Nginx"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://nginx.org/download/nginx-1.1.15.tar.gz | tar -zvx >/dev/null 2>&1
+	curl --silent http://nginx.org/download/nginx-1.1.15.tar.gz | tar -zx
 	mv bin/nginx-1.1.15 bin/nginx
 	cd bin/nginx && \
 	./configure --prefix=$(HERE)/bin/nginx --with-http_ssl_module \
@@ -99,7 +99,7 @@ $(ZOOKEEPER):
 	@echo "Installing Zookeeper"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://mirrors.ibiblio.org/apache//zookeeper/stable/zookeeper-3.3.4.tar.gz | tar -zvx >/dev/null 2>&1
+	curl --silent http://mirrors.ibiblio.org/apache//zookeeper/stable/zookeeper-3.3.4.tar.gz | tar -zx
 	mv bin/zookeeper-3.3.4 bin/zookeeper
 	cd bin/zookeeper && ant compile >/dev/null 2>&1
 	cd bin/zookeeper/src/c && \
