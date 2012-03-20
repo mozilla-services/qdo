@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import unittest2 as unittest
 import time
 
 import ujson
@@ -153,7 +154,8 @@ class TestWorker(BaseTestCase):
 
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 5)
-        self.assertEqual(self.worker.partitions[0].timestamp, last_timestamp)
+        self.assertEqual(
+            self.worker.partitions.values()[0].timestamp, last_timestamp)
 
     def test_work_multiple_queues(self):
         worker = self._make_one()
@@ -252,7 +254,8 @@ class TestWorker(BaseTestCase):
 
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 3)
-        self.assertEqual(self.worker.partitions[0].timestamp, last_timestamp)
+        self.assertEqual(
+            self.worker.partitions.values()[0].timestamp, last_timestamp)
 
 
 class TestRealWorker(BaseTestCase):
@@ -275,6 +278,7 @@ class TestRealWorker(BaseTestCase):
         finally:
             self.supervisor.stopProcess(u'qdo:qdo1')
 
+    @unittest.expectedFailure
     def test_work_real_processes(self):
         queuey_conn = self._queuey_conn
         zk_conn = self._zk_conn
@@ -285,12 +289,21 @@ class TestRealWorker(BaseTestCase):
         for name in (queue1, queue2, queue3):
             queuey_conn.post(name, data=data)
         try:
+            # start first worker
             testing.ensure_process(u'qdo:qdo1', noisy=False)
+            self.assertEqual(len(zk_conn.get_children(u'/workers')), 1)
+            # start second worker
             testing.ensure_process(u'qdo:qdo2', noisy=False)
+            self.assertEqual(len(zk_conn.get_children(u'/workers')), 2)
+            # start third worker
             testing.ensure_process(u'qdo:qdo3', noisy=False)
-        finally:
-            time.sleep(0.1)
             self.assertEqual(len(zk_conn.get_children(u'/workers')), 3)
+            # stop second worker
+            self.supervisor.stopProcess(u'qdo:qdo1')
+            time.sleep(0.1)
+            # second worker has unregistered itself
+            self.assertEqual(len(zk_conn.get_children(u'/workers')), 2)
+            # check
             partitions = zk_conn.get_children(u'/partitions')
             self.assertEqual(len(partitions), 6)
             owners = {}
@@ -305,7 +318,8 @@ class TestRealWorker(BaseTestCase):
                 else:
                     owners[owner].append(partition)
             # every worker did something
-            self.assertEqual(len(owners), 3)
+            self.assertEqual(len(owners), 2)
             for partitions in owners.values():
                 self.assertTrue(len(partitions) > 0)
+        finally:
             self.supervisor.stopProcessGroup(u'qdo')

@@ -30,6 +30,7 @@ class Worker(object):
         self.zk_conn = None
         self.zk_node = None
         self.job = None
+        self.partitions = {}
         self.configure()
 
     def configure(self):
@@ -58,31 +59,36 @@ class Worker(object):
         # implement simplified Kafka re-balancing algorithm
         # 1. let this worker be Wi
         # 2. let P be all partitions
-        partitions = self.queuey_conn._partitions()
+        all_partitions = self.queuey_conn._partitions()
         # 3. let W be all workers
         workers = self._workers()
         # 4. sort P
-        partitions = sorted(partitions)
+        all_partitions = sorted(all_partitions)
         # 5. sort W
         workers = sorted(workers)
         # 6. let i be the index position of Wi in W and
         #    let N = size(P) / size(W)
         i = workers.index(self.name)
-        N = len(partitions) / len(workers)
+        N = len(all_partitions) / len(workers)
         # 7. assign partitions from i*N to (i+1)*N - 1 to Wi
-        local_partitions = []
+        new_partitions = set()
         for num in xrange(i * N, (i + 1) * N):
-            local_partitions.append(partitions[num])
+            new_partitions.add(all_partitions[num])
         # 8. remove current entries owned by Wi from the partition owner registry
+        old_partitions = set(self.partitions.keys())
+        for name in old_partitions - new_partitions:
+            del self.partitions[name]
+            # TODO: wrong, needs to be a lock
+            self.zk_conn.delete(u'/partition-owners/' + name)
         # 9. add newly assigned partitions to the partition owner registry
         #    (we may need to re-try this until the original partition owner
         #     releases its ownership)
-
-        # TODO: This is wrong, needs to be a lock
-        for partition in local_partitions:
-            zk_lock = ZkNode(self.zk_conn, u'/partition-owners/' + partition)
+        for name in new_partitions - old_partitions:
+            self.partitions[name] = Partition(
+                self.queuey_conn, self.zk_conn, name)
+            # TODO: wrong, needs to be a lock
+            zk_lock = ZkNode(self.zk_conn, u'/partition-owners/' + name)
             zk_lock.value = self.name
-        return local_partitions
 
     def work(self):
         """Work on jobs.
@@ -97,16 +103,13 @@ class Worker(object):
         self.setup_zookeeper()
         self.register()
         # track partitions
-        new_partitions = self._assign_partitions()
-        self.partitions = partitions = []
-        for name in new_partitions:
-            partitions.append(Partition(self.queuey_conn, self.zk_conn, name))
+        self._assign_partitions()
         try:
             while 1:
                 if self.shutdown:
                     break
                 no_messages = 0
-                for partition in partitions:
+                for name, partition in self.partitions.items():
                     messages = partition.messages(limit=2)
                     if not messages:
                         no_messages += 1
@@ -115,7 +118,7 @@ class Worker(object):
                     timestamp = message[u'timestamp']
                     self.job(message)
                     partition.timestamp = timestamp
-                if no_messages == len(partitions):
+                if no_messages == len(self.partitions):
                     get_logger().incr(u'worker.wait_for_jobs')
                     time.sleep(self.wait_interval)
         finally:
