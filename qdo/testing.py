@@ -12,7 +12,7 @@ from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
 from qdo.config import ZOO_DEFAULT_ROOT
-from qdo.log import setup_debug_logging
+from qdo import log
 
 processes = {}
 
@@ -79,7 +79,7 @@ def setup_supervisor():
 
 def setup():
     """Shared one-time test setup, called from tests/__init__.py"""
-    setup_debug_logging()
+    log.configure(None, debug=True)
     setup_supervisor()
     ensure_process(u'cassandra')
     setup_cassandra_schema()
