@@ -3,7 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import ujson
+from ujson import decode as ujson_decode
 from zktools.node import ZkNode
 
 import qdo.exceptions
@@ -61,7 +61,7 @@ class Partition(object):
         with self.timer(u'queuey.get_messages'):
             response = self.queuey_conn.get(self.queue_name, params=params)
         if response.ok:
-            messages = ujson.decode(response.text)[u'messages']
+            messages = ujson_decode(response.text)[u'messages']
             # filter out exact timestamp matches
             return [m for m in messages if float(str(m[u'timestamp'])) > since]
         # failure
