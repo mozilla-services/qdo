@@ -27,20 +27,9 @@ class TestWorker(BaseTestCase):
         BaseTestCase.tearDownClass()
 
     def tearDown(self):
-        # clean up zookeeper
         zk_conn = self.worker.zk_conn
         if (zk_conn and zk_conn.handle is not None):
             zk_conn.close()
-        testing.ensure_process(u'zookeeper:zk1', noisy=False)
-        # clean up queuey
-        queuey_conn = self.worker.queuey_conn
-        response = queuey_conn.get()
-        queues = ujson.decode(response.text)[u'queues']
-        names = [q[u'queue_name'] for q in queues]
-        for n in names:
-            queuey_conn.delete(n)
-        del self.worker
-        del self.queue_name
 
     def _make_one(self, extra=None):
         from qdo.worker import Worker
@@ -251,8 +240,10 @@ class TestWorker(BaseTestCase):
         self._post_message(u'end')
         last_timestamp = float(ujson.decode(
             last.text)[u'messages'][0][u'timestamp'])
-
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        try:
+            self.assertRaises(KeyboardInterrupt, worker.work)
+        finally:
+            testing.ensure_process(u'zookeeper:zk1', noisy=False)
         self.assertEqual(processed[0], 3)
         self.assertEqual(
             self.worker.partitions.values()[0].timestamp, last_timestamp)

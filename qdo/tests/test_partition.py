@@ -29,10 +29,6 @@ class TestQueue(BaseTestCase):
         ZkNode(self.zk_conn, u'/partitions')
         ZkNode(self.zk_conn, u'/partition-owners')
 
-    def tearDown(self):
-        del self.partition
-        del self.queue_name
-
     def _make_one(self):
         from qdo.partition import Partition
         self.conn = self._make_queuey_conn()

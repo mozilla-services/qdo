@@ -25,7 +25,7 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
         QueueyBase.tearDownClass()
 
     def setUp(self):
-        self._clean_queuey()
+        QueueyBase._clean_queuey()
 
     def _make_one(self, connection=u'https://127.0.0.1:5001/v1/queuey/'):
         return self._make_queuey_conn(connection=connection)
