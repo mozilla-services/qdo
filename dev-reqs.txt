@@ -51,7 +51,7 @@ venusian==1.0a3
 virtualenv==1.7.1.2
 wsgiref==0.1.2
 z3c.checkversions==0.4.1
-zc-zookeeper-static==3.3.4.0
+zc-zookeeper-static==3.3.5
 zc.thread==0.1.0
 zc.zk==0.7.0
 zktools==0.2.1

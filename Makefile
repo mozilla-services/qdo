@@ -20,8 +20,9 @@ else
 endif
 INSTALL = $(HERE)/bin/pip install
 PIP_DOWNLOAD_CACHE ?= /tmp/pip_cache
-INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) --use-mirrors
+INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) --use-mirrors -f https://github.com/mozilla-services/qdo/downloads
 CASSANDRA_VERSION = 1.0.8
+ZOOKEEPER_VERSION = 3.3.5
 
 ifdef PYPIEXTRAS
 	PYPIOPTIONS += -e $(PYPIEXTRAS)
@@ -99,8 +100,8 @@ $(ZOOKEEPER):
 	@echo "Installing Zookeeper"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://mirrors.ibiblio.org/apache/zookeeper/zookeeper-3.3.4/zookeeper-3.3.4.tar.gz | tar -zx
-	mv bin/zookeeper-3.3.4 bin/zookeeper
+	curl --silent http://mirrors.ibiblio.org/apache/zookeeper/zookeeper-$(ZOOKEEPER_VERSION)/zookeeper-$(ZOOKEEPER_VERSION).tar.gz | tar -zx
+	mv bin/zookeeper-$(ZOOKEEPER_VERSION) bin/zookeeper
 	cd bin/zookeeper && ant compile >/dev/null 2>&1
 	cd bin/zookeeper/src/c && \
 	./configure >/dev/null 2>&1 && \
@@ -110,8 +111,6 @@ $(ZOOKEEPER):
 	cat old_build.xml | sed 's|executable="python"|executable="../../../../../bin/python"|g' > build.xml && \
 	ant install >/dev/null 2>&1
 	cd bin/zookeeper/bin && \
-	mv zkServer.sh old_zkServer.sh && \
-	cat old_zkServer.sh | sed 's|    $$JAVA "-Dzoo|    exec $$JAVA "-Dzoo|g' > zkServer.sh && \
 	chmod a+x zkServer.sh
 	mkdir -p zookeeper/server1/data && echo "1" > zookeeper/server1/data/myid
 	mkdir -p zookeeper/server2/data && echo "2" > zookeeper/server2/data/myid
