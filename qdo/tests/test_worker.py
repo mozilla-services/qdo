@@ -147,17 +147,14 @@ class TestWorker(BaseTestCase):
 
     def test_work_multiple_messages(self):
         worker = self._make_one()
-        # keep a runtime counter
-        processed = [0]
+        counter = [0]
 
-        def job(context, message, processed=processed):
-            # process the message
-            processed[0] += 1
-            if processed[0] > 5:
+        def job(context, message, counter=counter):
+            counter[0] += 1
+            if counter[0] > 5:
                 raise ValueError
             if message[u'body'] == u'end':
                 raise KeyboardInterrupt
-            return
 
         worker.job = job
         self._post_message(u'work')
@@ -170,7 +167,7 @@ class TestWorker(BaseTestCase):
             last.text)[u'messages'][0][u'timestamp']))
 
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual(processed[0], 5)
+        self.assertEqual(counter[0], 5)
         self.assertEqual(
             self.worker.partitions.values()[0].timestamp, last_timestamp)
 
@@ -182,20 +179,18 @@ class TestWorker(BaseTestCase):
         self._post_message(u'queue2-1', queue_name=queue2)
         self._post_message(u'queue2-2', queue_name=queue2)
         self._post_message(u'queue2-3', queue_name=queue2)
-        processed = [0]
+        counter = [0]
 
-        def job(context, message, processed=processed):
-            # process the message
-            processed[0] += 1
-            if processed[0] == 5:
+        def job(context, message, counter=counter):
+            counter[0] += 1
+            if counter[0] == 5:
                 raise KeyboardInterrupt
-            elif processed[0] > 5:
+            elif counter[0] > 5:
                 raise ValueError
-            return
 
         worker.job = job
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual(processed[0], 5)
+        self.assertEqual(counter[0], 5)
 
     def test_work_multiple_empty_queues(self):
         worker = self._make_one()
@@ -205,20 +200,18 @@ class TestWorker(BaseTestCase):
         self._post_message(u'queue1-1')
         self._post_message(u'queue1-2')
         self._post_message(u'queue2-1', queue_name=queue2)
-        processed = [0]
+        counter = [0]
 
-        def job(context, message, processed=processed):
-            # process the message
-            processed[0] += 1
-            if processed[0] == 3:
+        def job(context, message, counter=counter):
+            counter[0] += 1
+            if counter[0] == 3:
                 raise KeyboardInterrupt
-            elif processed[0] > 3:
+            elif counter[0] > 3:
                 raise ValueError
-            return
 
         worker.job = job
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual(processed[0], 3)
+        self.assertEqual(counter[0], 3)
 
     def test_work_multiple_queues_and_partitions(self):
         worker = self._make_one()
@@ -232,27 +225,25 @@ class TestWorker(BaseTestCase):
             ujson.decode(response.text)[u'messages']])
         # messages ended up in different partitions
         self.assertTrue(len(partitions) > 1, partitions)
-        processed = [0]
+        counter = [0]
 
-        def job(context, message, processed=processed):
-            # process the message
-            processed[0] += 1
-            if processed[0] == 10:
+        def job(context, message, counter=counter):
+            counter[0] += 1
+            if counter[0] == 10:
                 raise KeyboardInterrupt
-            elif processed[0] > 10:
+            elif counter[0] > 10:
                 raise ValueError
-            return
 
         worker.job = job
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual(processed[0], 10)
+        self.assertEqual(counter[0], 10)
 
     def test_work_lost_zookeeper(self):
         worker = self._make_one()
-        processed = [0]
+        counter = [0]
 
-        def job(context, message, processed=processed):
-            processed[0] += 1
+        def job(context, message, counter=counter):
+            counter[0] += 1
             body = message[u'body']
             if body == u'kill':
                 # shut down the current zk server
@@ -271,7 +262,7 @@ class TestWorker(BaseTestCase):
             self.assertRaises(KeyboardInterrupt, worker.work)
         finally:
             testing.ensure_process(u'zookeeper:zk1', noisy=False)
-        self.assertEqual(processed[0], 4)
+        self.assertEqual(counter[0], 4)
         self.assertEqual(
             self.worker.partitions.values()[0].timestamp, last_timestamp)
 
