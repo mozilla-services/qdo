@@ -54,10 +54,10 @@ z3c.checkversions==0.4.1
 zc-zookeeper-static==3.3.5
 zc.thread==0.1.0
 zc.zk==0.7.0
-zktools==0.2.1
 zope.component==3.12.0
 zope.deprecation==3.5.1
 zope.event==3.5.1
 zope.interface==3.8.0
 
 -e git://github.com/mozilla-services/queuey.git#egg=queuey
+-e git://github.com/hannosch/zktools.git#egg=zktools

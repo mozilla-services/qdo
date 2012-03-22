@@ -19,12 +19,6 @@ zookeeper
 - factor zookeeper handling out of worker
 - implement event handling / queue distribution
 
-general
--------
-
-- change zktools node last_modified time to use the ZK time instead of local
-  process time
-
 future
 ------
 
