@@ -12,6 +12,7 @@ from zktools.node import ZkNode
 
 from qdo.config import ZOO_DEFAULT_ROOT
 from qdo.queuey import QueueyConnection
+from qdo.zk import connect as zk_connect
 
 # as specified in the queuey-dev.ini
 TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
@@ -23,10 +24,9 @@ class ZKBase(object):
 
     @classmethod
     def setUpClass(cls):
-        root_conn = ZooKeeper(u'127.0.0.1:2181', wait=True)
-        if not root_conn.exists(cls.zk_root):
-            ZkNode(root_conn, cls.zk_root)
-        root_conn.close()
+        with zk_connect(u'127.0.0.1:2181') as root_conn:
+            if not root_conn.exists(cls.zk_root):
+                ZkNode(root_conn, cls.zk_root)
         cls._zk_conn = cls._make_zk_conn()
 
     @classmethod
