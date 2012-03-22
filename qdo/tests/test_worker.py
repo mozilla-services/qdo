@@ -3,10 +3,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import unittest2 as unittest
+from contextlib import contextmanager
 import time
 
 import ujson
+import unittest2 as unittest
 
 from qdo.config import QdoSettings
 from qdo import testing
@@ -116,6 +117,33 @@ class TestWorker(BaseTestCase):
         worker.job = stop
         self._post_message(u'Hello')
         self.assertRaises(KeyboardInterrupt, worker.work)
+
+    def test_work_context(self):
+        worker = self._make_one()
+        context = {}
+
+        @contextmanager
+        def job_context(context=context):
+            context[u'counter'] = 0
+            context[u'done'] = False
+            try:
+                yield context
+            finally:
+                context[u'done'] = True
+
+        def job(context, message):
+            context[u'counter'] += 1
+            if message[u'body'] == u'end':
+                raise KeyboardInterrupt
+
+        worker.context = job_context
+        worker.job = job
+
+        self._post_message(u'work')
+        self._post_message(u'end')
+        self.assertRaises(KeyboardInterrupt, worker.work)
+        self.assertEqual(context[u'counter'], 2)
+        self.assertEqual(context[u'done'], True)
 
     def test_work_multiple_messages(self):
         worker = self._make_one()
