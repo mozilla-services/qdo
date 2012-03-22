@@ -111,10 +111,10 @@ class TestWorker(BaseTestCase):
     def test_work(self):
         worker = self._make_one()
 
-        def stop(context, message):
+        def job(context, message):
             raise KeyboardInterrupt
 
-        worker.job = stop
+        worker.job = job
         self._post_message(u'Hello')
         self.assertRaises(KeyboardInterrupt, worker.work)
 
@@ -150,7 +150,7 @@ class TestWorker(BaseTestCase):
         # keep a runtime counter
         processed = [0]
 
-        def stop(context, message, processed=processed):
+        def job(context, message, processed=processed):
             # process the message
             processed[0] += 1
             if processed[0] > 5:
@@ -159,7 +159,7 @@ class TestWorker(BaseTestCase):
                 raise KeyboardInterrupt
             return
 
-        worker.job = stop
+        worker.job = job
         self._post_message(u'work')
         self._post_message(u'work')
         self._post_message(u'work')
@@ -184,7 +184,7 @@ class TestWorker(BaseTestCase):
         self._post_message(u'queue2-3', queue_name=queue2)
         processed = [0]
 
-        def stop(context, message, processed=processed):
+        def job(context, message, processed=processed):
             # process the message
             processed[0] += 1
             if processed[0] == 5:
@@ -193,7 +193,7 @@ class TestWorker(BaseTestCase):
                 raise ValueError
             return
 
-        worker.job = stop
+        worker.job = job
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 5)
 
@@ -207,7 +207,7 @@ class TestWorker(BaseTestCase):
         self._post_message(u'queue2-1', queue_name=queue2)
         processed = [0]
 
-        def stop(context, message, processed=processed):
+        def job(context, message, processed=processed):
             # process the message
             processed[0] += 1
             if processed[0] == 3:
@@ -216,7 +216,7 @@ class TestWorker(BaseTestCase):
                 raise ValueError
             return
 
-        worker.job = stop
+        worker.job = job
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 3)
 
@@ -234,7 +234,7 @@ class TestWorker(BaseTestCase):
         self.assertTrue(len(partitions) > 1, partitions)
         processed = [0]
 
-        def stop(context, message, processed=processed):
+        def job(context, message, processed=processed):
             # process the message
             processed[0] += 1
             if processed[0] == 10:
@@ -243,7 +243,7 @@ class TestWorker(BaseTestCase):
                 raise ValueError
             return
 
-        worker.job = stop
+        worker.job = job
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(processed[0], 10)
 
@@ -252,7 +252,7 @@ class TestWorker(BaseTestCase):
         # keep a runtime counter
         processed = [0]
 
-        def stop(context, message, processed=processed):
+        def job(context, message, processed=processed):
             # process the message
             processed[0] += 1
             if processed[0] == 1:
@@ -262,7 +262,7 @@ class TestWorker(BaseTestCase):
                 raise KeyboardInterrupt
             return
 
-        worker.job = stop
+        worker.job = job
         self._post_message(u'work')
         last = self._post_message(u'work')
         self._post_message(u'end')
