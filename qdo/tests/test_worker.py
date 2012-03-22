@@ -249,21 +249,20 @@ class TestWorker(BaseTestCase):
 
     def test_work_lost_zookeeper(self):
         worker = self._make_one()
-        # keep a runtime counter
         processed = [0]
 
         def job(context, message, processed=processed):
-            # process the message
             processed[0] += 1
-            if processed[0] == 1:
+            body = message[u'body']
+            if body == u'kill':
                 # shut down the current zk server
                 self.supervisor.stopProcess(u'zookeeper:zk1')
-            if message[u'body'] == u'end':
+            elif body == u'end':
                 raise KeyboardInterrupt
-            return
 
         worker.job = job
         self._post_message(u'work')
+        self._post_message(u'kill')
         last = self._post_message(u'work')
         self._post_message(u'end')
         last_timestamp = float(ujson.decode(
@@ -272,7 +271,7 @@ class TestWorker(BaseTestCase):
             self.assertRaises(KeyboardInterrupt, worker.work)
         finally:
             testing.ensure_process(u'zookeeper:zk1', noisy=False)
-        self.assertEqual(processed[0], 3)
+        self.assertEqual(processed[0], 4)
         self.assertEqual(
             self.worker.partitions.values()[0].timestamp, last_timestamp)
 
