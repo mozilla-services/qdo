@@ -27,12 +27,12 @@ ca_bundle
     officially signed ones.
 
 context
-    The resource specification for a Python job context. For example:
-    `qdo.worker:dict_context`
+    The :term:`resource specification` for a Python job context (manager).
+    For example: `qdo.worker:dict_context`
 
 job
-    The resource specification for the Python job function. For example:
-    `qdo.testing:example_job`
+    The :term:`resource specification` for the Python job function. For
+    example: `qdo.testing:example_job`
 
 [queuey]
 --------

@@ -16,6 +16,11 @@ Glossary
      The Mozilla Services team builds and operates scalable infrastructure
      for internal Mozilla projects. See https://wiki.mozilla.org/Services.
 
+   resource specification
+     A resource specification is a string, consisting of a dotted name
+     pointing to a Python module and separated by a colon the name of a
+     function in that module. For example: `os.path:join`
+
    Queuey
      Yet another message queue. See http://queuey.readthedocs.org/ or
      https://github.com/mozilla-services/queuey/.
