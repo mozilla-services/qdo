@@ -28,7 +28,7 @@ ca_bundle
 
 job
     The resource specification for the Python job function. For example:
-    `qdo.testing:live_job`
+    `qdo.testing:example_job`
 
 [queuey]
 --------
