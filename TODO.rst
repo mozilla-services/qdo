@@ -1,11 +1,6 @@
 TODO
 ====
 
-queue
------
-
-- How to handle multiple queues? Only some partitions of one queue?
-
 worker
 ------
 
