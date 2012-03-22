@@ -25,8 +25,7 @@ class ZKBase(object):
     @classmethod
     def setUpClass(cls):
         with zk_connect(u'127.0.0.1:2181') as root_conn:
-            if not root_conn.exists(cls.zk_root):
-                ZkNode(root_conn, cls.zk_root)
+            ZkNode(root_conn, cls.zk_root)
         cls._zk_conn = cls._make_zk_conn()
 
     @classmethod
