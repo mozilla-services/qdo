@@ -17,7 +17,7 @@ from qdo import log
 processes = {}
 
 
-def example_job(message):
+def example_job(context, message):
     body = message[u'body']
     if body == u'stop':
        raise KeyboardInterrupt

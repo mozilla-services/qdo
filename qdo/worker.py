@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from contextlib import contextmanager
 import os
 import time
 import socket
@@ -14,6 +15,15 @@ from zktools.node import ZkNode
 from qdo.partition import Partition
 from qdo.queuey import QueueyConnection
 from qdo.log import get_logger
+
+
+@contextmanager
+def dict_context():
+    context = dict()
+    try:
+        yield context
+    finally:
+        del context
 
 
 class Worker(object):
@@ -29,6 +39,7 @@ class Worker(object):
         self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
         self.zk_conn = None
         self.zk_node = None
+        self.context = dict_context
         self.job = None
         self.partitions = {}
         self.configure()
@@ -38,6 +49,10 @@ class Worker(object):
         """
         qdo_section = self.settings.getsection(u'qdo-worker')
         self.wait_interval = qdo_section[u'wait_interval']
+        if qdo_section[u'context']:
+            mod, fun = qdo_section[u'context'].split(u':')
+            result = __import__(mod, globals(), locals(), fun)
+            self.context = getattr(result, fun)
         if qdo_section[u'job']:
             mod, fun = qdo_section[u'job'].split(u':')
             result = __import__(mod, globals(), locals(), fun)
@@ -105,22 +120,23 @@ class Worker(object):
         # track partitions
         self._assign_partitions()
         try:
-            while 1:
-                if self.shutdown:
-                    break
-                no_messages = 0
-                for name, partition in self.partitions.items():
-                    messages = partition.messages(limit=2)
-                    if not messages:
-                        no_messages += 1
-                        continue
-                    message = messages[0]
-                    timestamp = message[u'timestamp']
-                    self.job(message)
-                    partition.timestamp = timestamp
-                if no_messages == len(self.partitions):
-                    get_logger().incr(u'worker.wait_for_jobs')
-                    time.sleep(self.wait_interval)
+            with self.context() as context:
+                while 1:
+                    if self.shutdown:
+                        break
+                    no_messages = 0
+                    for name, partition in self.partitions.items():
+                        messages = partition.messages(limit=2)
+                        if not messages:
+                            no_messages += 1
+                            continue
+                        message = messages[0]
+                        timestamp = message[u'timestamp']
+                        self.job(context, message)
+                        partition.timestamp = timestamp
+                    if no_messages == len(self.partitions):
+                        get_logger().incr(u'worker.wait_for_jobs')
+                        time.sleep(self.wait_interval)
         finally:
             self.unregister()
 
