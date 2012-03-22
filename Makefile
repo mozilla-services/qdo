@@ -133,7 +133,7 @@ clean-zookeeper:
 
 clean: clean-env
 
-build: lib
+build: lib cassandra nginx zookeeper
 	$(BUILDAPP) -c $(CHANNEL) $(PYPIOPTIONS) $(DEPS)
 
 html:

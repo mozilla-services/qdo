@@ -16,8 +16,5 @@ before_install:
 
 install:
     - make build
-    - make cassandra
-    - make nginx
-    - make zookeeper
 
 script: make test

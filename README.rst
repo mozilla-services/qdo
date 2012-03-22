@@ -29,31 +29,23 @@ proceeding:
 
 - Make
 - Python 2.6 (with virtualenv installed, available as `virtualenv-2.6`)
-- Zero MQ (zmq)
-- libevent
+- Java 1.6
+- Zero MQ (zmq-dev)
+- libevent-dev, libpcre-dev
 
 Installation
 ============
 
 After downloading the repository for the first time,
-cd into the directory and run make.
+cd into the directory and run::
+
+    make
 
 This will do the following:
 
 - Create a virtual Python environment
 - Install required Python packages into this environment
-
-Afterwards install Cassandra, Nginx and Zookeeper::
-
-    make cassandra
-    make nginx
-    make zookeeper
-
-Start Cassandra once in foreground mode and install the schema::
-
-    ./bin/cassandra/bin/cassandra -f
-    ./bin/cassandra/bin/cassandra-cli -host localhost --file etc/cassandra/message_schema.txt
-    ./bin/cassandra/bin/cassandra-cli -host localhost --file etc/cassandra/metadata_schema.txt
+- Install Cassandra, Nginx and Zookeeper
 
 If you get a problem installing gevent on Mac OS, make sure you have libevent
 installed and retry installation::
