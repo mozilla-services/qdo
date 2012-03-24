@@ -57,12 +57,12 @@ Information about existing partitions is stored under::
 
 A persistent node is created for each partition. For example::
 
-    /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-1
-    /<qdo-ns>/queues/a4bb2fb6dcda4b68aad743a4746d7f58-2
-    /<qdo-ns>/queues/958f8c0643484f13b7fb32f27a4a2a9f-1
+    /<qdo-ns>/partitions/a4bb2fb6dcda4b68aad743a4746d7f58-1
+    /<qdo-ns>/partitions/a4bb2fb6dcda4b68aad743a4746d7f58-2
+    /<qdo-ns>/partitions/958f8c0643484f13b7fb32f27a4a2a9f-1
 
 Each partition node stores a float value, specifying until when messages have
-been processed::
+been processed:
 
 .. code-block:: javascript
 
