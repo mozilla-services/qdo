@@ -65,18 +65,13 @@ class Worker(object):
             queuey_section[u'app_key'],
             connection=queuey_section[u'connection'])
 
-    def _workers(self):
-        # Get all active worker names registered in ZK
-        with get_logger().timer(u'zookeeper.get_workers'):
-            return self.zk_conn.get_children(u'/workers')
-
-    def _assign_partitions(self):
+    def _assign_partitions(self, worker_children):
         # implement simplified Kafka re-balancing algorithm
         # 1. let this worker be Wi
         # 2. let P be all partitions
         all_partitions = self.queuey_conn._partitions()
         # 3. let W be all workers
-        workers = self._workers()
+        workers = worker_children
         # 4. sort P
         all_partitions = sorted(all_partitions)
         # 5. sort W
@@ -118,8 +113,6 @@ class Worker(object):
         # Set up Zookeeper
         self.setup_zookeeper()
         self.register()
-        # track partitions
-        self._assign_partitions()
         try:
             with self.context() as context:
                 while 1:
@@ -150,9 +143,15 @@ class Worker(object):
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
+        # register a watch for /workers for changes
         self.zk_node = ZkNode(self.zk_conn, u'/workers/' + self.name,
             create_mode=zookeeper.EPHEMERAL)
-        # TODO: register a watch for /workers for changes
+
+        with get_logger().timer(u'zookeeper.get_workers'):
+            @self.zk_conn.children(u'/workers')
+            def workers_watcher(children):
+                self._assign_partitions(children.data)
+
         # TODO: register a watch for /partitions for changes
 
     def unregister(self):
