@@ -150,4 +150,5 @@ test:
 test-python:
 	$(NOSE) --with-coverage --cover-package=$(APPNAME) \
 	--cover-inclusive $(APPNAME) \
-	--set-env-variables="{'REQUESTS_CA_BUNDLE': '$(HERE)/etc/ssl/localhost.crt'}"
+	--set-env-variables="{'REQUESTS_CA_BUNDLE': '$(HERE)/etc/ssl/localhost.crt'}" \
+	$(ARG)
