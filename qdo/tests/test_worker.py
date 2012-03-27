@@ -238,7 +238,6 @@ class TestWorker(BaseTestCase):
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(counter[0], 10)
 
-    @unittest.expectedFailure
     def test_work_lost_zookeeper(self):
         worker = self._make_one()
         counter = [0]
