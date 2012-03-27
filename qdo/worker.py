@@ -89,7 +89,8 @@ class Worker(object):
         new_partitions = set()
         for num in xrange(i * N, (i + 1) * N):
             new_partitions.add(all_partitions[num])
-        # 8. remove current entries owned by Wi from the partition owner registry
+        # 8. remove current entries owned by Wi from the partition owner
+        # registry
         old_partitions = set(self.partitions.keys())
         for name in old_partitions - new_partitions:
             del self.partitions[name]
