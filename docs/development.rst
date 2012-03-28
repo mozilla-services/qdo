@@ -95,6 +95,29 @@ After starting Zookeeper, use the command line client::
 
     [zk:] quit
 
+Zookeeper logging
+-----------------
+
+Logging is configured via the `conf/log4j.properties` file. To get lots of
+insight, change the threshold from `INFO` to `TRACE` in the following lines::
+
+    log4j.rootLogger=INFO, CONSOLE
+
+and
+
+    log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
+    log4j.appender.CONSOLE.Threshold=INFO
+
+Zookeeper monitoring
+--------------------
+
+There's bunch of so called four letter words, providing low-level monitoring
+for Zookeeper servers. Run them via::
+
+    echo stat | nc 127.0.0.1 2181
+
+A full list is available via http://zookeeper.apache.org/doc/r3.3.0/zookeeperAdmin.html#sc_zkCommands
+
 Zookeeper internals
 -------------------
 
