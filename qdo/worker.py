@@ -7,6 +7,7 @@ from contextlib import contextmanager
 import os
 import time
 import socket
+import threading
 
 import zookeeper
 from zc.zk import ZooKeeper
@@ -144,6 +145,7 @@ class Worker(object):
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
         # register a watch for /workers for changes
+        self._worker_event = we = threading.Event()
         self.zk_node = ZkNode(self.zk_conn, u'/workers/' + self.name,
             create_mode=zookeeper.EPHEMERAL)
 
@@ -151,10 +153,12 @@ class Worker(object):
         def workers_watcher(children):
             with get_logger().timer(u'worker.assign_partitions'):
                 self._assign_partitions(children.data)
+            we.set()
 
         # We hold a reference to our function to ensure it is still
         # tracked since the decorator above uses a weak-ref
         self._workers_watcher = workers_watcher
+        we.wait()
 
         # TODO: register a watch for /partitions for changes
 
