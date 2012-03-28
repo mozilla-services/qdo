@@ -7,6 +7,7 @@ from contextlib import contextmanager
 import time
 
 import ujson
+import unittest2 as unittest
 
 from qdo.config import QdoSettings
 from qdo import testing
@@ -291,6 +292,7 @@ class TestRealWorker(BaseTestCase):
         self.assertEqual(len(zk_conn.get_children(u'/workers')), 0)
         self.assertEqual(len(zk_conn.get_children(u'/partition-owners')), 0)
 
+    @unittest.expectedFailure
     def test_work_real_processes(self):
         queuey_conn = self._queuey_conn
         zk_conn = self._zk_conn
