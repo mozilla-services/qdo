@@ -147,9 +147,9 @@ class Worker(object):
         self.zk_node = ZkNode(self.zk_conn, u'/workers/' + self.name,
             create_mode=zookeeper.EPHEMERAL)
 
-        with get_logger().timer(u'zookeeper.get_workers'):
-            @self.zk_conn.children(u'/workers')
-            def workers_watcher(children):
+        @self.zk_conn.children(u'/workers')
+        def workers_watcher(children):
+            with get_logger().timer(u'worker.assign_partitions'):
                 self._assign_partitions(children.data)
 
         # We hold a reference to our function to ensure it is still
