@@ -99,7 +99,8 @@ class Worker(object):
             self.partitions[name] = Partition(
                 self.queuey_conn, self.zk_conn, name)
             # TODO: wrong, needs to be a lock
-            zk_lock = ZkNode(self.zk_conn, u'/partition-owners/' + name)
+            zk_lock = ZkNode(self.zk_conn, u'/partition-owners/' + name,
+                create_mode=zookeeper.EPHEMERAL)
             zk_lock.value = self.name
 
     def work(self):
