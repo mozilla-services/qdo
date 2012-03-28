@@ -152,6 +152,10 @@ class Worker(object):
             def workers_watcher(children):
                 self._assign_partitions(children.data)
 
+        # We hold a reference to our function to ensure it is still
+        # tracked since the decorator above uses a weak-ref
+        self._workers_watcher = workers_watcher
+
         # TODO: register a watch for /partitions for changes
 
     def unregister(self):
