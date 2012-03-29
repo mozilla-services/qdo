@@ -20,7 +20,9 @@ else
 endif
 INSTALL = $(HERE)/bin/pip install
 PIP_DOWNLOAD_CACHE ?= /tmp/pip_cache
-INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) --use-mirrors -f https://github.com/mozilla-services/qdo/downloads
+INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) \
+	--use-mirrors -f https://github.com/mozilla-services/qdo/downloads \
+	-f https://github.com/hannosch/clint/downloads
 CASSANDRA_VERSION = 1.0.8
 ZOOKEEPER_VERSION = 3.3.5
 

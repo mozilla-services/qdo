@@ -52,6 +52,4 @@ setup(
     [console_scripts]
     qdo-worker = qdo.runner:run
     """,
-    # work around for clint 0.3.x and data_files
-    download_url='https://github.com/hannosch/clint/downloads',
     )
