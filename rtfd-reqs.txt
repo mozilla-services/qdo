@@ -1,0 +1,10 @@
+argparse==1.2.1
+metlog-py==0.8.1
+mock==0.8.0
+mozsvc==0.1
+requests==0.10.8
+ujson==1.18
+zc-zookeeper-static==3.3.5
+zc.thread==0.1.0
+zc.zk==0.7.0
+zktools==0.2.1

@@ -62,6 +62,7 @@ $(BIN)/pip: $(BIN)/python
 
 lib: $(BIN)/pip
 	@echo "Installing package pre-requisites..."
+	$(INSTALL) -r rtfd-reqs.txt >/dev/null 2>&1
 	$(INSTALL) -r dev-reqs.txt >/dev/null 2>&1
 	@echo "Running setup.py develop"
 	$(PYTHON) setup.py develop >/dev/null 2>&1
