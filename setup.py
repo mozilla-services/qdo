@@ -4,7 +4,7 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 
 version = '0.1'
 
@@ -32,7 +32,10 @@ setup(
     author_email='services-dev@mozilla.org',
     url='http://qdo.readthedocs.org/',
     license='MPLv2.0',
-    packages=find_packages(exclude=['ez_setup']),
+    packages=[
+        'qdo',
+        'qdo.tests',
+    ],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
