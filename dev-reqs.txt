@@ -1,25 +1,13 @@
-Chameleon==2.8.0
 Distutils2==1.0a3
-Jinja2==2.6
-Mako==0.6.2
-MarkupSafe==0.15
 MoPyTools==2.9
 Paste==1.7.5.1
-PasteDeploy==1.5.0
 PasteScript==1.7.5
-Pygments==1.5
-Sphinx==1.1.3
-WebOb==1.2b3
 WebTest==1.3.3
 cef==0.3
-certifi==0.0.8
-chardet==1.0.1
 clint==0.2.5
 colander==0.9.6
 cornice==0.6
 coverage==3.5.1
-distribute==0.6.25
-docutils==0.8.1
 flake8==1.2
 gevent==0.13.6
 gunicorn==0.14.2
@@ -29,26 +17,18 @@ nose-setenv==0.1-1
 ordereddict==1.1
 pycassa==1.5.1
 pypi2rpm==0.6.0
-pyramid==1.3b3
-pyramid-debugtoolbar==1.0
 pyramid_ipauth==0.1.1
 pyzmq==2.1.11
-repoze.lru==0.4
 repoze.profile==1.3
 repoze.who==2.0
-simplejson==2.4.0
 supervisor==3.0a12
 thrift==0.8.0
-translationstring==1.1
 unittest2==0.5.1
-venusian==1.0a3
 virtualenv==1.7.1.2
 wsgiref==0.1.2
 z3c.checkversions==0.4.1
 zope.component==3.12.0
-zope.deprecation==3.5.1
 zope.event==3.5.1
-zope.interface==3.8.0
 
 -e git://github.com/mozilla-services/queuey.git#egg=queuey
 -e git://github.com/hannosch/zktools.git#egg=zktools
