@@ -45,12 +45,6 @@ setup(name='qdo',
       include_package_data=True,
       zip_safe=False,
       install_requires=reqs,
-      tests_require=[
-          'nose',
-          'pycassa',
-          'supervisor',
-          ],
-      test_suite='nose.collector',
       entry_points="""
       [console_scripts]
       qdo-worker = qdo.runner:run
