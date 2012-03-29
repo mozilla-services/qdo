@@ -12,16 +12,6 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
-reqs = [
-    'argparse',
-    'metlog-py',
-    'mock',
-    'mozsvc',
-    'requests',
-    'ujson',
-    'zc.zk',
-    'zktools',
-]
 
 setup(name='qdo',
       version=version,
@@ -44,7 +34,16 @@ setup(name='qdo',
       packages=find_packages(exclude=['ez_setup']),
       include_package_data=True,
       zip_safe=False,
-      install_requires=reqs,
+      install_requires=[
+          'argparse',
+          'metlog-py',
+          'mock',
+          'mozsvc',
+          'requests',
+          'ujson',
+          'zc.zk',
+          'zktools',
+      ],
       entry_points="""
       [console_scripts]
       qdo-worker = qdo.runner:run
