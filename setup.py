@@ -23,11 +23,6 @@ reqs = [
     'zktools',
 ]
 
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-if on_rtd:
-    reqs.extend([
-    ])
-
 setup(name='qdo',
       version=version,
       description="Queuey worker library",
