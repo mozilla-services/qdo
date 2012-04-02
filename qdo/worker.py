@@ -119,6 +119,8 @@ class Worker(object):
                 while 1:
                     if self.shutdown:
                         break
+                    # don't process anything while we re-assign partitions
+                    self._worker_event.wait()
                     no_messages = 0
                     for name, partition in self.partitions.items():
                         messages = partition.messages(limit=2)
@@ -151,6 +153,7 @@ class Worker(object):
 
         @self.zk_conn.children(u'/workers')
         def workers_watcher(children):
+            we.clear()
             with get_logger().timer(u'worker.assign_partitions'):
                 self._assign_partitions(children.data)
             we.set()
