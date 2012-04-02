@@ -50,11 +50,7 @@ app_key
 
 connection
     Which :term:`Zookeeper` servers to connect to. Defaults to
-    `127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187` for a local three server
-    ensemble. In production these would be three different hosts, for example:
-    `10.0.0.1:2181,10.0.0.2:2181,10.0.0.3:2181`
-
-namespace
-    The path to the root :term:`Zookeeper` node, under which `qdo` will store
-    all its information. Defaults to `mozilla-qdo`. The node needs to be
-    created before `qdo-worker` is run.
+    `127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187/mozilla-qdo` for a local
+    three server ensemble, using `mozilla-qdo` as the top-level namespace.
+    In production these would be three different hosts, for example:
+    `10.0.0.1:2181,10.0.0.2:2181,10.0.0.3:2181/mozilla-qdo`

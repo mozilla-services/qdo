@@ -27,8 +27,7 @@ class QdoSettings(SettingsDict):
         self[u'queuey.app_key'] = None
 
         self[u'zookeeper.connection'] = \
-            u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'
-        self[u'zookeeper.namespace'] = ZOO_DEFAULT_NS
+            u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187/' + ZOO_DEFAULT_NS
 
         self[u'metlog.logger'] = u'qdo-worker'
         self[u'metlog.sender'] = {}

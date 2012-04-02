@@ -59,8 +59,7 @@ class Worker(object):
             result = __import__(mod, globals(), locals(), fun)
             self.job = getattr(result, fun)
         zk_section = self.settings.getsection(u'zookeeper')
-        self.zk_root_url = zk_section[u'connection'] + u'/' + \
-            zk_section[u'namespace']
+        self.zk_root_url = zk_section[u'connection']
         queuey_section = self.settings.getsection(u'queuey')
         self.queuey_conn = QueueyConnection(
             queuey_section[u'app_key'],

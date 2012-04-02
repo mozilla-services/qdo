@@ -16,7 +16,7 @@ Quick intro
 ===========
 
 Assuming you have a working installation and setup of Queuey and Zookeeper,
-you need at least one Python module named `hello.py`::
+you need at least one Python module named for example `hello.py`::
 
     from contextlib import contextmanager
 
@@ -45,8 +45,7 @@ And one config file named `hello.conf`:
     job = hello:job
 
     [zookeeper]
-    connection = 127.0.0.1:2181
-    namespace = hello
+    connection = 127.0.0.1:2181/hello
 
     [queuey]
     connection = https://127.0.0.1:5000/v1/queuey/

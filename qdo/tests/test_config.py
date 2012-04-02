@@ -24,13 +24,13 @@ class TestConfig(unittest.TestCase):
             u'https://127.0.0.1:5001/v1/queuey/')
         zk_section = settings.getsection(u'zookeeper')
         self.assertEqual(zk_section[u'connection'],
-            u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187')
+            u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187/mozilla-qdo')
 
     def test_configure(self):
         extra = {
             u'qdo-worker.wait_interval': 30,
             u'queuey.url': u'https://10.0.0.1:2345',
-            u'zookeeper.connection': u'10.0.0.2:3456',
+            u'zookeeper.connection': u'10.0.0.2:3456/qdo',
             }
         settings = self._make_one(extra)
         qdo_section = settings.getsection(u'qdo-worker')
@@ -38,4 +38,4 @@ class TestConfig(unittest.TestCase):
         queuey_section = settings.getsection(u'queuey')
         self.assertEqual(queuey_section[u'url'], u'https://10.0.0.1:2345')
         zk_section = settings.getsection(u'zookeeper')
-        self.assertEqual(zk_section[u'connection'], u'10.0.0.2:3456')
+        self.assertEqual(zk_section[u'connection'], u'10.0.0.2:3456/qdo')

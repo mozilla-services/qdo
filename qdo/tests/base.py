@@ -14,7 +14,7 @@ from qdo.config import ZOO_DEFAULT_ROOT
 from qdo.queuey import QueueyConnection
 from qdo.zk import connect as zk_connect
 
-# as specified in the queuey-dev.ini
+# as specified in the queuey.ini
 TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
 
 
