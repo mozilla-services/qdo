@@ -20,8 +20,8 @@ class QdoSettings(SettingsDict):
         """Populate settings with default values"""
         self[u'qdo-worker.wait_interval'] = 5
         self[u'qdo-worker.ca_bundle'] = None
-        self[u'qdo-worker.context'] = u'qdo.worker:dict_context'
         self[u'qdo-worker.job'] = None
+        self[u'qdo-worker.job_context'] = u'qdo.worker:dict_context'
 
         self[u'queuey.connection'] = u'https://127.0.0.1:5001/v1/queuey/'
         self[u'queuey.app_key'] = None

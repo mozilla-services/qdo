@@ -40,8 +40,8 @@ class Worker(object):
         self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
         self.zk_conn = None
         self.zk_node = None
-        self.context = dict_context
         self.job = None
+        self.job_context = dict_context
         self.partitions = {}
         self.configure()
 
@@ -50,14 +50,14 @@ class Worker(object):
         """
         qdo_section = self.settings.getsection(u'qdo-worker')
         self.wait_interval = qdo_section[u'wait_interval']
-        if qdo_section[u'context']:
-            mod, fun = qdo_section[u'context'].split(u':')
-            result = __import__(mod, globals(), locals(), fun)
-            self.context = getattr(result, fun)
         if qdo_section[u'job']:
             mod, fun = qdo_section[u'job'].split(u':')
             result = __import__(mod, globals(), locals(), fun)
             self.job = getattr(result, fun)
+        if qdo_section[u'job_context']:
+            mod, fun = qdo_section[u'job_context'].split(u':')
+            result = __import__(mod, globals(), locals(), fun)
+            self.job_context = getattr(result, fun)
         zk_section = self.settings.getsection(u'zookeeper')
         self.zk_root_url = zk_section[u'connection']
         queuey_section = self.settings.getsection(u'queuey')
@@ -115,7 +115,7 @@ class Worker(object):
         self.setup_zookeeper()
         self.register()
         try:
-            with self.context() as context:
+            with self.job_context() as context:
                 while 1:
                     if self.shutdown:
                         break

@@ -136,8 +136,8 @@ class TestWorker(BaseTestCase):
             if message[u'body'] == u'end':
                 raise KeyboardInterrupt
 
-        worker.context = job_context
         worker.job = job
+        worker.job_context = job_context
 
         self._post_message(u'work')
         self._post_message(u'end')

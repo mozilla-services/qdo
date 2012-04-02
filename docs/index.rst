@@ -41,8 +41,8 @@ And one config file named `hello.conf`:
 .. code-block:: ini
 
     [qdo-worker]
-    context = hello:job_context
     job = hello:job
+    job_context = hello:job_context
 
     [zookeeper]
     connection = 127.0.0.1:2181/hello

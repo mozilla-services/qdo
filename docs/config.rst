@@ -26,13 +26,13 @@ ca_bundle
     Path to a private certificate used for SSL connections, in addition to all
     officially signed ones.
 
-context
-    The :term:`resource specification` for a Python job context (manager).
-    For example: `qdo.worker:dict_context`
-
 job
     The :term:`resource specification` for the Python job function. For
     example: `qdo.testing:example_job`
+
+job_context
+    The :term:`resource specification` for a Python job context (manager).
+    For example: `qdo.worker:dict_context`
 
 [queuey]
 --------
