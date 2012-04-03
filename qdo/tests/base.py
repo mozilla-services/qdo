@@ -48,7 +48,7 @@ class ZKBase(object):
         for child in conn.get_children(u'/'):
             conn.delete_recursive(u'/' + child)
         if len(conn.get_children(u'/')) > 0:
-            time.sleep(1.0)
+            time.sleep(0.5)
             cls._clean_zk(count + 1)
 
 
