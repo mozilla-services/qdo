@@ -7,6 +7,12 @@ worker
 - add `get queues` hook (dotted path to function via ini file - get ZK and
   Queuey connection as arguments?)
 
+queuey
+------
+
+- queuey test real multi host, update index.rst, randomize hosts
+- add note on random host selection for q&zk
+
 zookeeper
 ---------
 
