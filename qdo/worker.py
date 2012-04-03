@@ -173,7 +173,8 @@ class Worker(object):
 
     def stop(self):
         self.shutdown = True
-        self.unregister()
+        if self.zk_conn.handle is not None:
+            self.unregister()
 
 
 def run(settings):

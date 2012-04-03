@@ -10,8 +10,10 @@ from zc.zk import ZooKeeper
 
 @contextmanager
 def connect(hosts):
+    conn = None
     try:
         conn = ZooKeeper(hosts, wait=True)
         yield conn
     finally:
-        conn.close()
+        if conn is not None:
+            conn.close()
