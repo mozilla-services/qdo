@@ -6,7 +6,6 @@ worker
 
 - add `get queues` hook (dotted path to function via ini file - get ZK and
   Queuey connection as arguments?)
-- define `job` API
 
 zookeeper
 ---------
