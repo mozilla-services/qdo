@@ -20,7 +20,7 @@ processes = {}
 def example_job(context, message):
     body = message[u'body']
     if body == u'stop':
-       raise KeyboardInterrupt
+        raise KeyboardInterrupt
     elif body == u'wait':
         time.sleep(0.01)
 
