@@ -289,6 +289,7 @@ class TestRealWorker(BaseTestCase):
         finally:
             self.supervisor.stopProcess(u'qdo:qdo1')
         # worker has cleaned up after itself
+        time.sleep(1.0)
         self.assertEqual(len(zk_conn.get_children(u'/workers')), 0)
         self.assertEqual(len(zk_conn.get_children(u'/partition-owners')), 0)
 

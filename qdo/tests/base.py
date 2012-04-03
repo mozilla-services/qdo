@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import time
 
 from requests.exceptions import ConnectionError
 from ujson import decode as ujson_decode
@@ -40,10 +41,15 @@ class ZKBase(object):
         return ZooKeeper(hosts + cls.zk_root, wait=True)
 
     @classmethod
-    def _clean_zk(cls):
+    def _clean_zk(cls, count=0):
+        if count > 10:
+            raise ValueError(u"Couldn't clean up Zookeeper")
         conn = cls._zk_conn
         for child in conn.get_children(u'/'):
             conn.delete_recursive(u'/' + child)
+        if len(conn.get_children(u'/')) > 0:
+            time.sleep(1.0)
+            cls._clean_zk(count + 1)
 
 
 class QueueyBase(object):
