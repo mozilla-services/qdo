@@ -53,7 +53,7 @@ def setup_cassandra_schema():
             time.sleep(1)
 
 
-def ensure_process(name, timeout=10, noisy=True):
+def ensure_process(name, timeout=20, noisy=True):
     srpc = processes[u'supervisor']
     if srpc.getProcessInfo(name)[u'statename'] in (u'STOPPED', u'EXITED'):
         if noisy:
