@@ -10,7 +10,6 @@ worker
 queuey
 ------
 
-- queuey test real multi host, update index.rst, randomize hosts
 - add note on random host selection for q&zk
 
 zookeeper

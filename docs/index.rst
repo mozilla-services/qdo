@@ -45,10 +45,10 @@ And one config file named `hello.conf`:
     job_context = hello:job_context
 
     [zookeeper]
-    connection = 127.0.0.1:2181/hello
+    connection = 127.0.0.1:2181,127.0.0.1:2182/hello
 
     [queuey]
-    connection = https://127.0.0.1:5000/v1/queuey/
+    connection = https://127.0.0.1:5000/v1/queuey/,https://127.0.0.1:5001/v1/queuey/
     app_key = f25bfb8fe200475c8a0532a9cbe7651e
 
 Then run::

@@ -3,6 +3,7 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from functools import wraps
+from random import randint
 from urlparse import urljoin
 from urlparse import urlsplit
 
@@ -69,8 +70,10 @@ class QueueyConnection(object):
         self.retries = retries
         self.timeout = timeout
         self.connection = [c.strip() for c in connection.split(',')]
-        self.app_url = self.connection[0]
-        self.fallback_urls = self.connection[1:]
+        rand_index = randint(0, len(self.connection))
+        self.app_url = self.connection[rand_index - 1]
+        self.fallback_urls = self.connection[:(rand_index - 1)] + \
+            self.connection[rand_index:]
         self.failed_urls = []
         headers = {u'Authorization': u'Application %s' % app_key}
         # Setting pool_maxsize to 1 ensures we re-use the same connection.
