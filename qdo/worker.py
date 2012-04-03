@@ -172,6 +172,7 @@ class Worker(object):
         self.zk_conn.close()
 
     def stop(self):
+        """Stop the worker loop and unregister. Used in an `atexit` hook."""
         self.shutdown = True
         if self.zk_conn.handle is not None:
             self.unregister()
