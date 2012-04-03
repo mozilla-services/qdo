@@ -6,8 +6,9 @@
 Contains a :term:`Queuey` connection helper.
 
 The connection automatically handles retries on connection timeouts and fall
-back to alternate :term:`Queuey` servers on SSL or connection errors.
-Currently fall back happens exactly once per server, after which it is
+back to alternate :term:`Queuey` servers on SSL or connection errors. If
+multiple servers are provided, one will be selected at random. Currently fall
+back to secondary servers happens exactly once per server, after which it is
 considered inactive. You have to restart the worker process to reset the
 inactive status.
 
