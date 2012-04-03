@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import atexit
 from contextlib import contextmanager
 import os
 import time
@@ -114,6 +115,7 @@ class Worker(object):
         # Set up Zookeeper
         self.setup_zookeeper()
         self.register()
+        atexit.register(self.stop)
         try:
             with self.job_context() as context:
                 while 1:
@@ -168,6 +170,10 @@ class Worker(object):
     def unregister(self):
         """Unregister this worker from :term:`Zookeeper`."""
         self.zk_conn.close()
+
+    def stop(self):
+        self.shutdown = True
+        self.unregister()
 
 
 def run(settings):
