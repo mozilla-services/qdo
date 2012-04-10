@@ -45,6 +45,7 @@ setup(
         'mozsvc',
         'requests',
         'ujson',
+        'txzookeeper',
         'zc.zk',
         'zktools',
     ],
