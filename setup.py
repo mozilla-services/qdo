@@ -45,6 +45,7 @@ setup(
         'mozsvc',
         'requests',
         'ujson',
+        'Twisted',
         'txzookeeper',
     ],
     entry_points="""
