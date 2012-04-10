@@ -46,8 +46,6 @@ setup(
         'requests',
         'ujson',
         'txzookeeper',
-        'zc.zk',
-        'zktools',
     ],
     entry_points="""
     [console_scripts]
