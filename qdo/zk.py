@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from socket import create_connection
 import threading
 
+from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.selectreactor import SelectReactor
 from txzookeeper.client import ZookeeperClient
 from zc.zk import ZooKeeper
@@ -18,10 +19,15 @@ class ZKReactor(object):
     def __init__(self, poll_interval=1):
         self.reactor = SelectReactor()
         self.poll_interval = poll_interval
-        self.client = ZookeeperClient(
+        self.client = None
+
+    @inlineCallbacks
+    def configure(self):
+        self.client = yield ZookeeperClient(
             servers=u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'
                 '/mozilla-qdo',
-            session_timeout=None)
+            session_timeout=None).connect()
+        returnValue(self.client)
 
     def start(self):
         if self.reactor.running:
@@ -35,10 +41,14 @@ class ZKReactor(object):
         self.thread = threading.Thread(target=run_reactor)
         self.thread.setDaemon(True)
         self.thread.start()
+        self.reactor.callFromThread(self.configure)
 
     def stop(self):
         if not self.reactor.running:
             return
+
+        if self.client and self.client.connected:
+            self.reactor.callFromThread(self.client.close)
 
         self.reactor.callFromThread(self.reactor.stop)
         self.thread.join(3)
