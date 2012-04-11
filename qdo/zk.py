@@ -11,7 +11,7 @@ import threading
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.selectreactor import SelectReactor
 from txzookeeper.client import ZookeeperClient
-from zc.zk import ZooKeeper
+import zookeeper
 
 
 class ZKReactor(object):
@@ -61,15 +61,28 @@ class ZKReactor(object):
         self.reactor.callLater(self.poll_interval, self.poll)
 
 
+class ZK(object):
+
+    def __init__(self, handle):
+        self._handle = handle
+
+    def __getattr__(self, name):
+        zoo_func = getattr(zookeeper, name)
+
+        def func(*args, **kwargs):
+            return zoo_func(self._handle, *args, **kwargs)
+        return func
+
+
 @contextmanager
 def connect(hosts):
-    conn = None
+    handle = None
     try:
-        conn = ZooKeeper(hosts, wait=True)
-        yield conn
+        handle = zookeeper.init(hosts)
+        yield ZK(handle)
     finally:
-        if conn is not None:
-            conn.close()
+        if handle is not None:
+            zookeeper.close(handle)
 
 
 def sent_command(host=u'127.0.0.1', port=2181, command=b'ruok'):
