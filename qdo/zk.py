@@ -21,9 +21,8 @@ ZOO_OPEN_ACL_UNSAFE = dict(
 
 class ZKReactor(object):
 
-    def __init__(self, poll_interval=1):
+    def __init__(self):
         self.reactor = SelectReactor()
-        self.poll_interval = poll_interval
         self.client = None
 
     @inlineCallbacks
@@ -38,7 +37,7 @@ class ZKReactor(object):
             return
 
         def run_reactor():
-            self.reactor.callWhenRunning(self.poll)
+            # self.reactor.callWhenRunning(<function>)
             self.reactor.run(installSignalHandlers=0)
 
         atexit.register(self.stop)
@@ -60,9 +59,6 @@ class ZKReactor(object):
             # Not dead yet? Well I guess you will have to!
             self.reactor.callFromThread(self.reactor.crash)
             self.thread.join(3)
-
-    def poll(self):
-        self.reactor.callLater(self.poll_interval, self.poll)
 
 
 class ZK(object):
