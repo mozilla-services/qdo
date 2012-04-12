@@ -11,6 +11,7 @@ from unittest2 import TestCase
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
 
+from qdo.config import ZOO_DEFAULT_HOST
 from qdo.config import ZOO_DEFAULT_ROOT
 from qdo.queuey import QueueyConnection
 from qdo.zk import connect as zk_connect
@@ -36,8 +37,7 @@ class ZKBase(object):
         del cls._zk_conn
 
     @classmethod
-    def _make_zk_conn(cls,
-            hosts=u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'):
+    def _make_zk_conn(cls, hosts=ZOO_DEFAULT_HOST):
         return ZooKeeper(hosts + cls.zk_root, wait=True)
 
     @classmethod

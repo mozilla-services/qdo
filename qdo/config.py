@@ -6,7 +6,9 @@
 from mozsvc.config import SettingsDict
 
 ZOO_DEFAULT_NS = u'mozilla-qdo'
-ZOO_DEFAULT_ROOT = u'/mozilla-qdo'
+ZOO_DEFAULT_ROOT = u'/' + ZOO_DEFAULT_NS
+ZOO_DEFAULT_HOST = u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'
+ZOO_DEFAULT_CONN = ZOO_DEFAULT_HOST + ZOO_DEFAULT_ROOT
 
 
 class QdoSettings(SettingsDict):
@@ -26,8 +28,7 @@ class QdoSettings(SettingsDict):
         self[u'queuey.connection'] = u'https://127.0.0.1:5001/v1/queuey/'
         self[u'queuey.app_key'] = None
 
-        self[u'zookeeper.connection'] = \
-            u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187/' + ZOO_DEFAULT_NS
+        self[u'zookeeper.connection'] = ZOO_DEFAULT_CONN
 
         self[u'metlog.logger'] = u'qdo-worker'
         self[u'metlog.sender'] = {}

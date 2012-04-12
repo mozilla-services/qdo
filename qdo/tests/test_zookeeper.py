@@ -6,6 +6,7 @@
 import unittest2 as unittest
 from zktools.node import ZkNode
 
+from qdo.config import ZOO_DEFAULT_HOST
 from qdo import testing
 from qdo.tests.base import ZKBase
 from qdo.zk import connect as zk_connect
@@ -24,8 +25,7 @@ class TestZookeeper(unittest.TestCase, ZKBase):
     def setUp(self):
         ZKBase._clean_zk()
 
-    def _make_one(self, hosts=u'127.0.0.1:2181,127.0.0.1:2184,'
-            '127.0.0.1:2187'):
+    def _make_one(self, hosts=ZOO_DEFAULT_HOST):
         return zk_connect(hosts + self.zk_root)
 
     def test_add_node_cluster_visibility(self):

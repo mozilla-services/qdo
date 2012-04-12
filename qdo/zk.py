@@ -13,6 +13,8 @@ from twisted.internet.selectreactor import SelectReactor
 from txzookeeper.client import ZookeeperClient
 import zookeeper
 
+from qdo.config import ZOO_DEFAULT_CONN
+
 
 class ZKReactor(object):
 
@@ -24,8 +26,7 @@ class ZKReactor(object):
     @inlineCallbacks
     def configure(self):
         self.client = yield ZookeeperClient(
-            servers=u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'
-                '/mozilla-qdo',
+            servers=ZOO_DEFAULT_CONN,
             session_timeout=None).connect()
         returnValue(self.client)
 
