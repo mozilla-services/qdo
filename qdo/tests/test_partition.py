@@ -7,9 +7,9 @@ import time
 
 from requests.exceptions import HTTPError
 import ujson
-from zktools.node import ZkNode
 
 from qdo.tests.base import BaseTestCase
+from qdo import zk
 
 
 class TestQueue(BaseTestCase):
@@ -26,8 +26,8 @@ class TestQueue(BaseTestCase):
 
     def setUp(self):
         BaseTestCase.setUp(self)
-        ZkNode(self.zk_conn, u'/partitions')
-        ZkNode(self.zk_conn, u'/partition-owners')
+        zk.create(self.zk_conn, u'/partitions')
+        zk.create(self.zk_conn, u'/partition-owners')
 
     def _make_one(self):
         from qdo.partition import Partition

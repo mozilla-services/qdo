@@ -15,6 +15,9 @@ import zookeeper
 
 from qdo.config import ZOO_DEFAULT_CONN
 
+ZOO_OPEN_ACL_UNSAFE = dict(
+    perms=zookeeper.PERM_ALL, scheme='world', id='anyone')
+
 
 class ZKReactor(object):
 
@@ -64,26 +67,40 @@ class ZKReactor(object):
 
 class ZK(object):
 
-    def __init__(self, handle):
-        self._handle = handle
+    def __init__(self, hosts):
+        self.handle = zookeeper.init(hosts)
 
     def __getattr__(self, name):
         zoo_func = getattr(zookeeper, name)
 
         def func(*args, **kwargs):
-            return zoo_func(self._handle, *args, **kwargs)
+            return zoo_func(self.handle, *args, **kwargs)
         return func
 
 
 @contextmanager
 def connect(hosts):
-    handle = None
+    conn = None
     try:
-        handle = zookeeper.init(hosts)
-        yield ZK(handle)
+        conn = ZK(hosts)
+        yield conn
     finally:
-        if handle is not None:
-            zookeeper.close(handle)
+        if conn is not None:
+            conn.close()
+
+
+def create(zk_conn, path, create_mode=0):
+    if not zk_conn.exists(path):
+        zk_conn.create(path, u'', [ZOO_OPEN_ACL_UNSAFE], create_mode)
+
+
+def delete_recursive(conn, root):
+    for child in conn.get_children(root):
+        path = root + u'/' + child
+        if conn.get_children(path):
+            delete_recursive(conn, path)
+        conn.delete(path)
+    conn.delete(root)
 
 
 def sent_command(host=u'127.0.0.1', port=2181, command=b'ruok'):

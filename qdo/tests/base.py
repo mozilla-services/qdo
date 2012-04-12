@@ -8,13 +8,11 @@ import time
 from requests.exceptions import ConnectionError
 from ujson import decode as ujson_decode
 from unittest2 import TestCase
-from zc.zk import ZooKeeper
-from zktools.node import ZkNode
 
 from qdo.config import ZOO_DEFAULT_HOST
 from qdo.config import ZOO_DEFAULT_ROOT
 from qdo.queuey import QueueyConnection
-from qdo.zk import connect as zk_connect
+from qdo import zk
 
 # as specified in the queuey.ini
 TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
@@ -26,8 +24,8 @@ class ZKBase(object):
 
     @classmethod
     def setUpClass(cls):
-        with zk_connect(u'127.0.0.1:2181') as root_conn:
-            ZkNode(root_conn, cls.zk_root)
+        with zk.connect(u'127.0.0.1:2181') as root_conn:
+            zk.create(root_conn, cls.zk_root)
         cls._zk_conn = cls._make_zk_conn()
 
     @classmethod
@@ -38,7 +36,7 @@ class ZKBase(object):
 
     @classmethod
     def _make_zk_conn(cls, hosts=ZOO_DEFAULT_HOST):
-        return ZooKeeper(hosts + cls.zk_root, wait=True)
+        return zk.ZK(hosts + cls.zk_root)
 
     @classmethod
     def _clean_zk(cls, count=0):
@@ -46,7 +44,7 @@ class ZKBase(object):
             raise ValueError(u"Couldn't clean up Zookeeper")
         conn = cls._zk_conn
         for child in conn.get_children(u'/'):
-            conn.delete_recursive(u'/' + child)
+            zk.delete_recursive(conn, u'/' + child)
         if len(conn.get_children(u'/')) > 0:
             time.sleep(0.5)
             cls._clean_zk(count + 1)

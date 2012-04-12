@@ -4,10 +4,10 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from ujson import decode as ujson_decode
-from zktools.node import ZkNode
 
 import qdo.exceptions
 from qdo.log import get_logger
+from qdo import zk
 
 
 class Partition(object):
@@ -33,9 +33,10 @@ class Partition(object):
             self.name = name + u'-1'
             self.queue_name, self.partition = (name, 1)
 
-        self.zk_node = ZkNode(zk_conn, u'/partitions/' + name, use_json=True)
-        if self.zk_node.value is None:
-            self.zk_node.value = 0.0
+        self.zk_node = u'/partitions/' + name
+        zk.create(zk_conn, self.zk_node)
+        if not zk_conn.get(self.zk_node)[0]:
+            zk_conn.set(self.zk_node, '0.0')
         self.timer = get_logger().timer
 
     def messages(self, limit=100, order='ascending'):
@@ -72,7 +73,7 @@ class Partition(object):
         """Property for the timestamp of the last processed message.
         """
         with self.timer(u'zookeeper.get_value'):
-            return float(self.zk_node.value)
+            return float(self.zk_conn.get(self.zk_node)[0])
 
     @timestamp.setter
     def timestamp(self, value):
@@ -84,4 +85,4 @@ class Partition(object):
         with self.timer(u'zookeeper.set_value'):
             if isinstance(value, basestring):
                 value = float(str(value))
-            self.zk_node.value = repr(value)
+            self.zk_conn.set(self.zk_node, repr(value))

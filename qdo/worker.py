@@ -11,12 +11,11 @@ import socket
 import threading
 
 import zookeeper
-from zc.zk import ZooKeeper
-from zktools.node import ZkNode
 
 from qdo.partition import Partition
 from qdo.queuey import QueueyConnection
 from qdo.log import get_logger
+from qdo import zk
 
 
 @contextmanager
@@ -99,9 +98,9 @@ class Worker(object):
             self.partitions[name] = Partition(
                 self.queuey_conn, self.zk_conn, name)
             # TODO: wrong, needs to be a lock
-            zk_lock = ZkNode(self.zk_conn, u'/partition-owners/' + name,
-                create_mode=zookeeper.EPHEMERAL)
-            zk_lock.value = self.name
+            zk_lock = u'/partition-owners/' + name
+            zk.create(self.zk_conn, zk_lock, create_mode=zookeeper.EPHEMERAL)
+            self.zk_conn.set(zk_lock, self.name)
 
     def work(self):
         """Work on jobs.
@@ -122,7 +121,7 @@ class Worker(object):
                     if self.shutdown:
                         break
                     # don't process anything while we re-assign partitions
-                    self._worker_event.wait()
+                    # XXX self._worker_event.wait()
                     no_messages = 0
                     for name, partition in self.partitions.items():
                         messages = partition.messages(limit=2)
@@ -141,35 +140,41 @@ class Worker(object):
 
     def setup_zookeeper(self):
         """Setup global data structures in :term:`Zookeeper`."""
-        self.zk_conn = ZooKeeper(self.zk_root_url)
-        ZkNode(self.zk_conn, u'/workers')
-        ZkNode(self.zk_conn, u'/partitions')
-        ZkNode(self.zk_conn, u'/partition-owners')
+        self.zk_conn = zk.ZK(self.zk_root_url)
+        zk.create(self.zk_conn, u'/workers')
+        zk.create(self.zk_conn, u'/partitions')
+        zk.create(self.zk_conn, u'/partition-owners')
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
         # register a watch for /workers for changes
-        self._worker_event = we = threading.Event()
-        self.zk_node = ZkNode(self.zk_conn, u'/workers/' + self.name,
+        # XXX self._worker_event = we = threading.Event()
+        self.zk_node = zk.create(self.zk_conn, u'/workers/' + self.name,
             create_mode=zookeeper.EPHEMERAL)
 
-        @self.zk_conn.children(u'/workers')
-        def workers_watcher(children):
-            we.clear()
-            with get_logger().timer(u'worker.assign_partitions'):
-                self._assign_partitions(children.data)
-            we.set()
+        children = self.zk_conn.get_children(u'/workers')
+        self._assign_partitions(children)
+
+        # XXX @self.zk_conn.children(u'/workers')
+        # def workers_watcher(children):
+        #     we.clear()
+        #     with get_logger().timer(u'worker.assign_partitions'):
+        #         self._assign_partitions(children.data)
+        #     we.set()
 
         # We hold a reference to our function to ensure it is still
         # tracked since the decorator above uses a weak-ref
-        self._workers_watcher = workers_watcher
-        we.wait()
+        # XXX self._workers_watcher = workers_watcher
+        # we.wait()
 
         # TODO: register a watch for /partitions for changes
 
     def unregister(self):
         """Unregister this worker from :term:`Zookeeper`."""
-        self.zk_conn.close()
+        try:
+            self.zk_conn.close()
+        except zookeeper.ZooKeeperException:
+            pass
 
     def stop(self):
         """Stop the worker loop and unregister. Used in an `atexit` hook."""
