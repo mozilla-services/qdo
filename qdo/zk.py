@@ -8,7 +8,8 @@ from contextlib import contextmanager
 from socket import create_connection
 import threading
 
-from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.internet.defer import inlineCallbacks
+from twisted.internet.defer import returnValue
 from twisted.internet.selectreactor import SelectReactor
 from txzookeeper.client import ZookeeperClient
 import zookeeper
@@ -21,15 +22,21 @@ ZOO_OPEN_ACL_UNSAFE = dict(
 
 class ZKReactor(object):
 
-    def __init__(self):
+    def __init__(self, servers=ZOO_DEFAULT_CONN):
         self.reactor = SelectReactor()
+        self.servers = servers
         self.client = None
+
+    def _poll(self):
+        # debugging hook to get into the thread running the twisted loop
+        self.reactor.callLater(10, self._poll)
 
     @inlineCallbacks
     def configure(self):
-        self.client = yield ZookeeperClient(
-            servers=ZOO_DEFAULT_CONN,
-            session_timeout=None).connect()
+        self.client = ZookeeperClient(
+            servers=self.servers,
+            session_timeout=None)
+        yield self.client.connect()
         returnValue(self.client)
 
     def start(self):
@@ -37,7 +44,7 @@ class ZKReactor(object):
             return
 
         def run_reactor():
-            # self.reactor.callWhenRunning(<function>)
+            self.reactor.callWhenRunning(self._poll)
             self.reactor.run(installSignalHandlers=0)
 
         atexit.register(self.stop)

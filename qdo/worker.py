@@ -8,8 +8,8 @@ from contextlib import contextmanager
 import os
 import time
 import socket
-import threading
 
+from twisted.internet.defer import inlineCallbacks
 import zookeeper
 
 from qdo.partition import Partition
@@ -39,7 +39,7 @@ class Worker(object):
         self.shutdown = False
         self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
         self.zk_conn = None
-        self.zk_node = None
+        self.zk_reactor = None
         self.job = None
         self.job_context = dict_context
         self.partitions = {}
@@ -140,17 +140,38 @@ class Worker(object):
 
     def setup_zookeeper(self):
         """Setup global data structures in :term:`Zookeeper`."""
+        self.zk_reactor = zk_reactor = zk.ZKReactor(self.zk_root_url)
+        zk_reactor.start()
+        self.zk_client = zk_reactor.client
+        zk_reactor.reactor.callFromThread(self._setup_zookeeper)
+        # XXX remove this
         self.zk_conn = zk.ZK(self.zk_root_url)
-        zk.create(self.zk_conn, u'/workers')
-        zk.create(self.zk_conn, u'/partitions')
-        zk.create(self.zk_conn, u'/partition-owners')
+
+    @inlineCallbacks
+    def _setup_zookeeper(self):
+        try:
+            yield self.zk_client.create(u'/workers')
+        except zookeeper.NodeExistsException:
+            pass
+        try:
+            yield self.zk_client.create(u'/partitions')
+        except zookeeper.NodeExistsException:
+            pass
+        try:
+            yield self.zk_client.create(u'/partition-owners')
+        except zookeeper.NodeExistsException:
+            pass
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
+        self.zk_reactor.reactor.callFromThread(self._register)
+
+    @inlineCallbacks
+    def _register(self):
         # register a watch for /workers for changes
         # XXX self._worker_event = we = threading.Event()
-        self.zk_node = zk.create(self.zk_conn, u'/workers/' + self.name,
-            create_mode=zookeeper.EPHEMERAL)
+        yield self.zk_client.create(u'/workers/' + self.name,
+            flags=zookeeper.EPHEMERAL)
 
         children = self.zk_conn.get_children(u'/workers')
         self._assign_partitions(children)
@@ -181,6 +202,8 @@ class Worker(object):
         self.shutdown = True
         if self.zk_conn.handle is not None:
             self.unregister()
+        if self.zk_reactor is not None:
+            self.zk_reactor.stop()
 
 
 def run(settings):
