@@ -140,10 +140,8 @@ class Worker(object):
 
     def setup_zookeeper(self):
         """Setup global data structures in :term:`Zookeeper`."""
-        self.zk_reactor = zk_reactor = zk.ZKReactor(self.zk_root_url)
-        zk_reactor.start()
-        self.zk_client = zk_reactor.client
-        zk_reactor.reactor.callFromThread(self._setup_zookeeper)
+        self.zk_reactor = zk.ZKReactor(self.zk_root_url)
+        self.zk_reactor.start()
         # XXX remove this
         self.zk_conn = zk.ZK(self.zk_root_url)
 
@@ -170,7 +168,7 @@ class Worker(object):
     def _register(self):
         # register a watch for /workers for changes
         # XXX self._worker_event = we = threading.Event()
-        yield self.zk_client.create(u'/workers/' + self.name,
+        yield self.zk_reactor.client.create(u'/workers/' + self.name,
             flags=zookeeper.EPHEMERAL)
 
         children = self.zk_conn.get_children(u'/workers')
