@@ -35,7 +35,7 @@ class ZKReactor(object):
     def configure(self):
         self.client = ManagedClient(
             servers=self.servers,
-            session_timeout=None)
+            session_timeout=1000)
         yield self.client.connect()
         # ensure global state is present
         try:
