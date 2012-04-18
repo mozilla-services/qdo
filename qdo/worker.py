@@ -147,7 +147,7 @@ class Worker(object):
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
-        self.zk_reactor.reactor.callFromThread(self._register)
+        self.zk_reactor.blocking_call(self._register)
 
     @inlineCallbacks
     def _register(self):

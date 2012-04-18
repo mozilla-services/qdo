@@ -10,7 +10,8 @@ import threading
 
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.defer import returnValue
-from twisted.internet.selectreactor import SelectReactor
+from twisted.internet import reactor
+from twisted.internet.threads import blockingCallFromThread
 from txzookeeper.managed import ManagedClient
 import zookeeper
 
@@ -22,14 +23,11 @@ ZOO_OPEN_ACL_UNSAFE = dict(
 
 class ZKReactor(object):
 
+    reactor = reactor
+
     def __init__(self, servers=ZOO_DEFAULT_CONN):
-        self.reactor = SelectReactor()
         self.servers = servers
         self.client = None
-
-    def _poll(self):
-        # debugging hook to get into the thread running the twisted loop
-        self.reactor.callLater(10, self._poll)
 
     @inlineCallbacks
     def configure(self):
@@ -39,15 +37,15 @@ class ZKReactor(object):
         yield self.client.connect()
         # ensure global state is present
         try:
-            yield self.zk_client.create(u'/workers')
+            yield self.client.create(u'/workers')
         except zookeeper.NodeExistsException:
             pass
         try:
-            yield self.zk_client.create(u'/partitions')
+            yield self.client.create(u'/partitions')
         except zookeeper.NodeExistsException:
             pass
         try:
-            yield self.zk_client.create(u'/partition-owners')
+            yield self.client.create(u'/partition-owners')
         except zookeeper.NodeExistsException:
             pass
         returnValue(self.client)
@@ -57,28 +55,33 @@ class ZKReactor(object):
             return
 
         def run_reactor():
-            self.reactor.callWhenRunning(self._poll)
             self.reactor.run(installSignalHandlers=0)
 
         atexit.register(self.stop)
         self.thread = threading.Thread(target=run_reactor)
         self.thread.setDaemon(True)
         self.thread.start()
-        self.reactor.callFromThread(self.configure)
+        self.blocking_call(self.configure)
 
     def stop(self):
         if not self.reactor.running:
             return
 
         if self.client and self.client.connected:
-            self.reactor.callFromThread(self.client.close)
+            self.call(self.client.close)
 
-        self.reactor.callFromThread(self.reactor.stop)
+        self.call(self.reactor.stop)
         self.thread.join(3)
         if self.thread.isAlive():
             # Not dead yet? Well I guess you will have to!
-            self.reactor.callFromThread(self.reactor.crash)
+            self.call(self.reactor.crash)
             self.thread.join(3)
+
+    def call(self, func, *args, **kw):
+        return self.reactor.callFromThread(func, *args, **kw)
+
+    def blocking_call(self, func, *args, **kw):
+        return blockingCallFromThread(self.reactor, func, *args, **kw)
 
 
 class ZK(object):
