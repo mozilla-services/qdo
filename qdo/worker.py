@@ -145,21 +145,6 @@ class Worker(object):
         # XXX remove this
         self.zk_conn = zk.ZK(self.zk_root_url)
 
-    @inlineCallbacks
-    def _setup_zookeeper(self):
-        try:
-            yield self.zk_client.create(u'/workers')
-        except zookeeper.NodeExistsException:
-            pass
-        try:
-            yield self.zk_client.create(u'/partitions')
-        except zookeeper.NodeExistsException:
-            pass
-        try:
-            yield self.zk_client.create(u'/partition-owners')
-        except zookeeper.NodeExistsException:
-            pass
-
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
         self.zk_reactor.reactor.callFromThread(self._register)

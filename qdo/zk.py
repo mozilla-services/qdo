@@ -37,6 +37,19 @@ class ZKReactor(object):
             servers=self.servers,
             session_timeout=None)
         yield self.client.connect()
+        # ensure global state is present
+        try:
+            yield self.zk_client.create(u'/workers')
+        except zookeeper.NodeExistsException:
+            pass
+        try:
+            yield self.zk_client.create(u'/partitions')
+        except zookeeper.NodeExistsException:
+            pass
+        try:
+            yield self.zk_client.create(u'/partition-owners')
+        except zookeeper.NodeExistsException:
+            pass
         returnValue(self.client)
 
     def start(self):
