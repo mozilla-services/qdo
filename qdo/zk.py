@@ -11,7 +11,7 @@ import threading
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.defer import returnValue
 from twisted.internet.selectreactor import SelectReactor
-from txzookeeper.client import ZookeeperClient
+from txzookeeper.managed import ManagedClient
 import zookeeper
 
 from qdo.config import ZOO_DEFAULT_CONN
@@ -33,7 +33,7 @@ class ZKReactor(object):
 
     @inlineCallbacks
     def configure(self):
-        self.client = ZookeeperClient(
+        self.client = ManagedClient(
             servers=self.servers,
             session_timeout=None)
         yield self.client.connect()
