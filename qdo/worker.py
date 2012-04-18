@@ -156,7 +156,7 @@ class Worker(object):
         yield self.zk_reactor.client.create(u'/workers/' + self.name,
             flags=zookeeper.EPHEMERAL)
 
-        children = self.zk_conn.get_children(u'/workers')
+        children = yield self.zk_reactor.client.get_children(u'/workers')
         self._assign_partitions(children)
 
         # XXX @self.zk_conn.children(u'/workers')
