@@ -179,6 +179,7 @@ class Worker(object):
             self.zk_conn.close()
         except zookeeper.ZooKeeperException:
             pass
+        self.zk_reactor.stop()
 
     def stop(self):
         """Stop the worker loop and unregister. Used in an `atexit` hook."""
