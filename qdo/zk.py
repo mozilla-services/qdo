@@ -22,32 +22,34 @@ ZOO_OPEN_ACL_UNSAFE = dict(
 
 
 class ZKReactor(object):
+    """Zookeeper connection handling, based on `txzookeeper` and Twisted,
+    while hiding most of the asynchronous nature of those.
 
+    The Twisted reactor is a module global. The API is limited to one
+    `ZKReactor` instance per process.
+
+    :param connection: Zookeeper connection string
+    :type connection: unicode
+    :param session_timeout: Zookeeper session timeout hint in milliseconds
+    :type session_timeout: int
+    """
+
+    # make global reactor available for convenience
     reactor = reactor
 
-    def __init__(self, servers=ZOO_DEFAULT_CONN):
-        self.servers = servers
+    def __init__(self, connection=ZOO_DEFAULT_CONN, session_timeout=5000):
+        self.connection = connection
+        self.session_timeout = session_timeout
         self.client = None
         self.thread = None
-
-    @inlineCallbacks
-    def configure(self):
-        self.client = ManagedClient(
-            servers=self.servers,
-            session_timeout=1000)
-        yield self.client.connect()
-        # ensure global state is present
-        yield self._create(u'/workers')
-        yield self._create(u'/partitions')
-        yield self._create(u'/partition-owners')
-        returnValue(self.client)
 
     def start(self):
         if self.reactor.running:
             return
 
         def run_reactor():
-            self.reactor.run(installSignalHandlers=0)
+            # signal handlers only work in the main thread
+            self.reactor.run(installSignalHandlers=False)
 
         atexit.register(self.stop)
         self.thread = threading.Thread(target=run_reactor)
@@ -61,20 +63,34 @@ class ZKReactor(object):
 
         self.close()
         self.call(self.reactor.stop)
-        if self.thread is not None:
+        self.thread.join(3)
+        if self.thread.isAlive():
+            # Not dead yet? Force!
+            self.call(self.reactor.crash)
             self.thread.join(3)
-            if self.thread.isAlive():
-                # Not dead yet? Well I guess you will have to!
-                self.call(self.reactor.crash)
-                self.thread.join(3)
 
     def connect(self):
-        self.blocking_call(self.configure)
+        if self.client is None:
+            self.blocking_call(self.configure)
+        elif not self.client.connected:
+            self.blocking_call(self.client.connect)
 
     def close(self):
         if self.client is not None and self.client.connected:
             self.blocking_call(self.client.close)
         self.client = None
+
+    @inlineCallbacks
+    def configure(self):
+        self.client = ManagedClient(
+            servers=self.connection,
+            session_timeout=self.session_timeout)
+        yield self.client.connect()
+        # ensure global state is present
+        yield self._create(u'/workers')
+        yield self._create(u'/partitions')
+        yield self._create(u'/partition-owners')
+        returnValue(self.client)
 
     def call(self, func, *args, **kw):
         return self.reactor.callFromThread(func, *args, **kw)
