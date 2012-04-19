@@ -64,14 +64,13 @@ class Worker(object):
             queuey_section[u'app_key'],
             connection=queuey_section[u'connection'])
 
-    @inlineCallbacks
-    def _assign_partitions(self, worker_children):
+    def _assign_partitions(self):
         # implement simplified Kafka re-balancing algorithm
         # 1. let this worker be Wi
         # 2. let P be all partitions
         all_partitions = self.queuey_conn._partitions()
         # 3. let W be all workers
-        workers = worker_children
+        workers = self.zk_reactor.get_children(u'/workers')
         # 4. sort P
         all_partitions = sorted(all_partitions)
         # 5. sort W
@@ -90,7 +89,7 @@ class Worker(object):
         for name in old_partitions - new_partitions:
             del self.partitions[name]
             # TODO: wrong, needs to be a lock
-            yield self.zk_reactor._delete(u'/partition-owners/' + name)
+            self.zk_reactor.delete(u'/partition-owners/' + name)
         # 9. add newly assigned partitions to the partition owner registry
         #    (we may need to re-try this until the original partition owner
         #     releases its ownership)
@@ -99,7 +98,7 @@ class Worker(object):
                 self.queuey_conn, self.zk_reactor, name)
             # TODO: wrong, needs to be a lock
             zk_lock = u'/partition-owners/' + name
-            yield self.zk_reactor._create(zk_lock, data=self.name,
+            self.zk_reactor.create(zk_lock, data=self.name,
                 flags=zookeeper.EPHEMERAL)
 
     def work(self):
@@ -145,17 +144,12 @@ class Worker(object):
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
-        self.zk_reactor.blocking_call(self._register)
+        self.zk_reactor.create(u'/workers/' + self.name,
+            flags=zookeeper.EPHEMERAL)
+        self._assign_partitions()
 
-    @inlineCallbacks
-    def _register(self):
         # register a watch for /workers for changes
         # XXX self._worker_event = we = threading.Event()
-        yield self.zk_reactor._create(u'/workers/' + self.name,
-            flags=zookeeper.EPHEMERAL)
-
-        children = yield self.zk_reactor.client.get_children(u'/workers')
-        yield self._assign_partitions(children)
 
         # XXX @self.zk_conn.children(u'/workers')
         # def workers_watcher(children):
