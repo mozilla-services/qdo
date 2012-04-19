@@ -45,6 +45,7 @@ class ZKReactor(object):
 
     def start(self):
         if self.reactor.running:
+            self.connect()
             return
 
         def run_reactor():
@@ -98,15 +99,22 @@ class ZKReactor(object):
     def blocking_call(self, func, *args, **kw):
         return blockingCallFromThread(self.reactor, func, *args, **kw)
 
-    def create(self, path, flags=0):
-        return self.blocking_call(self._create, path, flags=flags)
+    def create(self, path, data=u'', flags=0):
+        self.blocking_call(self._create, path, flags=flags)
 
     @inlineCallbacks
-    def _create(self, path, flags=0):
+    def _create(self, path, data=u'', flags=0):
         try:
-            yield self.client.create(path, flags=flags)
+            yield self.client.create(path, data=data, flags=flags)
         except zookeeper.NodeExistsException:
             pass
+
+    def delete(self, path, version=-1):
+        self.blocking_call(self._delete, path, version=version)
+
+    @inlineCallbacks
+    def _delete(self, path, version=-1):
+        yield self.client.delete(path, version=version)
 
     def exists(self, path):
         return self.blocking_call(self.client.exists, path)
@@ -116,6 +124,9 @@ class ZKReactor(object):
 
     def get_children(self, path):
         return self.blocking_call(self.client.get_children, path)
+
+    def set(self, path, data=u'', version=-1):
+        self.blocking_call(self.client.set, path, data=data, version=version)
 
 
 class ZK(object):

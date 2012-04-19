@@ -64,6 +64,7 @@ class Worker(object):
             queuey_section[u'app_key'],
             connection=queuey_section[u'connection'])
 
+    @inlineCallbacks
     def _assign_partitions(self, worker_children):
         # implement simplified Kafka re-balancing algorithm
         # 1. let this worker be Wi
@@ -89,7 +90,7 @@ class Worker(object):
         for name in old_partitions - new_partitions:
             del self.partitions[name]
             # TODO: wrong, needs to be a lock
-            self.zk_conn.delete(u'/partition-owners/' + name)
+            yield self.zk_reactor._delete(u'/partition-owners/' + name)
         # 9. add newly assigned partitions to the partition owner registry
         #    (we may need to re-try this until the original partition owner
         #     releases its ownership)
@@ -98,8 +99,8 @@ class Worker(object):
                 self.queuey_conn, self.zk_reactor, name)
             # TODO: wrong, needs to be a lock
             zk_lock = u'/partition-owners/' + name
-            zk.create(self.zk_conn, zk_lock, create_mode=zookeeper.EPHEMERAL)
-            self.zk_conn.set(zk_lock, self.name)
+            yield self.zk_reactor._create(zk_lock, data=self.name,
+                flags=zookeeper.EPHEMERAL)
 
     def work(self):
         """Work on jobs.
@@ -154,7 +155,7 @@ class Worker(object):
             flags=zookeeper.EPHEMERAL)
 
         children = yield self.zk_reactor.client.get_children(u'/workers')
-        # self._assign_partitions(children)
+        yield self._assign_partitions(children)
 
         # XXX @self.zk_conn.children(u'/workers')
         # def workers_watcher(children):
