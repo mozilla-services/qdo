@@ -172,7 +172,8 @@ class Worker(object):
 
     def unregister(self):
         """Unregister this worker from :term:`Zookeeper`."""
-        self.zk_reactor.close()
+        if self.zk_reactor is not None:
+            self.zk_reactor.close()
 
     def stop(self):
         """Stop the worker loop and unregister. Used in an `atexit` hook."""

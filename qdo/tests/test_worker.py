@@ -28,8 +28,8 @@ class TestWorker(BaseTestCase):
         BaseTestCase.tearDownClass()
 
     def tearDown(self):
-        if self.worker.zk_reactor is not None:
-            self.worker.zk_reactor.close()
+        self.worker.unregister()
+        del self.worker
 
     def _make_one(self, extra=None):
         from qdo.worker import Worker
