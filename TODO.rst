@@ -21,6 +21,8 @@ zookeeper
 future
 ------
 
+- smart host selection for queuey and zookeeper (prefer localhost), instead
+  of random
 - look over design.rst - integrate into docs
 - reduce direct qdo dependencies (no pyramid please)
 - add back prod-reqs.txt / build rpm structure
