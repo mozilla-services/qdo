@@ -84,6 +84,15 @@ class ZKReactor(object):
         except zookeeper.NodeExistsException:
             pass
 
+    def exists(self, path):
+        return self.blocking_call(self.client.exists, path)
+
+    def get(self, path):
+        return self.blocking_call(self.client.get, path)
+
+    def get_children(self, path):
+        return self.blocking_call(self.client.get_children, path)
+
 
 class ZK(object):
 

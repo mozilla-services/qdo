@@ -83,11 +83,11 @@ class TestWorker(BaseTestCase):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zk_conn.exists(u'/workers'))
-        children = worker.zk_conn.get_children(u'/workers')
+        self.assertTrue(worker.zk_reactor.exists(u'/workers'))
+        children = worker.zk_reactor.get_children(u'/workers')
         self.assertEqual(len(children), 1)
         self.assertEqual(children[0], worker.name)
-        before_version = worker.zk_conn.get(u'/workers')[1][u'cversion']
+        before_version = worker.zk_reactor.get(u'/workers')[1][u'cversion']
         worker.unregister()
         # wait for changes to propagate
         for i in xrange(0, 10):
