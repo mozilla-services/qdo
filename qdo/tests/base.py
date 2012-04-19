@@ -39,6 +39,12 @@ class ZKBase(object):
         return zk.ZK(hosts + cls.zk_root)
 
     @classmethod
+    def _make_zk_reactor(cls):
+        reactor = zk.ZKReactor()
+        reactor.start()
+        return reactor
+
+    @classmethod
     def _clean_zk(cls, count=0):
         if count > 10:
             raise ValueError(u"Couldn't clean up Zookeeper")

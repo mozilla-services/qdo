@@ -9,25 +9,17 @@ from requests.exceptions import HTTPError
 import ujson
 
 from qdo.tests.base import BaseTestCase
-from qdo import zk
 
 
-class TestQueue(BaseTestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        BaseTestCase.setUpClass()
-        cls.zk_conn = cls._make_zk_conn()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.zk_conn.close()
-        BaseTestCase.tearDownClass()
+class TestPartition(BaseTestCase):
 
     def setUp(self):
         BaseTestCase.setUp(self)
-        zk.create(self.zk_conn, u'/partitions')
-        zk.create(self.zk_conn, u'/partition-owners')
+        self.zk_conn = self._make_zk_reactor()
+
+    def tearDown(self):
+        self.zk_conn.close()
+        BaseTestCase.tearDown(self)
 
     def _make_one(self):
         from qdo.partition import Partition
