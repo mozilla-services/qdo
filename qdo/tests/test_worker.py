@@ -30,6 +30,10 @@ class TestWorker(BaseTestCase):
 
     def tearDown(self):
         pass
+        # XXX we need to close the ZK connection, but the Twisted reactor
+        # is not restartable, so we need to be smarter
+        # if self.worker.zk_reactor is not None:
+        #     self.worker.zk_reactor.stop()
 
     def _make_one(self, extra=None):
         from qdo.worker import Worker
