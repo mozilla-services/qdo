@@ -38,7 +38,6 @@ class Worker(object):
         self.settings = settings
         self.shutdown = False
         self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
-        self.zk_conn = None
         self.zk_reactor = None
         self.job = None
         self.job_context = dict_context
@@ -96,7 +95,7 @@ class Worker(object):
         #     releases its ownership)
         for name in new_partitions - old_partitions:
             self.partitions[name] = Partition(
-                self.queuey_conn, self.zk_conn, name)
+                self.queuey_conn, self.zk_reactor, name)
             # TODO: wrong, needs to be a lock
             zk_lock = u'/partition-owners/' + name
             zk.create(self.zk_conn, zk_lock, create_mode=zookeeper.EPHEMERAL)
@@ -142,8 +141,6 @@ class Worker(object):
         """Setup global data structures in :term:`Zookeeper`."""
         self.zk_reactor = zk.ZKReactor(self.zk_root_url)
         self.zk_reactor.start()
-        # XXX remove this
-        self.zk_conn = zk.ZK(self.zk_root_url)
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
@@ -157,7 +154,7 @@ class Worker(object):
             flags=zookeeper.EPHEMERAL)
 
         children = yield self.zk_reactor.client.get_children(u'/workers')
-        self._assign_partitions(children)
+        # self._assign_partitions(children)
 
         # XXX @self.zk_conn.children(u'/workers')
         # def workers_watcher(children):
@@ -175,17 +172,11 @@ class Worker(object):
 
     def unregister(self):
         """Unregister this worker from :term:`Zookeeper`."""
-        try:
-            self.zk_conn.close()
-        except zookeeper.ZooKeeperException:
-            pass
         self.zk_reactor.stop()
 
     def stop(self):
         """Stop the worker loop and unregister. Used in an `atexit` hook."""
         self.shutdown = True
-        if self.zk_conn.handle is not None:
-            self.unregister()
         if self.zk_reactor is not None:
             self.zk_reactor.stop()
 

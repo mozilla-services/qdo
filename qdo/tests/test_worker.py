@@ -29,12 +29,7 @@ class TestWorker(BaseTestCase):
         BaseTestCase.tearDownClass()
 
     def tearDown(self):
-        zk_conn = self.worker.zk_conn
-        if (zk_conn and zk_conn.handle is not None):
-            try:
-                zk_conn.close()
-            except zookeeper.ZooKeeperException:
-                pass
+        pass
 
     def _make_one(self, extra=None):
         from qdo.worker import Worker
@@ -54,7 +49,7 @@ class TestWorker(BaseTestCase):
     def test_setup_zookeeper(self):
         worker = self._make_one()
         worker.setup_zookeeper()
-        children = worker.zk_conn.get_children(u'/')
+        children = worker.zk_reactor.get_children(u'/')
         self.assertTrue(u'workers' in children, children)
         self.assertTrue(u'partitions' in children, children)
         self.assertTrue(u'partition-owners' in children, children)
@@ -63,20 +58,20 @@ class TestWorker(BaseTestCase):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zk_conn.exists(u'/workers'))
-        children = worker.zk_conn.get_children(u'/workers')
+        self.assertTrue(worker.zk_reactor.exists(u'/workers'))
+        children = worker.zk_reactor.get_children(u'/workers')
         self.assertEqual(len(children), 1)
 
     def test_register_twice(self):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zk_conn.exists(u'/workers'))
-        children = worker.zk_conn.get_children(u'/workers')
+        self.assertTrue(worker.zk_reactor.exists(u'/workers'))
+        children = worker.zk_reactor.get_children(u'/workers')
         self.assertEqual(len(children), 1)
         # a second call to register neither fails nor adds a duplicate
         worker.register()
-        children = worker.zk_conn.get_children(u'/workers')
+        children = worker.zk_reactor.get_children(u'/workers')
         self.assertEqual(len(children), 1)
 
     def test_unregister(self):
