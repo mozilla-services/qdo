@@ -8,7 +8,6 @@ import time
 
 import ujson
 import unittest2 as unittest
-import zookeeper
 
 from qdo.config import QdoSettings
 from qdo import testing
