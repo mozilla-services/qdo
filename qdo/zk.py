@@ -36,18 +36,9 @@ class ZKReactor(object):
             session_timeout=1000)
         yield self.client.connect()
         # ensure global state is present
-        try:
-            yield self.client.create(u'/workers')
-        except zookeeper.NodeExistsException:
-            pass
-        try:
-            yield self.client.create(u'/partitions')
-        except zookeeper.NodeExistsException:
-            pass
-        try:
-            yield self.client.create(u'/partition-owners')
-        except zookeeper.NodeExistsException:
-            pass
+        yield self._create(u'/workers')
+        yield self._create(u'/partitions')
+        yield self._create(u'/partition-owners')
         returnValue(self.client)
 
     def start(self):
@@ -82,6 +73,16 @@ class ZKReactor(object):
 
     def blocking_call(self, func, *args, **kw):
         return blockingCallFromThread(self.reactor, func, *args, **kw)
+
+    def create(self, path, flags=0):
+        return self.blocking_call(self._create, path, flags=flags)
+
+    @inlineCallbacks
+    def _create(self, path, flags=0):
+        try:
+            yield self.client.create(path, flags=flags)
+        except zookeeper.NodeExistsException:
+            pass
 
 
 class ZK(object):

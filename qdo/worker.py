@@ -153,7 +153,7 @@ class Worker(object):
     def _register(self):
         # register a watch for /workers for changes
         # XXX self._worker_event = we = threading.Event()
-        yield self.zk_reactor.client.create(u'/workers/' + self.name,
+        yield self.zk_reactor._create(u'/workers/' + self.name,
             flags=zookeeper.EPHEMERAL)
 
         children = yield self.zk_reactor.client.get_children(u'/workers')
