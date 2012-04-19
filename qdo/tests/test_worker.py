@@ -295,9 +295,8 @@ class TestRealWorker(BaseTestCase):
         self.assertEqual(len(zk_conn.get_children(u'/workers')), 0)
         self.assertEqual(len(zk_conn.get_children(u'/partition-owners')), 0)
 
-    # @unittest.expectedFailure
-    def DISABLE_test_work_real_processes(self):
-        return
+    @unittest.expectedFailure
+    def test_work_real_processes(self):
         queuey_conn = self._queuey_conn
         zk_conn = self._zk_conn
         queue1 = queuey_conn._create_queue(partitions=1)
