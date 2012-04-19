@@ -166,8 +166,10 @@ class TestWorker(BaseTestCase):
 
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(counter[0], 5)
-        self.assertEqual(
-            self.worker.partitions.values()[0].timestamp, last_timestamp)
+        # the worker's zk connection got closed, use an external one
+        partition_id = self.worker.partitions.keys()[0]
+        value = float(self.zk_conn.get(u'/partitions/' + partition_id)[0])
+        self.assertEqual(value, last_timestamp)
 
     def test_work_multiple_queues(self):
         worker = self._make_one()
@@ -261,8 +263,10 @@ class TestWorker(BaseTestCase):
         finally:
             testing.ensure_process(u'zookeeper:zk1', noisy=False)
         self.assertEqual(counter[0], 4)
-        self.assertEqual(
-            self.worker.partitions.values()[0].timestamp, last_timestamp)
+        # the worker's zk connection got closed, use an external one
+        partition_id = self.worker.partitions.keys()[0]
+        value = float(self.zk_conn.get(u'/partitions/' + partition_id)[0])
+        self.assertEqual(value, last_timestamp)
 
 
 class TestRealWorker(BaseTestCase):
