@@ -28,6 +28,7 @@ class ZKReactor(object):
     def __init__(self, servers=ZOO_DEFAULT_CONN):
         self.servers = servers
         self.client = None
+        self.thread = None
 
     @inlineCallbacks
     def configure(self):
@@ -52,21 +53,28 @@ class ZKReactor(object):
         self.thread = threading.Thread(target=run_reactor)
         self.thread.setDaemon(True)
         self.thread.start()
-        self.blocking_call(self.configure)
+        self.connect()
 
     def stop(self):
         if not self.reactor.running:
             return
 
-        if self.client and self.client.connected:
-            self.call(self.client.close)
-
+        self.close()
         self.call(self.reactor.stop)
-        self.thread.join(3)
-        if self.thread.isAlive():
-            # Not dead yet? Well I guess you will have to!
-            self.call(self.reactor.crash)
+        if self.thread is not None:
             self.thread.join(3)
+            if self.thread.isAlive():
+                # Not dead yet? Well I guess you will have to!
+                self.call(self.reactor.crash)
+                self.thread.join(3)
+
+    def connect(self):
+        self.blocking_call(self.configure)
+
+    def close(self):
+        if self.client is not None and self.client.connected:
+            self.blocking_call(self.client.close)
+        self.client = None
 
     def call(self, func, *args, **kw):
         return self.reactor.callFromThread(func, *args, **kw)
