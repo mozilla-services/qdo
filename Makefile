@@ -24,6 +24,7 @@ INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) \
 	--use-mirrors -f https://github.com/mozilla-services/qdo/downloads \
 	-f https://github.com/hannosch/clint/downloads
 CASSANDRA_VERSION = 1.0.8
+NGINX_VERSION = 1.1.15
 ZOOKEEPER_VERSION = 3.4.3
 
 ifdef PYPIEXTRAS
@@ -87,8 +88,8 @@ $(NGINX):
 	@echo "Installing Nginx"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://nginx.org/download/nginx-1.1.15.tar.gz | tar -zx
-	mv bin/nginx-1.1.15 bin/nginx
+	curl --silent http://nginx.org/download/nginx-$(NGINX_VERSION).tar.gz | tar -zx
+	mv bin/nginx-$(NGINX_VERSION) bin/nginx
 	cd bin/nginx && \
 	./configure --prefix=$(HERE)/bin/nginx --with-http_ssl_module \
 	--conf-path=../../etc/nginx/nginx.conf --pid-path=../../var/nginx.pid \
