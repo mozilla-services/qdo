@@ -63,12 +63,14 @@ class ZKReactor(object):
             return
 
         self.close()
-        self.call(self.reactor.stop)
-        self.thread.join(3)
-        if self.thread.isAlive():
-            # Not dead yet? Force!
-            self.call(self.reactor.crash)
+        if not self.reactor.running:
+            self.call(self.reactor.stop)
+        if self.thread is not None:
             self.thread.join(3)
+            if self.thread.isAlive():
+                # Not dead yet? Force!
+                self.call(self.reactor.crash)
+                self.thread.join(3)
 
     def connect(self):
         if self.client is None:
