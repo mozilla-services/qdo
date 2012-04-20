@@ -24,7 +24,7 @@ INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) \
 	--use-mirrors -f https://github.com/mozilla-services/qdo/downloads \
 	-f https://github.com/hannosch/clint/downloads
 CASSANDRA_VERSION = 1.0.8
-ZOOKEEPER_VERSION = 3.3.5
+ZOOKEEPER_VERSION = 3.4.3
 
 ifdef PYPIEXTRAS
 	PYPIOPTIONS += -e $(PYPIEXTRAS)
@@ -114,6 +114,8 @@ $(ZOOKEEPER):
 	cat old_build.xml | sed 's|executable="python"|executable="../../../../../bin/python"|g' > build.xml && \
 	ant install >/dev/null 2>&1
 	cd bin/zookeeper/bin && \
+	mv zkServer.sh old_zkServer.sh && \
+	cat old_zkServer.sh | sed 's|    $$JAVA "-Dzoo|    exec $$JAVA "-Dzoo|g' > zkServer.sh && \
 	chmod a+x zkServer.sh
 	mkdir -p zookeeper/server1/data && echo "1" > zookeeper/server1/data/myid
 	mkdir -p zookeeper/server2/data && echo "2" > zookeeper/server2/data/myid
