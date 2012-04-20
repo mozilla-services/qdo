@@ -284,14 +284,26 @@ class TestRealWorker(BaseTestCase):
 
     def test_work_real_process(self):
         zk_conn = self._zk_conn
+
+        def worker_version():
+            return self.zk_conn.get('/workers')[1]['cversion']
+
+        def wait_for_change(old):
+            for i in xrange(1, 30):
+                new = worker_version()
+                if new > old:
+                    return new
+                time.sleep(i * 0.1)
+            self.assert_(False, u"Worker hasn't registered.")
+
         self._queuey_conn._create_queue(partitions=2)
         try:
             self.supervisor.startProcess(u'qdo:qdo1')
-            time.sleep(0.1)
+            before = wait_for_change(0)
         finally:
             self.supervisor.stopProcess(u'qdo:qdo1')
         # worker has cleaned up after itself
-        time.sleep(2.0)
+        wait_for_change(before)
         self.assertEqual(len(zk_conn.get_children(u'/workers')), 0)
         self.assertEqual(len(zk_conn.get_children(u'/partition-owners')), 0)
 
