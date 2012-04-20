@@ -8,6 +8,7 @@ import time
 import xmlrpclib
 
 import pycassa
+import zookeeper
 
 from qdo.config import ZOO_DEFAULT_ROOT
 from qdo import log
@@ -27,10 +28,12 @@ def example_job(context, message):
 def cleanup_zookeeper():
     """Opens a connection to Zookeeper and removes all nodes from it."""
     root = ZOO_DEFAULT_ROOT
+    zookeeper.set_debug_level(zookeeper.LOG_LEVEL_ERROR)
     with zk.connect(u'127.0.0.1:2187') as zk_conn:
         if zk_conn.exists(root):
             zk.delete_recursive(zk_conn, root)
         zk.create(zk_conn, root)
+    zookeeper.set_debug_level(zookeeper.LOG_LEVEL_DEBUG)
 
 
 def setup_cassandra_schema():
