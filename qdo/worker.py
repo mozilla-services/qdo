@@ -6,6 +6,7 @@
 import atexit
 from contextlib import contextmanager
 import os
+import threading
 import time
 import socket
 
@@ -39,6 +40,7 @@ class Worker(object):
         self.shutdown = False
         self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
         self.zk_reactor = None
+        self.zk_event = threading.Event()
         self.job = None
         self.job_context = dict_context
         self.partitions = {}
@@ -66,6 +68,7 @@ class Worker(object):
 
     def _assign_partitions(self):
         # implement simplified Kafka re-balancing algorithm
+        self.zk_event.clear()
         # 1. let this worker be Wi
         # 2. let P be all partitions
         all_partitions = self.queuey_conn._partitions()
@@ -100,6 +103,7 @@ class Worker(object):
             zk_lock = u'/partition-owners/' + name
             self.zk_reactor.create(zk_lock, data=self.name,
                 flags=zookeeper.EPHEMERAL)
+        self.zk_event.set()
 
     def work(self):
         """Work on jobs.
@@ -120,7 +124,7 @@ class Worker(object):
                     if self.shutdown:
                         break
                     # don't process anything while we re-assign partitions
-                    # XXX self._worker_event.wait()
+                    self.zk_event.wait()
                     no_messages = 0
                     for name, partition in self.partitions.items():
                         messages = partition.messages(limit=2)
@@ -149,7 +153,6 @@ class Worker(object):
         self._assign_partitions()
 
         # register a watch for /workers for changes
-        # XXX self._worker_event = we = threading.Event()
 
         # XXX @self.zk_conn.children(u'/workers')
         # def workers_watcher(children):
