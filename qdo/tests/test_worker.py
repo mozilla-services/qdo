@@ -8,6 +8,7 @@ import time
 
 import ujson
 import unittest2 as unittest
+import zookeeper
 
 from qdo.config import QdoSettings
 from qdo import testing
@@ -285,14 +286,15 @@ class TestRealWorker(BaseTestCase):
     def test_work_real_process(self):
         zk_conn = self._zk_conn
 
-        def worker_version():
-            return self.zk_conn.get('/workers')[1]['cversion']
-
         def wait_for_change(old):
             for i in xrange(1, 30):
-                new = worker_version()
-                if new > old:
-                    return new
+                try:
+                    new = self.zk_conn.get('/workers')[1]['cversion']
+                except zookeeper.NoNodeException:
+                    pass
+                else:
+                    if new > old:
+                        return new
                 time.sleep(i * 0.1)
             self.assert_(False, u"Worker hasn't registered.")
 
