@@ -58,7 +58,7 @@ BUILD_DIRS = bin build deps include lib lib64 man
 all:	build
 
 $(BIN)/python:
-	python2.6 $(SW)/virtualenv.py --no-site-packages --distribute . >/dev/null 2>&1
+	python2.6 $(SW)/virtualenv.py --distribute . >/dev/null 2>&1
 	rm distribute-0.6.*.tar.gz
 
 $(BIN)/pip: $(BIN)/python
