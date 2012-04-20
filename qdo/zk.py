@@ -167,7 +167,7 @@ def delete_recursive(conn, root):
     conn.delete(root)
 
 
-def sent_command(host=u'127.0.0.1', port=2181, command=b'ruok'):
+def send_command(host=u'127.0.0.1', port=2181, command=b'ruok'):
     sock = create_connection((host, port))
     sock.sendall(command)
     result = sock.recv(8192)
