@@ -30,6 +30,6 @@ Twisted==12.0.0
 txzookeeper==0.9.5
 ujson==1.18
 venusian==1.0a3
-zc-zookeeper-static==3.3.5
+zc-zookeeper-static==3.4.3
 zope.deprecation==3.5.1
 zope.interface==3.8.0
