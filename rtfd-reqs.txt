@@ -14,11 +14,11 @@ clint==0.3.1-hanno1
 distribute==0.6.26
 docutils==0.8.1
 macauthlib==0.1.0
-metlog-py==0.8.3
+metlog-py==0.8.4
 mock==0.8.0
 mozsvc==0.2
 pyramid==1.3
-pyramid-debugtoolbar==1.0.1
+pyramid-debugtoolbar==1.0.2
 pyramid_whoauth==0.1.1
 repoze.lru==0.5
 repoze.who.plugins.macauth==0.1.0
