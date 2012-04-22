@@ -103,7 +103,7 @@ insight, change the threshold from `INFO` to `TRACE` in the following lines::
 
     log4j.rootLogger=INFO, CONSOLE
 
-and
+and::
 
     log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
     log4j.appender.CONSOLE.Threshold=INFO
