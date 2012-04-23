@@ -163,9 +163,12 @@ def create(zk_conn, path, create_mode=0):
 def delete_recursive(conn, root):
     for child in conn.get_children(root):
         path = root + u'/' + child
-        if conn.get_children(path):
-            delete_recursive(conn, path)
-        conn.delete(path)
+        try:
+            if conn.get_children(path):
+                delete_recursive(conn, path)
+            conn.delete(path)
+        except zookeeper.NoNodeException:
+            pass
     conn.delete(root)
 
 
