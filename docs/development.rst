@@ -51,10 +51,10 @@ Zookeeper
 Links
 +++++
 
-- http://zktools.readthedocs.org/en/latest/index.html
 - http://zookeeper.apache.org/doc/current/zookeeperProgrammers.html
 - http://zookeeper.apache.org/doc/current/api/index.html?org/apache/zookeeper/ZooKeeper.html
 - http://svn.apache.org/repos/asf/zookeeper/trunk/src/contrib/zkpython/src/test/
+- http://bazaar.launchpad.net/~juju/txzookeeper/trunk/files/head:/txzookeeper/
 
 Inspect Zookeeper
 -----------------
