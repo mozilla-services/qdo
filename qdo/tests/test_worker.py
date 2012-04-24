@@ -8,6 +8,7 @@ import time
 
 import ujson
 import unittest2 as unittest
+import zookeeper
 
 from qdo.config import QdoSettings
 from qdo import testing
@@ -28,9 +29,8 @@ class TestWorker(BaseTestCase):
         BaseTestCase.tearDownClass()
 
     def tearDown(self):
-        zk_conn = self.worker.zk_conn
-        if (zk_conn and zk_conn.handle is not None):
-            zk_conn.close()
+        self.worker.unregister()
+        del self.worker
 
     def _make_one(self, extra=None):
         from qdo.worker import Worker
@@ -50,7 +50,7 @@ class TestWorker(BaseTestCase):
     def test_setup_zookeeper(self):
         worker = self._make_one()
         worker.setup_zookeeper()
-        children = worker.zk_conn.get_children(u'/')
+        children = worker.zk_reactor.get_children(u'/')
         self.assertTrue(u'workers' in children, children)
         self.assertTrue(u'partitions' in children, children)
         self.assertTrue(u'partition-owners' in children, children)
@@ -59,33 +59,32 @@ class TestWorker(BaseTestCase):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zk_conn.exists(u'/workers'))
-        children = worker.zk_conn.get_children(u'/workers')
+        self.assertTrue(worker.zk_reactor.exists(u'/workers'))
+        children = worker.zk_reactor.get_children(u'/workers')
         self.assertEqual(len(children), 1)
 
     def test_register_twice(self):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zk_conn.exists(u'/workers'))
-        children = worker.zk_conn.get_children(u'/workers')
+        self.assertTrue(worker.zk_reactor.exists(u'/workers'))
+        children = worker.zk_reactor.get_children(u'/workers')
         self.assertEqual(len(children), 1)
         # a second call to register neither fails nor adds a duplicate
         worker.register()
-        children = worker.zk_conn.get_children(u'/workers')
+        children = worker.zk_reactor.get_children(u'/workers')
         self.assertEqual(len(children), 1)
 
     def test_unregister(self):
         worker = self._make_one()
         worker.setup_zookeeper()
         worker.register()
-        self.assertTrue(worker.zk_conn.exists(u'/workers'))
-        children = worker.zk_conn.get_children(u'/workers')
+        self.assertTrue(worker.zk_reactor.exists(u'/workers'))
+        children = worker.zk_reactor.get_children(u'/workers')
         self.assertEqual(len(children), 1)
         self.assertEqual(children[0], worker.name)
-        before_version = worker.zk_conn.get(u'/workers')[1][u'cversion']
+        before_version = worker.zk_reactor.get(u'/workers')[1][u'cversion']
         worker.unregister()
-        self.assertTrue(worker.zk_conn.handle is None)
         # wait for changes to propagate
         for i in xrange(0, 10):
             if (self.zk_conn.get(
@@ -168,8 +167,10 @@ class TestWorker(BaseTestCase):
 
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(counter[0], 5)
-        self.assertEqual(
-            self.worker.partitions.values()[0].timestamp, last_timestamp)
+        # the worker's zk connection got closed, use an external one
+        partition_id = self.worker.partitions.keys()[0]
+        value = float(self.zk_conn.get(u'/partitions/' + partition_id)[0])
+        self.assertEqual(value, last_timestamp)
 
     def test_work_multiple_queues(self):
         worker = self._make_one()
@@ -263,8 +264,10 @@ class TestWorker(BaseTestCase):
         finally:
             testing.ensure_process(u'zookeeper:zk1', noisy=False)
         self.assertEqual(counter[0], 4)
-        self.assertEqual(
-            self.worker.partitions.values()[0].timestamp, last_timestamp)
+        # the worker's zk connection got closed, use an external one
+        partition_id = self.worker.partitions.keys()[0]
+        value = float(self.zk_conn.get(u'/partitions/' + partition_id)[0])
+        self.assertEqual(value, last_timestamp)
 
 
 class TestRealWorker(BaseTestCase):
@@ -280,16 +283,31 @@ class TestRealWorker(BaseTestCase):
         cls.zk_conn.close()
         BaseTestCase.tearDownClass()
 
+    def _get_worker_version(self, zk_conn):
+        return zk_conn.get('/workers')[1]['cversion']
+
+    def _wait_for_worker_change(self, zk_conn, old):
+        for i in xrange(1, 30):
+            try:
+                new = self._get_worker_version(zk_conn)
+            except zookeeper.NoNodeException:
+                pass
+            else:
+                if new > old:
+                    return new
+            time.sleep(i * 0.1)
+        self.assert_(False, u"Worker hasn't registered.")
+
     def test_work_real_process(self):
         zk_conn = self._zk_conn
         self._queuey_conn._create_queue(partitions=2)
         try:
             self.supervisor.startProcess(u'qdo:qdo1')
-            time.sleep(0.1)
+            before = self._wait_for_worker_change(zk_conn, 0)
         finally:
             self.supervisor.stopProcess(u'qdo:qdo1')
         # worker has cleaned up after itself
-        time.sleep(1.0)
+        self._wait_for_worker_change(zk_conn, before)
         self.assertEqual(len(zk_conn.get_children(u'/workers')), 0)
         self.assertEqual(len(zk_conn.get_children(u'/partition-owners')), 0)
 
@@ -314,8 +332,9 @@ class TestRealWorker(BaseTestCase):
             testing.ensure_process(u'qdo:qdo3', noisy=False)
             self.assertEqual(len(zk_conn.get_children(u'/workers')), 3)
             # stop second worker
+            before = self._get_worker_version(zk_conn)
             self.supervisor.stopProcess(u'qdo:qdo2')
-            time.sleep(0.1)
+            self._wait_for_worker_change(zk_conn, before)
             # second worker has unregistered itself
             self.assertEqual(len(zk_conn.get_children(u'/workers')), 2)
             # check

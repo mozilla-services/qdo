@@ -45,8 +45,8 @@ setup(
         'mozsvc',
         'requests',
         'ujson',
-        'zc.zk',
-        'zktools',
+        'Twisted',
+        'txzookeeper',
     ],
     entry_points="""
     [console_scripts]

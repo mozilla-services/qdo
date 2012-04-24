@@ -23,8 +23,9 @@ PIP_DOWNLOAD_CACHE ?= /tmp/pip_cache
 INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) \
 	--use-mirrors -f https://github.com/mozilla-services/qdo/downloads \
 	-f https://github.com/hannosch/clint/downloads
-CASSANDRA_VERSION = 1.0.8
-ZOOKEEPER_VERSION = 3.3.5
+CASSANDRA_VERSION = 1.0.9
+NGINX_VERSION = 1.1.19
+ZOOKEEPER_VERSION = 3.4.3
 
 ifdef PYPIEXTRAS
 	PYPIOPTIONS += -e $(PYPIEXTRAS)
@@ -57,7 +58,7 @@ BUILD_DIRS = bin build deps include lib lib64 man
 all:	build
 
 $(BIN)/python:
-	python2.6 $(SW)/virtualenv.py --no-site-packages --distribute . >/dev/null 2>&1
+	python2.6 $(SW)/virtualenv.py --distribute . >/dev/null 2>&1
 	rm distribute-0.6.*.tar.gz
 
 $(BIN)/pip: $(BIN)/python
@@ -87,8 +88,8 @@ $(NGINX):
 	@echo "Installing Nginx"
 	mkdir -p bin
 	cd bin && \
-	curl --silent http://nginx.org/download/nginx-1.1.15.tar.gz | tar -zx
-	mv bin/nginx-1.1.15 bin/nginx
+	curl --silent http://nginx.org/download/nginx-$(NGINX_VERSION).tar.gz | tar -zx
+	mv bin/nginx-$(NGINX_VERSION) bin/nginx
 	cd bin/nginx && \
 	./configure --prefix=$(HERE)/bin/nginx --with-http_ssl_module \
 	--conf-path=../../etc/nginx/nginx.conf --pid-path=../../var/nginx.pid \
@@ -114,6 +115,8 @@ $(ZOOKEEPER):
 	cat old_build.xml | sed 's|executable="python"|executable="../../../../../bin/python"|g' > build.xml && \
 	ant install >/dev/null 2>&1
 	cd bin/zookeeper/bin && \
+	mv zkServer.sh old_zkServer.sh && \
+	cat old_zkServer.sh | sed 's|    $$JAVA "-Dzoo|    exec $$JAVA "-Dzoo|g' > zkServer.sh && \
 	chmod a+x zkServer.sh
 	mkdir -p zookeeper/server1/data && echo "1" > zookeeper/server1/data/myid
 	mkdir -p zookeeper/server2/data && echo "2" > zookeeper/server2/data/myid

@@ -27,7 +27,7 @@ Data structure
 --------------
 
 In the following definitions ``/<qdo-ns>/`` is used as a shorthand for
-``/mozilla-qdo/`` or an apps specific namespace like `socorro-qdo`.
+``/mozilla-qdo/`` or an apps specific namespace like ``socorro-qdo``.
 
 Workers
 +++++++
@@ -62,7 +62,7 @@ A persistent node is created for each partition. For example::
     /<qdo-ns>/partitions/958f8c0643484f13b7fb32f27a4a2a9f-1
 
 Each partition node stores a float value, specifying until when messages have
-been processed:
+been processed. Messages matching the time stamp are considered processed:
 
 .. code-block:: javascript
 
@@ -81,12 +81,12 @@ The structure is the same as used for the partition tracking. For example::
     /<qdo-ns>/partition-owners/a4bb2fb6dcda4b68aad743a4746d7f58-1
 
 These nodes are ephemeral nodes, constituting a lock as implemented via a
-`zktools.locking.ZkWriteLock <http://zktools.readthedocs.org/en/latest/api/locking.html>`_.
+`txzookeeper.lock.Lock <http://bazaar.launchpad.net/~juju/txzookeeper/trunk/view/head:/txzookeeper/lock.py>`_.
 
-If a re-balancing happens and a partition is assigned to a new worker, the new
-worker will wait until it can acquire a write lock on each partition before
-processing it. This ensures that no message is processed twice, both by the
-old and a new worker.
+If a re-balancing is triggered and a partition is assigned to a new worker,
+the new worker will wait until it can acquire a write lock on each partition
+before processing it. This ensures that no message is processed twice, both by
+the old and a new worker.
 
 Worker assignment and re-balancing
 ++++++++++++++++++++++++++++++++++
