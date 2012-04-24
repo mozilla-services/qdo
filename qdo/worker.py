@@ -10,7 +10,6 @@ import threading
 import time
 import socket
 
-from twisted.internet.defer import inlineCallbacks
 import zookeeper
 
 from qdo.partition import Partition
