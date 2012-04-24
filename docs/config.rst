@@ -2,7 +2,7 @@
 Configuration
 =============
 
-`qdo` uses an ini-style configuration file for most of its configuration. The
+`qdo` uses an ini-style configuration file for its configuration. The
 configuration file is specified via the `-c` option to the `qdo-worker`
 script. It defaults to `etc/qdo-worker.conf`.
 
@@ -18,14 +18,6 @@ Settings are organized into multiple sections.
 [qdo-worker]
 ------------
 
-wait_interval
-    Interval in seconds for which the worker pauses if it has no messages to
-    work on. Defaults to 5 seconds.
-
-ca_bundle
-    Path to a private certificate used for SSL connections, in addition to all
-    officially signed ones.
-
 job
     The :term:`resource specification` for the Python job function. For
     example: `qdo.testing:example_job`
@@ -33,6 +25,14 @@ job
 job_context
     The :term:`resource specification` for a Python job context (manager).
     For example: `qdo.worker:dict_context`
+
+ca_bundle
+    Path to a private certificate used for SSL connections, in addition to all
+    officially signed ones.
+
+wait_interval
+    Interval in seconds for which the worker pauses if it has no messages to
+    work on. Defaults to 5 seconds.
 
 [queuey]
 --------
