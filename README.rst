@@ -3,6 +3,10 @@ qdo: Python worker library for Mozilla Services' message queuing
 ================================================================
 
 .. image:: https://secure.travis-ci.org/mozilla-services/qdo.png?branch=master
+   :width: 82px
+   :height: 13px
+   :alt: Travis CI build report
+   :target: https://secure.travis-ci.org/#!/mozilla-services/qdo
 
 qdo
     pronounced `qu-doe`
