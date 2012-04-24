@@ -116,7 +116,7 @@ for Zookeeper servers. Run them via::
 
     echo stat | nc 127.0.0.1 2181
 
-A full list is available via http://zookeeper.apache.org/doc/r3.3.0/zookeeperAdmin.html#sc_zkCommands
+A full list is available via http://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_zkCommands
 
 Zookeeper internals
 -------------------
