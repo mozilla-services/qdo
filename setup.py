@@ -47,7 +47,6 @@ setup(
     zip_safe=False,
     install_requires=[
         'metlog-py',
-        'mozsvc',
         'requests',
         'ujson',
     ] + install_requires,
