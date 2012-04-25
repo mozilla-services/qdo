@@ -68,6 +68,8 @@ lib-dev: $(BIN)/pip
 	$(INSTALL) -r dev-reqs.txt
 
 lib-prod: lib-dev
+	@echo "Installing build pre-requisites..."
+	$(INSTALL) -r prod-reqs.txt
 	@echo "Installing production pre-requisites..."
 	$(INSTALL) -r prod-reqs.txt
 
