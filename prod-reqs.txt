@@ -21,7 +21,6 @@ repoze.who==2.0
 supervisor==3.0a12
 thrift==0.8.0
 txzookeeper==0.9.5
-unittest2==0.5.1
 virtualenv==1.7.1.2
 wsgiref==0.1.2
 z3c.checkversions==0.4.1
