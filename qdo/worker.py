@@ -10,8 +10,6 @@ import threading
 import time
 import socket
 
-import zookeeper
-
 from qdo.partition import Partition
 from qdo.queuey import QueueyConnection
 from qdo.log import get_logger
@@ -101,7 +99,7 @@ class Worker(object):
             # TODO: wrong, needs to be a lock
             zk_lock = u'/partition-owners/' + name
             self.zk_reactor.create(zk_lock, data=self.name,
-                flags=zookeeper.EPHEMERAL)
+                flags=zk.EPHEMERAL)
         self.zk_event.set()
 
     def work(self):
@@ -148,7 +146,7 @@ class Worker(object):
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
         self.zk_reactor.create(u'/workers/' + self.name,
-            flags=zookeeper.EPHEMERAL)
+            flags=zk.EPHEMERAL)
         self._assign_partitions()
 
         # register a watch for /workers for changes

@@ -17,6 +17,12 @@ import zookeeper
 
 from qdo.config import ZOO_DEFAULT_CONN
 
+try:
+    from zookeeper import EPHEMERAL
+    EPHEMERAL  # pyflakes
+except ImportError:
+    EPHEMERAL = 1
+
 ZOO_OPEN_ACL_UNSAFE = dict(
     perms=zookeeper.PERM_ALL, scheme='world', id='anyone')
 

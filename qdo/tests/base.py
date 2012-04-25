@@ -8,7 +8,6 @@ import time
 from requests.exceptions import ConnectionError
 from ujson import decode as ujson_decode
 from unittest2 import TestCase
-import zookeeper
 
 from qdo.config import ZOO_DEFAULT_HOST
 from qdo.config import ZOO_DEFAULT_ROOT
@@ -25,6 +24,7 @@ class ZKBase(object):
 
     @classmethod
     def setUpClass(cls):
+        import zookeeper
         zookeeper.set_debug_level(zookeeper.LOG_LEVEL_ERROR)
         with zk.connect(u'127.0.0.1:2181') as root_conn:
             zk.create(root_conn, cls.zk_root)
@@ -32,6 +32,7 @@ class ZKBase(object):
 
     @classmethod
     def tearDownClass(cls):
+        import zookeeper
         cls._clean_zk()
         cls._zk_conn.close()
         del cls._zk_conn

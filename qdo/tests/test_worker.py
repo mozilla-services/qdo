@@ -8,7 +8,6 @@ import time
 
 import ujson
 import unittest2 as unittest
-import zookeeper
 
 from qdo.config import QdoSettings
 from qdo import testing
@@ -287,6 +286,7 @@ class TestRealWorker(BaseTestCase):
         return zk_conn.get('/workers')[1]['cversion']
 
     def _wait_for_worker_change(self, zk_conn, old):
+        import zookeeper
         for i in xrange(1, 30):
             try:
                 new = self._get_worker_version(zk_conn)
