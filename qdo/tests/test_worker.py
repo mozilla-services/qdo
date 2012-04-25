@@ -19,12 +19,15 @@ class TestWorker(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         BaseTestCase.setUpClass()
-        cls.zk_conn = cls._make_zk_conn()
-        cls.supervisor = testing.processes[u'supervisor']
+        if testing.ZOOKEEPER:
+            cls.zk_conn = cls._make_zk_conn()
+        if testing.SUPERVISOR:
+            cls.supervisor = testing.processes[u'supervisor']
 
     @classmethod
     def tearDownClass(cls):
-        cls.zk_conn.close()
+        if testing.ZOOKEEPER:
+            cls.zk_conn.close()
         BaseTestCase.tearDownClass()
 
     def tearDown(self):

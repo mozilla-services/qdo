@@ -73,6 +73,10 @@ else:
         def tearDownClass(cls):
             pass
 
+        @classmethod
+        def _clean_zk(cls):
+            pass
+
 
 class QueueyBase(object):
 
