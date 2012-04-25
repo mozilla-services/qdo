@@ -51,7 +51,6 @@ setup(
         'ujson',
     ] + install_requires,
     extras_require=dict(
-        fs=['zc.lockfile'],
         test=['mock'],
         zookeeper=['txzookeeper', 'Twisted'],
         ),
