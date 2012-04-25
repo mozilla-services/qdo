@@ -7,12 +7,27 @@ import os
 import time
 import xmlrpclib
 
-import pycassa
-import zookeeper
+CASSANDRA = True
+try:
+    import pycassa
+except ImportError:
+    CASSANDRA = False
+
+SUPERVISOR = True
+try:
+    import supervisor
+    supervisor  # pyflakes
+except ImportError:
+    SUPERVISOR = False
+
+ZOOKEEPER = True
+try:
+    import zookeeper
+except ImportError:
+    ZOOKEEPER = False
 
 from qdo.config import ZOO_DEFAULT_ROOT
 from qdo import log
-from qdo import zk
 
 processes = {}
 
@@ -27,6 +42,7 @@ def example_job(context, message):
 
 def cleanup_zookeeper():
     """Opens a connection to Zookeeper and removes all nodes from it."""
+    from qdo import zk
     root = ZOO_DEFAULT_ROOT
     zookeeper.set_debug_level(zookeeper.LOG_LEVEL_ERROR)
     with zk.connect(u'127.0.0.1:2187') as zk_conn:
@@ -81,17 +97,22 @@ def setup_supervisor():
 def setup():
     """Shared one-time test setup, called from tests/__init__.py"""
     log.configure(None, debug=True)
-    setup_supervisor()
-    ensure_process(u'cassandra')
-    setup_cassandra_schema()
-    ensure_process(u'zookeeper:zk1')
-    ensure_process(u'zookeeper:zk2')
-    ensure_process(u'zookeeper:zk3')
-    cleanup_zookeeper()
-    ensure_process(u'queuey')
-    ensure_process(u'nginx')
+    if SUPERVISOR:
+        setup_supervisor()
+    if CASSANDRA:
+        ensure_process(u'cassandra')
+        setup_cassandra_schema()
+    if ZOOKEEPER:
+        ensure_process(u'zookeeper:zk1')
+        ensure_process(u'zookeeper:zk2')
+        ensure_process(u'zookeeper:zk3')
+        cleanup_zookeeper()
+    if SUPERVISOR:
+        ensure_process(u'queuey')
+        ensure_process(u'nginx')
 
 
 def teardown():
     """Shared one-time test tear down, called from tests/__init__.py"""
-    cleanup_zookeeper()
+    if ZOOKEEPER:
+        cleanup_zookeeper()
