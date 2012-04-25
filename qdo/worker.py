@@ -13,7 +13,6 @@ import socket
 from qdo.partition import Partition
 from qdo.queuey import QueueyConnection
 from qdo.log import get_logger
-from qdo import zk
 
 
 @contextmanager
@@ -41,7 +40,15 @@ class Worker(object):
         self.job = None
         self.job_context = dict_context
         self.partitions = {}
+        self._policies()
         self.configure()
+
+    def _policies(self):
+        try:
+            from qdo import zk
+            self._zk_module = zk
+        except ImportError:
+            self._zk_module = None
 
     def configure(self):
         """Configure the worker based on the configuration settings.
@@ -99,7 +106,7 @@ class Worker(object):
             # TODO: wrong, needs to be a lock
             zk_lock = u'/partition-owners/' + name
             self.zk_reactor.create(zk_lock, data=self.name,
-                flags=zk.EPHEMERAL)
+                flags=self._zk_module.EPHEMERAL)
         self.zk_event.set()
 
     def work(self):
@@ -112,8 +119,9 @@ class Worker(object):
         # Try Queuey heartbeat connection
         self.queuey_conn.connect()
         # Set up Zookeeper
-        self.setup_zookeeper()
-        self.register()
+        if self._zk_module is not None:
+            self.setup_zookeeper()
+            self.register()
         atexit.register(self.stop)
         try:
             with self.job_context() as context:
@@ -136,17 +144,18 @@ class Worker(object):
                         get_logger().incr(u'worker.wait_for_jobs')
                         time.sleep(self.wait_interval)
         finally:
-            self.unregister()
+            if self._zk_module is not None:
+                self.unregister()
 
     def setup_zookeeper(self):
         """Setup global data structures in :term:`Zookeeper`."""
-        self.zk_reactor = zk.ZKReactor(self.zk_root_url)
+        self.zk_reactor = self._zk_module.ZKReactor(self.zk_root_url)
         self.zk_reactor.start()
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
         self.zk_reactor.create(u'/workers/' + self.name,
-            flags=zk.EPHEMERAL)
+            flags=self._zk_module.EPHEMERAL)
         self._assign_partitions()
 
         # register a watch for /workers for changes
