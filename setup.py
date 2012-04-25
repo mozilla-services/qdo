@@ -4,6 +4,8 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import os
+import sys
+
 from setuptools import setup
 
 version = '0.1'
@@ -11,6 +13,11 @@ version = '0.1'
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
+
+install_requires = []
+
+if sys.version_info[:2] < (2, 7):
+    install_requires += ['argparse']
 
 
 setup(
@@ -39,15 +46,16 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'argparse',
         'metlog-py',
-        'mock',
         'mozsvc',
         'requests',
         'ujson',
-        'Twisted',
-        'txzookeeper',
-    ],
+    ] + install_requires,
+    extras_require=dict(
+        fs=['zc.lockfile'],
+        test=['mock'],
+        zookeeper=['txzookeeper', 'Twisted'],
+        ),
     entry_points="""
     [console_scripts]
     qdo-worker = qdo.runner:run
