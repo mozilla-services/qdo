@@ -51,7 +51,6 @@ setup(
         'ujson',
     ] + install_requires,
     extras_require=dict(
-        test=['mock'],
         zookeeper=['txzookeeper', 'Twisted'],
         ),
     entry_points="""
