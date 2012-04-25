@@ -8,11 +8,13 @@ import sys
 
 
 def main():
+    args = sys.argv[1:]
     ret = 0
     started_supervisor = False
-    if not os.path.exists(os.path.join('var', 'supervisor.sock')):
-        started_supervisor = True
-        os.system('bin/supervisord')
+    if '--dev' not in args:
+        if not os.path.exists(os.path.join('var', 'supervisor.sock')):
+            started_supervisor = True
+            os.system('bin/supervisord')
     try:
         ret = os.system('make test-python')
     finally:

@@ -55,7 +55,7 @@ BUILD_DIRS = bin build deps include lib lib64 man
 .PHONY: all build test build_rpms mach
 .SILENT: lib python pip $(CASSANDRA) cassandra $(NGINX) nginx $(ZOOKEEPER) zookeeper
 
-all:	build
+all: build-dev
 
 $(BIN)/python:
 	python2.6 $(SW)/virtualenv.py --distribute . >/dev/null 2>&1
@@ -63,12 +63,13 @@ $(BIN)/python:
 
 $(BIN)/pip: $(BIN)/python
 
-lib: $(BIN)/pip
+lib-dev: $(BIN)/pip
 	@echo "Installing package pre-requisites..."
-	$(INSTALL) -r rtfd-reqs.txt
 	$(INSTALL) -r dev-reqs.txt
-	@echo "Running setup.py develop"
-	$(PYTHON) setup.py develop
+
+lib-prod: lib-dev
+	@echo "Installing production pre-requisites..."
+	$(INSTALL) -r prod-reqs.txt
 
 $(CASSANDRA):
 	@echo "Installing Cassandra"
@@ -139,13 +140,23 @@ clean-zookeeper:
 
 clean: clean-env
 
-build: lib cassandra nginx zookeeper
+build-dev: lib-dev
+
+build-prod: lib-prod cassandra nginx zookeeper
 	$(BUILDAPP) -c $(CHANNEL) $(PYPIOPTIONS) $(DEPS)
 
 html:
 	cd docs && make html
 
-test:
+test-dev:
+	@echo "Running tests..."
+	rm -f $(HERE)/.coverage*
+	$(PYTHON) runtests.py --dev
+	$(HERE)/bin/coverage combine
+	$(HERE)/bin/coverage report -m --omit="qdo/test*" --include="qdo/*"
+	@echo "Finished running tests"
+
+test-prod:
 	@echo "Running tests..."
 	rm -f $(HERE)/.coverage*
 	$(PYTHON) runtests.py
