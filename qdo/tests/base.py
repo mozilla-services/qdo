@@ -12,52 +12,66 @@ from unittest2 import TestCase
 from qdo.config import ZOO_DEFAULT_HOST
 from qdo.config import ZOO_DEFAULT_ROOT
 from qdo.queuey import QueueyConnection
-from qdo import zk
+from qdo.testing import ZOOKEEPER
 
 # as specified in the queuey.ini
 TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
 
 
-class ZKBase(object):
+if ZOOKEEPER:
+    from qdo import zk
 
-    zk_root = ZOO_DEFAULT_ROOT
+    class ZKBase(object):
 
-    @classmethod
-    def setUpClass(cls):
-        import zookeeper
-        zookeeper.set_debug_level(zookeeper.LOG_LEVEL_ERROR)
-        with zk.connect(u'127.0.0.1:2181') as root_conn:
-            zk.create(root_conn, cls.zk_root)
-        cls._zk_conn = cls._make_zk_conn()
+        zk_root = ZOO_DEFAULT_ROOT
 
-    @classmethod
-    def tearDownClass(cls):
-        import zookeeper
-        cls._clean_zk()
-        cls._zk_conn.close()
-        del cls._zk_conn
-        zookeeper.set_debug_level(zookeeper.LOG_LEVEL_DEBUG)
+        @classmethod
+        def setUpClass(cls):
+            import zookeeper
+            zookeeper.set_debug_level(zookeeper.LOG_LEVEL_ERROR)
+            with zk.connect(u'127.0.0.1:2181') as root_conn:
+                zk.create(root_conn, cls.zk_root)
+            cls._zk_conn = cls._make_zk_conn()
 
-    @classmethod
-    def _make_zk_conn(cls, hosts=ZOO_DEFAULT_HOST):
-        return zk.ZK(hosts + cls.zk_root)
+        @classmethod
+        def tearDownClass(cls):
+            import zookeeper
+            cls._clean_zk()
+            cls._zk_conn.close()
+            del cls._zk_conn
+            zookeeper.set_debug_level(zookeeper.LOG_LEVEL_DEBUG)
 
-    @classmethod
-    def _make_zk_reactor(cls):
-        reactor = zk.ZKReactor()
-        reactor.start()
-        return reactor
+        @classmethod
+        def _make_zk_conn(cls, hosts=ZOO_DEFAULT_HOST):
+            return zk.ZK(hosts + cls.zk_root)
 
-    @classmethod
-    def _clean_zk(cls, count=0):
-        if count > 10:
-            raise ValueError(u"Couldn't clean up Zookeeper")
-        conn = cls._zk_conn
-        for child in conn.get_children(u'/'):
-            zk.delete_recursive(conn, u'/' + child)
-        if len(conn.get_children(u'/')) > 0:
-            time.sleep(0.5)
-            cls._clean_zk(count + 1)
+        @classmethod
+        def _make_zk_reactor(cls):
+            reactor = zk.ZKReactor()
+            reactor.start()
+            return reactor
+
+        @classmethod
+        def _clean_zk(cls, count=0):
+            if count > 10:
+                raise ValueError(u"Couldn't clean up Zookeeper")
+            conn = cls._zk_conn
+            for child in conn.get_children(u'/'):
+                zk.delete_recursive(conn, u'/' + child)
+            if len(conn.get_children(u'/')) > 0:
+                time.sleep(0.5)
+                cls._clean_zk(count + 1)
+
+else:
+    class ZKBase(object):
+
+        @classmethod
+        def setUpClass(cls):
+            pass
+
+        @classmethod
+        def tearDownClass(cls):
+            pass
 
 
 class QueueyBase(object):

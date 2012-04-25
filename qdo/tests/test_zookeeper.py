@@ -3,10 +3,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from qdo import testing
+if not testing.ZOOKEEPER:
+    import nose
+    raise nose.SkipTest
+
 import unittest2 as unittest
 
 from qdo.config import ZOO_DEFAULT_HOST
-from qdo import testing
 from qdo.tests.base import ZKBase
 from qdo import zk
 
