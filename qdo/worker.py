@@ -6,7 +6,6 @@
 import atexit
 from contextlib import contextmanager
 import os
-import threading
 import time
 import socket
 
@@ -35,20 +34,10 @@ class Worker(object):
         self.settings = settings
         self.shutdown = False
         self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
-        self.zk_reactor = None
-        self.zk_event = threading.Event()
         self.job = None
         self.job_context = dict_context
         self.partitions = {}
-        self._policies()
         self.configure()
-
-    def _policies(self):
-        try:
-            from qdo import zk
-            self._zk_module = zk
-        except ImportError:
-            self._zk_module = None
 
     def configure(self):
         """Configure the worker based on the configuration settings.
@@ -63,51 +52,10 @@ class Worker(object):
             mod, fun = qdo_section[u'job_context'].split(u':')
             result = __import__(mod, globals(), locals(), fun)
             self.job_context = getattr(result, fun)
-        zk_section = self.settings.getsection(u'zookeeper')
-        self.zk_root_url = zk_section[u'connection']
         queuey_section = self.settings.getsection(u'queuey')
         self.queuey_conn = QueueyConnection(
             queuey_section[u'app_key'],
             connection=queuey_section[u'connection'])
-
-    def _assign_partitions(self):
-        # implement simplified Kafka re-balancing algorithm
-        self.zk_event.clear()
-        # 1. let this worker be Wi
-        # 2. let P be all partitions
-        all_partitions = self.queuey_conn._partitions()
-        # 3. let W be all workers
-        workers = self.zk_reactor.get_children(u'/workers')
-        # 4. sort P
-        all_partitions = sorted(all_partitions)
-        # 5. sort W
-        workers = sorted(workers)
-        # 6. let i be the index position of Wi in W and
-        #    let N = size(P) / size(W)
-        i = workers.index(self.name)
-        N = len(all_partitions) / len(workers)
-        # 7. assign partitions from i*N to (i+1)*N - 1 to Wi
-        new_partitions = set()
-        for num in xrange(i * N, (i + 1) * N):
-            new_partitions.add(all_partitions[num])
-        # 8. remove current entries owned by Wi from the partition owner
-        # registry
-        old_partitions = set(self.partitions.keys())
-        for name in old_partitions - new_partitions:
-            del self.partitions[name]
-            # TODO: wrong, needs to be a lock
-            self.zk_reactor.delete(u'/partition-owners/' + name)
-        # 9. add newly assigned partitions to the partition owner registry
-        #    (we may need to re-try this until the original partition owner
-        #     releases its ownership)
-        for name in new_partitions - old_partitions:
-            self.partitions[name] = Partition(
-                self.queuey_conn, self.zk_reactor, name)
-            # TODO: wrong, needs to be a lock
-            zk_lock = u'/partition-owners/' + name
-            self.zk_reactor.create(zk_lock, data=self.name,
-                flags=self._zk_module.EPHEMERAL)
-        self.zk_event.set()
 
     def work(self):
         """Work on jobs.
@@ -116,74 +64,30 @@ class Worker(object):
         """
         if not self.job:
             return
+        atexit.register(self.stop)
         # Try Queuey heartbeat connection
         self.queuey_conn.connect()
-        # Set up Zookeeper
-        if self._zk_module is not None:
-            self.setup_zookeeper()
-            self.register()
-        atexit.register(self.stop)
-        try:
-            with self.job_context() as context:
-                while 1:
-                    if self.shutdown:
-                        break
-                    # don't process anything while we re-assign partitions
-                    self.zk_event.wait()
-                    no_messages = 0
-                    for name, partition in self.partitions.items():
-                        messages = partition.messages(limit=2)
-                        if not messages:
-                            no_messages += 1
-                            continue
-                        message = messages[0]
-                        timestamp = message[u'timestamp']
-                        self.job(context, message)
-                        partition.timestamp = timestamp
-                    if no_messages == len(self.partitions):
-                        get_logger().incr(u'worker.wait_for_jobs')
-                        time.sleep(self.wait_interval)
-        finally:
-            if self._zk_module is not None:
-                self.unregister()
-
-    def setup_zookeeper(self):
-        """Setup global data structures in :term:`Zookeeper`."""
-        self.zk_reactor = self._zk_module.ZKReactor(self.zk_root_url)
-        self.zk_reactor.start()
-
-    def register(self):
-        """Register this worker with :term:`Zookeeper`."""
-        self.zk_reactor.create(u'/workers/' + self.name,
-            flags=self._zk_module.EPHEMERAL)
-        self._assign_partitions()
-
-        # register a watch for /workers for changes
-
-        # XXX @self.zk_conn.children(u'/workers')
-        # def workers_watcher(children):
-        #     we.clear()
-        #     with get_logger().timer(u'worker.assign_partitions'):
-        #         self._assign_partitions(children.data)
-        #     we.set()
-
-        # We hold a reference to our function to ensure it is still
-        # tracked since the decorator above uses a weak-ref
-        # XXX self._workers_watcher = workers_watcher
-        # we.wait()
-
-        # TODO: register a watch for /partitions for changes
-
-    def unregister(self):
-        """Unregister this worker from :term:`Zookeeper`."""
-        if self.zk_reactor is not None:
-            self.zk_reactor.close()
+        with self.job_context() as context:
+            while 1:
+                if self.shutdown:
+                    break
+                no_messages = 0
+                for name, partition in self.partitions.items():
+                    messages = partition.messages(limit=2)
+                    if not messages:
+                        no_messages += 1
+                        continue
+                    message = messages[0]
+                    timestamp = message[u'timestamp']
+                    self.job(context, message)
+                    partition.timestamp = timestamp
+                if no_messages == len(self.partitions):
+                    get_logger().incr(u'worker.wait_for_jobs')
+                    time.sleep(self.wait_interval)
 
     def stop(self):
-        """Stop the worker loop and unregister. Used in an `atexit` hook."""
+        """Stop the worker loop. Used in an `atexit` hook."""
         self.shutdown = True
-        if self.zk_reactor is not None:
-            self.zk_reactor.stop()
 
 
 def run(settings):

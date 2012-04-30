@@ -20,13 +20,6 @@ try:
 except ImportError:
     SUPERVISOR = False
 
-ZOOKEEPER = True
-try:
-    import zookeeper
-except ImportError:
-    ZOOKEEPER = False
-
-from qdo.config import ZOO_DEFAULT_ROOT
 from qdo import log
 
 processes = {}
@@ -38,18 +31,6 @@ def example_job(context, message):
         raise KeyboardInterrupt
     elif body == u'wait':
         time.sleep(0.01)
-
-
-def cleanup_zookeeper():
-    """Opens a connection to Zookeeper and removes all nodes from it."""
-    from qdo import zk
-    root = ZOO_DEFAULT_ROOT
-    zookeeper.set_debug_level(zookeeper.LOG_LEVEL_ERROR)
-    with zk.connect(u'127.0.0.1:2187') as zk_conn:
-        if zk_conn.exists(root):
-            zk.delete_recursive(zk_conn, root)
-        zk.create(zk_conn, root)
-    zookeeper.set_debug_level(zookeeper.LOG_LEVEL_DEBUG)
 
 
 def setup_cassandra_schema():
@@ -102,11 +83,6 @@ def setup():
     if CASSANDRA:
         ensure_process(u'cassandra')
         setup_cassandra_schema()
-    if ZOOKEEPER:
-        ensure_process(u'zookeeper:zk1')
-        ensure_process(u'zookeeper:zk2')
-        ensure_process(u'zookeeper:zk3')
-        cleanup_zookeeper()
     if SUPERVISOR:
         ensure_process(u'queuey')
         ensure_process(u'nginx')
@@ -114,5 +90,4 @@ def setup():
 
 def teardown():
     """Shared one-time test tear down, called from tests/__init__.py"""
-    if ZOOKEEPER:
-        cleanup_zookeeper()
+    pass

@@ -50,9 +50,6 @@ setup(
         'requests',
         'ujson',
     ] + install_requires,
-    extras_require=dict(
-        zookeeper=['txzookeeper', 'Twisted'],
-        ),
     entry_points="""
     [console_scripts]
     qdo-worker = qdo.runner:run
