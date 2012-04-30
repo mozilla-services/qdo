@@ -29,6 +29,7 @@ class Partition(object):
             self.name = name + u'-1'
             self.queue_name, self.partition = (name, 1)
         self.timer = get_logger().timer
+        self.value = '0.0'
 
     def messages(self, limit=100, order='ascending'):
         """Returns messages for the partition, by default from oldest to
@@ -63,8 +64,7 @@ class Partition(object):
     def timestamp(self):
         """Property for the timestamp of the last processed message.
         """
-        # XXX
-        return float(0.0)
+        return float(self.value)
 
     @timestamp.setter
     def timestamp(self, value):
@@ -75,5 +75,4 @@ class Partition(object):
         """
         if isinstance(value, basestring):
             value = float(str(value))
-        # XXX
-        # repr(value)
+        self.value = repr(value)
