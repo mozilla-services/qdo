@@ -57,6 +57,10 @@ class Worker(object):
             queuey_section[u'app_key'],
             connection=queuey_section[u'connection'])
 
+    def _assign_partitions(self):
+        for name in self.queuey_conn._partitions():
+            self.partitions[name] = Partition(self.queuey_conn, name)
+
     def work(self):
         """Work on jobs.
 
@@ -67,6 +71,8 @@ class Worker(object):
         atexit.register(self.stop)
         # Try Queuey heartbeat connection
         self.queuey_conn.connect()
+        # Assign partitions
+        self._assign_partitions()
         with self.job_context() as context:
             while 1:
                 if self.shutdown:

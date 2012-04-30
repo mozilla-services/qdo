@@ -7,7 +7,6 @@ from contextlib import contextmanager
 import time
 
 import ujson
-import unittest2 as unittest
 
 from qdo.config import QdoSettings
 from qdo import testing
@@ -200,7 +199,6 @@ class TestRealWorker(BaseTestCase):
         finally:
             self.supervisor.stopProcess(u'qdo:qdo1')
 
-    @unittest.expectedFailure
     def test_work_real_processes(self):
         queuey_conn = self._queuey_conn
         queue1 = queuey_conn._create_queue(partitions=1)
