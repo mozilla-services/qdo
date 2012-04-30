@@ -35,13 +35,3 @@ queuey.get_messages
 
 queuey.get_partitions
     Time for each request getting the list of all queues and partitions.
-
-worker.assign_partitions
-    Time to get a list of all active partitions and workers and re-assign
-    partitions to this worker.
-
-zookeeper.get_value
-    Time to read a :term:`Zookeeper` node value.
-
-zookeeper.set_value
-    Time to set a new :term:`Zookeeper` node value.

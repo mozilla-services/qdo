@@ -24,7 +24,3 @@ Glossary
    Queuey
      Yet another message queue. See http://queuey.readthedocs.org/ or
      https://github.com/mozilla-services/queuey/.
-
-   Zookeeper
-     A highly available, distributed coordination service. See
-     http://zookeeper.apache.org/.
