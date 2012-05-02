@@ -54,7 +54,7 @@ BUILD_DIRS = bin build deps include lib lib64 man
 .PHONY: all build test build_rpms mach
 .SILENT: lib python pip $(CASSANDRA) cassandra $(NGINX) nginx
 
-all: build-dev
+all: build
 
 $(BIN)/python:
 	python2.6 $(SW)/virtualenv.py --distribute . >/dev/null 2>&1
