@@ -1,7 +1,6 @@
 Chameleon==2.8.5
 Distutils2==1.0a3
 MoPyTools==3.2
-MozSvc==0.3
 Paste==1.7.5.1
 PasteDeploy==1.5.0
 PasteScript==1.7.5
