@@ -4,6 +4,7 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import os
+import os.path
 import time
 import xmlrpclib
 
@@ -22,6 +23,9 @@ except ImportError:
 
 from qdo import log
 
+here = os.path.dirname(__file__)
+maindir = os.path.dirname(here)
+vardir = os.path.join(maindir, 'var')
 processes = {}
 
 
@@ -67,6 +71,12 @@ def ensure_process(name, timeout=30, noisy=True):
                 print(u'Waiting on %s for %s seconds.' % (name, i * 0.1))
             time.sleep(i * 0.1)
     if srpc.getProcessInfo(name)[u'statename'] != u'RUNNING':
+        for name in os.listdir(vardir):
+            if name == u'README.txt':
+                continue
+            print(u"\n\nFILE: %s" % name)
+            with open(os.path.join(vardir, name)) as f:
+                print(f.read())
         raise RuntimeError(u'%s not running' % name)
 
 
