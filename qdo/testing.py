@@ -89,6 +89,8 @@ def setup():
     cleanup_zookeeper()
     ensure_process(u'queuey')
     ensure_process(u'nginx')
+    import zookeeper
+    zookeeper.deterministic_conn_order(True)
 
 
 def teardown():
