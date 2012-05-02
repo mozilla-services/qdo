@@ -10,6 +10,7 @@ from ujson import decode as ujson_decode
 from unittest2 import TestCase
 from zc.zk import ZooKeeper
 from zktools.node import ZkNode
+import zookeeper
 
 from qdo.config import ZOO_DEFAULT_ROOT
 from qdo.queuey import QueueyConnection
@@ -46,7 +47,10 @@ class ZKBase(object):
             raise ValueError(u"Couldn't clean up Zookeeper")
         conn = cls._zk_conn
         for child in conn.get_children(u'/'):
-            conn.delete_recursive(u'/' + child)
+            try:
+                conn.delete_recursive(u'/' + child)
+            except zookeeper.NoNodeException:
+                pass
         if len(conn.get_children(u'/')) > 0:
             time.sleep(0.5)
             cls._clean_zk(count + 1)
