@@ -25,7 +25,6 @@ INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) \
 	-f https://github.com/hannosch/clint/downloads
 CASSANDRA_VERSION = 1.0.9
 NGINX_VERSION = 1.1.19
-ZOOKEEPER_VERSION = 3.4.3
 
 ifdef PYPIEXTRAS
 	PYPIOPTIONS += -e $(PYPIEXTRAS)
