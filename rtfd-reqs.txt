@@ -12,7 +12,7 @@ chardet==1.0.1
 clint==0.3.1-hanno1
 distribute==0.6.25
 docutils==0.8.1
-metlog-py==0.8.1
+metlog-py==0.8.4
 mock==0.8.0
 mozsvc==0.1
 pyramid==1.3b3
