@@ -8,6 +8,7 @@ import time
 
 import ujson
 import unittest2 as unittest
+import zookeeper
 
 from qdo.config import QdoSettings
 from qdo import testing
@@ -280,16 +281,31 @@ class TestRealWorker(BaseTestCase):
         cls.zk_conn.close()
         BaseTestCase.tearDownClass()
 
+    def _get_worker_version(self, zk_conn):
+        return zk_conn.get('/workers')[1]['cversion']
+
+    def _wait_for_worker_change(self, zk_conn, old):
+        for i in xrange(1, 30):
+            try:
+                new = self._get_worker_version(zk_conn)
+            except zookeeper.NoNodeException:
+                pass
+            else:
+                if new > old:
+                    return new
+            time.sleep(i * 0.1)
+        self.assert_(False, u"Worker hasn't registered.")
+
     def test_work_real_process(self):
         zk_conn = self._zk_conn
         self._queuey_conn._create_queue(partitions=2)
         try:
             self.supervisor.startProcess(u'qdo:qdo1')
-            time.sleep(0.1)
+            before = self._wait_for_worker_change(zk_conn, 0)
         finally:
             self.supervisor.stopProcess(u'qdo:qdo1')
         # worker has cleaned up after itself
-        time.sleep(1.0)
+        self._wait_for_worker_change(zk_conn, before)
         self.assertEqual(len(zk_conn.get_children(u'/workers')), 0)
         self.assertEqual(len(zk_conn.get_children(u'/partition-owners')), 0)
 
@@ -314,8 +330,9 @@ class TestRealWorker(BaseTestCase):
             testing.ensure_process(u'qdo:qdo3', noisy=False)
             self.assertEqual(len(zk_conn.get_children(u'/workers')), 3)
             # stop second worker
+            before = self._get_worker_version(zk_conn)
             self.supervisor.stopProcess(u'qdo:qdo2')
-            time.sleep(0.1)
+            self._wait_for_worker_change(zk_conn, before)
             # second worker has unregistered itself
             self.assertEqual(len(zk_conn.get_children(u'/workers')), 2)
             # check
