@@ -3,60 +3,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import time
-
 from requests.exceptions import ConnectionError
 from ujson import decode as ujson_decode
 from unittest2 import TestCase
-import zookeeper
 
-from qdo.config import ZOO_DEFAULT_HOST
-from qdo.config import ZOO_DEFAULT_ROOT
 from qdo.queuey import QueueyConnection
-from qdo import zk
 
 # as specified in the queuey.ini
 TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
-
-
-class ZKBase(object):
-
-    zk_root = ZOO_DEFAULT_ROOT
-
-    @classmethod
-    def setUpClass(cls):
-        zookeeper.set_debug_level(zookeeper.LOG_LEVEL_ERROR)
-        with zk.connect(u'127.0.0.1:2181') as root_conn:
-            zk.create(root_conn, cls.zk_root)
-        cls._zk_conn = cls._make_zk_conn()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._clean_zk()
-        cls._zk_conn.close()
-        del cls._zk_conn
-        zookeeper.set_debug_level(zookeeper.LOG_LEVEL_DEBUG)
-
-    @classmethod
-    def _make_zk_conn(cls, hosts=ZOO_DEFAULT_HOST):
-        return zk.ZK(hosts + cls.zk_root)
-
-    @classmethod
-    def _make_zk_reactor(cls):
-        reactor = zk.ZKReactor()
-        reactor.start()
-        return reactor
-
-    @classmethod
-    def _clean_zk(cls, count=0):
-        if count > 10:
-            raise ValueError(u"Couldn't clean up Zookeeper")
-        conn = cls._zk_conn
-        for child in conn.get_children(u'/'):
-            zk.delete_recursive(conn, u'/' + child)
-        if len(conn.get_children(u'/')) > 0:
-            time.sleep(0.5)
-            cls._clean_zk(count + 1)
 
 
 class QueueyBase(object):
@@ -90,18 +44,15 @@ class QueueyBase(object):
             pass
 
 
-class BaseTestCase(TestCase, QueueyBase, ZKBase):
+class BaseTestCase(TestCase, QueueyBase):
 
     @classmethod
     def setUpClass(cls):
-        ZKBase.setUpClass()
         QueueyBase.setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        ZKBase.tearDownClass()
         QueueyBase.tearDownClass()
 
     def setUp(self):
         QueueyBase._clean_queuey()
-        ZKBase._clean_zk()

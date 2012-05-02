@@ -48,14 +48,13 @@ INSTALL += $(INSTALLOPTIONS)
 SW = sw
 CASSANDRA = $(BIN)/cassandra/bin/cassandra
 NGINX = $(BIN)/nginx
-ZOOKEEPER = $(BIN)/zookeeper
 BUILD_DIRS = bin build deps include lib lib64 man
 
 
 .PHONY: all build test build_rpms mach
-.SILENT: lib python pip $(CASSANDRA) cassandra $(NGINX) nginx $(ZOOKEEPER) zookeeper
+.SILENT: lib python pip $(CASSANDRA) cassandra $(NGINX) nginx
 
-all:	build
+all: build-dev
 
 $(BIN)/python:
 	python2.6 $(SW)/virtualenv.py --distribute . >/dev/null 2>&1
@@ -65,10 +64,9 @@ $(BIN)/pip: $(BIN)/python
 
 lib: $(BIN)/pip
 	@echo "Installing package pre-requisites..."
-	$(INSTALL) -r rtfd-reqs.txt
 	$(INSTALL) -r dev-reqs.txt
-	@echo "Running setup.py develop"
-	$(PYTHON) setup.py develop
+	@echo "Installing production pre-requisites..."
+	$(INSTALL) -r prod-reqs.txt
 
 $(CASSANDRA):
 	@echo "Installing Cassandra"
@@ -100,31 +98,6 @@ $(NGINX):
 
 nginx: $(NGINX)
 
-$(ZOOKEEPER):
-	@echo "Installing Zookeeper"
-	mkdir -p bin
-	cd bin && \
-	curl --silent http://apache.osuosl.org/zookeeper/zookeeper-$(ZOOKEEPER_VERSION)/zookeeper-$(ZOOKEEPER_VERSION).tar.gz | tar -zx
-	mv bin/zookeeper-$(ZOOKEEPER_VERSION) bin/zookeeper
-	cd bin/zookeeper && ant compile >/dev/null 2>&1
-	cd bin/zookeeper/src/c && \
-	./configure >/dev/null 2>&1 && \
-	make >/dev/null 2>&1
-	cd bin/zookeeper/src/contrib/zkpython && \
-	mv build.xml old_build.xml && \
-	cat old_build.xml | sed 's|executable="python"|executable="../../../../../bin/python"|g' > build.xml && \
-	ant install >/dev/null 2>&1
-	cd bin/zookeeper/bin && \
-	mv zkServer.sh old_zkServer.sh && \
-	cat old_zkServer.sh | sed 's|    $$JAVA "-Dzoo|    exec $$JAVA "-Dzoo|g' > zkServer.sh && \
-	chmod a+x zkServer.sh
-	mkdir -p zookeeper/server1/data && echo "1" > zookeeper/server1/data/myid
-	mkdir -p zookeeper/server2/data && echo "2" > zookeeper/server2/data/myid
-	mkdir -p zookeeper/server3/data && echo "3" > zookeeper/server3/data/myid
-	@echo "Finished installing Zookeeper"
-
-zookeeper: $(ZOOKEEPER)
-
 clean-env:
 	rm -rf $(BUILD_DIRS)
 
@@ -134,12 +107,9 @@ clean-cassandra:
 clean-nginx:
 	rm -rf bin/nginx
 
-clean-zookeeper:
-	rm -rf zookeeper bin/zookeeper
-
 clean: clean-env
 
-build: lib cassandra nginx zookeeper
+build: lib cassandra nginx
 	$(BUILDAPP) -c $(CHANNEL) $(PYPIOPTIONS) $(DEPS)
 
 html:

@@ -15,28 +15,21 @@ class Partition(object):
     :param queuey_conn: A
         :py:class:`QueueyConnection <qdo.queue.QueueyConnection>` instance.
     :type queuey_conn: object
-    :param zk_conn: A :py:class:`ZKReactor <qdo.zk.ZKReactor>` instance.
-    :type zk_conn: object
     :param name: The queue name (a uuid4 hash) or the combined queue name and
         partition id, separated by a dash.
     :type name: str
     """
 
-    def __init__(self, queuey_conn, zk_conn, name):
+    def __init__(self, queuey_conn, name):
         self.queuey_conn = queuey_conn
-        self.zk_conn = zk_conn
         if '-' in name:
             self.name = name
             self.queue_name, self.partition = name.split(u'-')
         else:
             self.name = name + u'-1'
             self.queue_name, self.partition = (name, 1)
-
-        self.zk_node = u'/partitions/' + name
-        zk_conn.create(self.zk_node)
-        if not zk_conn.get(self.zk_node)[0]:
-            zk_conn.set(self.zk_node, data='0.0')
         self.timer = get_logger().timer
+        self.value = '0.0'
 
     def messages(self, limit=100, order='ascending'):
         """Returns messages for the partition, by default from oldest to
@@ -71,8 +64,7 @@ class Partition(object):
     def timestamp(self):
         """Property for the timestamp of the last processed message.
         """
-        with self.timer(u'zookeeper.get_value'):
-            return float(self.zk_conn.get(self.zk_node)[0])
+        return float(self.value)
 
     @timestamp.setter
     def timestamp(self, value):
@@ -81,7 +73,6 @@ class Partition(object):
         :param value: New timestamp value as a float.
         :type value: float
         """
-        with self.timer(u'zookeeper.set_value'):
-            if isinstance(value, basestring):
-                value = float(str(value))
-            self.zk_conn.set(self.zk_node, repr(value))
+        if isinstance(value, basestring):
+            value = float(str(value))
+        self.value = repr(value)

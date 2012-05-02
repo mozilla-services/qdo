@@ -26,7 +26,7 @@ This will do the following:
 
 - Create a virtual Python environment
 - Install required Python packages into this environment
-- Install Cassandra, Nginx and Zookeeper
+- Install Cassandra and Nginx
 
 If you get a problem installing gevent on Mac OS, make sure you have libevent
 installed and retry installation::

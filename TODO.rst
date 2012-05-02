@@ -4,25 +4,23 @@ TODO
 worker
 ------
 
-- add `get queues` hook (dotted path to function via ini file - get ZK and
-  Queuey connection as arguments?)
+- read queues from ini file
+- specify 'admin/status' queue
+- specify 'failed' queue
+- add 'storage policy'
+- add instructions for consumer-dev environment, with memory-based queuey
+  and no nginx nor ssl
+- rewrite/update internals.txt
+- add job error handling hook
 
 queuey
 ------
 
 - implement smarter fallback on Queuey connections, not just try-once
 
-zookeeper
----------
-
-- factor zookeeper handling out of worker
-- implement event handling / queue distribution
-
 future
 ------
 
-- smart host selection for queuey and zookeeper (prefer localhost), instead
-  of random
+- smart host selection for queuey (prefer localhost), instead of random
 - look over design.rst - integrate into docs
-- reduce direct qdo dependencies (no pyramid please)
-- add back prod-reqs.txt / build rpm structure
+- add build rpm structure

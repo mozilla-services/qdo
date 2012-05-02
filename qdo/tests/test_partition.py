@@ -13,19 +13,11 @@ from qdo.tests.base import BaseTestCase
 
 class TestPartition(BaseTestCase):
 
-    def setUp(self):
-        BaseTestCase.setUp(self)
-        self.zk_conn = self._make_zk_reactor()
-
-    def tearDown(self):
-        self.zk_conn.close()
-        BaseTestCase.tearDown(self)
-
     def _make_one(self):
         from qdo.partition import Partition
         self.conn = self._make_queuey_conn()
         self.queue_name = self.conn._create_queue()
-        self.partition = Partition(self.conn, self.zk_conn, self.queue_name)
+        self.partition = Partition(self.conn, self.queue_name)
         return self.partition
 
     def test_name(self):

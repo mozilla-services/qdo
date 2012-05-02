@@ -9,10 +9,10 @@ import os.path
 import sys
 
 import pkg_resources
-from mozsvc.config import load_into_settings
 
 from qdo import log
 from qdo import worker
+from qdo.config import load_into_settings
 from qdo.config import QdoSettings
 
 DEFAULT_CONFIGFILE = os.path.join(os.curdir, u'etc', u'qdo-worker.conf')
