@@ -251,6 +251,8 @@ class QdoSettings(SettingsDict):
 
         self[u'partitions.policy'] = u'manual'
         self[u'partitions.ids'] = []
+        self[u'partitions.error_queue'] = None
+        self[u'partitions.status_queue'] = None
 
         self[u'queuey.connection'] = u'https://127.0.0.1:5001/v1/queuey/'
         self[u'queuey.app_key'] = None

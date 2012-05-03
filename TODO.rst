@@ -4,13 +4,12 @@ TODO
 worker
 ------
 
-- specify 'admin/status' queue
-- specify 'failed' queue
+- use 'admin/status' queue
 - add 'storage policy'
 - add instructions for consumer-dev environment, with memory-based queuey
   and no nginx nor ssl
 - rewrite/update internals.txt
-- add job error handling hook
+- add job error handling hook / use 'failed' queue
 
 queuey
 ------

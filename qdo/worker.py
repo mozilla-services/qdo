@@ -38,6 +38,8 @@ class Worker(object):
         self.job_context = dict_context
         self.partition_policy = u'manual'
         self.partitions = {}
+        self.error_queue = None
+        self.status_queue = None
         self.configure()
 
     def configure(self):
@@ -62,12 +64,17 @@ class Worker(object):
 
     def configure_partitions(self, section):
         self.partition_policy = policy = section[u'policy']
+        self.error_queue = section[u'error_queue']
+        self.status_queue = section[u'status_queue']
+
         partition_ids = []
         if policy == u'manual':
             partition_ids = section[u'ids']
         elif policy == u'all':
             partition_ids = self.queuey_conn._partitions()
         for pid in partition_ids:
+            if pid.startswith((self.error_queue, self.status_queue)):
+                continue
             self.partitions[pid] = Partition(self.queuey_conn, pid)
 
     def _assign_partitions(self):

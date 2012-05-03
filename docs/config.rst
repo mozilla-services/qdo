@@ -43,6 +43,14 @@ policy
     The other value is `all`, which gets a list of all partitions from
     Queuey and assigns them to this worker.
 
+status_queue
+    The uuid of a special queue used for tracking the processing status for
+    all other queues. This queue must not contain normal messages.
+
+error_queue
+    The uuid of a special queue used for tracking failed jobs for
+    all other queues. This queue must not contain normal messages.
+
 ids
     Only used when the policy is `manual`. A new-line separated list of
     partitions, for example::
