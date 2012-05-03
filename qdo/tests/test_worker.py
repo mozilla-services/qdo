@@ -316,7 +316,7 @@ class TestRealWorker(BaseTestCase):
         queue1 = queuey_conn._create_queue(partitions=1)
         queue2 = queuey_conn._create_queue(partitions=2)
         queue3 = queuey_conn._create_queue(partitions=3)
-        data = [u'%s' % i for i in xrange(9)]
+        data = [u'wait' for i in xrange(9)]
         for name in (queue1, queue2, queue3):
             queuey_conn.post(name, data=data)
         try:
