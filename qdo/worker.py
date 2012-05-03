@@ -45,6 +45,12 @@ class Worker(object):
         self.job_context = dict_context
         self.partitions = {}
         self.configure()
+        import logging
+        h = logging.StreamHandler()
+        l = logging.getLogger('zc.zk')
+        l.addHandler(h)
+        l = logging.getLogger('ZooKeeper')
+        l.addHandler(h)
 
     def configure(self):
         """Configure the worker based on the configuration settings.
@@ -67,6 +73,10 @@ class Worker(object):
             connection=queuey_section[u'connection'])
 
     def _assign_partitions(self, worker_children):
+        with open('/opt/tmp/%s' % self.name, 'a+') as fd:
+            fd.write(str(time.time()) + '\n')
+            fd.write(repr(worker_children) + '\n')
+            fd.write(repr(self.partitions.keys()) + '\n')
         # implement simplified Kafka re-balancing algorithm
         # 1. let this worker be Wi
         # 2. let P be all partitions
@@ -91,7 +101,7 @@ class Worker(object):
         for name in old_partitions - new_partitions:
             del self.partitions[name]
             # TODO: wrong, needs to be a lock
-            self.zk_conn.delete(u'/partition-owners/' + name)
+            # self.zk_conn.delete(u'/partition-owners/' + name)
         # 9. add newly assigned partitions to the partition owner registry
         #    (we may need to re-try this until the original partition owner
         #     releases its ownership)
@@ -99,9 +109,11 @@ class Worker(object):
             self.partitions[name] = Partition(
                 self.queuey_conn, self.zk_conn, name)
             # TODO: wrong, needs to be a lock
-            zk_lock = ZkNode(self.zk_conn, u'/partition-owners/' + name,
-                create_mode=zookeeper.EPHEMERAL)
-            zk_lock.value = self.name
+            # zk_lock = ZkNode(self.zk_conn, u'/partition-owners/' + name,
+            #     create_mode=zookeeper.EPHEMERAL)
+            # zk_lock.value = self.name
+        with open('/opt/tmp/%s' % self.name, 'a+') as fd:
+            fd.write(repr(self.partitions.keys()) + '\n')
 
     def work(self):
         """Work on jobs.
@@ -134,17 +146,34 @@ class Worker(object):
                         self.job(context, message)
                         partition.timestamp = timestamp
                     if no_messages == len(self.partitions):
-                        get_logger().incr(u'worker.wait_for_jobs')
-                        time.sleep(self.wait_interval)
+                        get_logger().incr(u'wait', fields={'p': len(self.partitions.keys())})
+                        # time.sleep(self.wait_interval)
+                        time.sleep(0.2)
         finally:
             self.unregister()
 
     def setup_zookeeper(self):
         """Setup global data structures in :term:`Zookeeper`."""
         self.zk_conn = ZooKeeper(self.zk_root_url)
-        ZkNode(self.zk_conn, u'/workers')
-        ZkNode(self.zk_conn, u'/partitions')
-        ZkNode(self.zk_conn, u'/partition-owners')
+
+        ZOO_OPEN_ACL_UNSAFE = dict(perms=zookeeper.PERM_ALL, scheme='world',
+                           id='anyone')
+        try:
+            self.zk_conn.create(u'/workers', u'', [ZOO_OPEN_ACL_UNSAFE], 0)
+        except zookeeper.NodeExistsException:
+            pass
+        try:
+            self.zk_conn.create(u'/partitions', u'', [ZOO_OPEN_ACL_UNSAFE], 0)
+        except zookeeper.NodeExistsException:
+            pass
+        try:
+            self.zk_conn.create(u'/partition-owners', u'', [ZOO_OPEN_ACL_UNSAFE], 0)
+        except zookeeper.NodeExistsException:
+            pass
+
+        # ZkNode(self.zk_conn, u'/workers')
+        # ZkNode(self.zk_conn, u'/partitions')
+        # ZkNode(self.zk_conn, u'/partition-owners')
 
     def register(self):
         """Register this worker with :term:`Zookeeper`."""
@@ -156,14 +185,14 @@ class Worker(object):
         @self.zk_conn.children(u'/workers')
         def workers_watcher(children):
             we.clear()
-            with get_logger().timer(u'worker.assign_partitions'):
-                self._assign_partitions(children.data)
+            # with get_logger().timer(u'worker.assign_partitions'):
+            self._assign_partitions(children.data)
             we.set()
 
         # We hold a reference to our function to ensure it is still
         # tracked since the decorator above uses a weak-ref
         self._workers_watcher = workers_watcher
-        we.wait()
+        # we.wait()
 
         # TODO: register a watch for /partitions for changes
 

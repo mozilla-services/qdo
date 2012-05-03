@@ -22,13 +22,13 @@ def example_job(context, message):
     if body == u'stop':
         raise KeyboardInterrupt
     elif body == u'wait':
-        time.sleep(0.01)
+        time.sleep(0.001)
 
 
 def cleanup_zookeeper():
     """Opens a connection to Zookeeper and removes all nodes from it."""
     root = ZOO_DEFAULT_ROOT
-    zk_conn = ZooKeeper(u'127.0.0.1:2187', wait=True)
+    zk_conn = ZooKeeper(u'127.0.0.1:2181', wait=True)
     if zk_conn.exists(root):
         zk_conn.delete_recursive(root)
     ZkNode(zk_conn, root)
@@ -84,8 +84,8 @@ def setup():
     ensure_process(u'cassandra')
     setup_cassandra_schema()
     ensure_process(u'zookeeper:zk1')
-    ensure_process(u'zookeeper:zk2')
-    ensure_process(u'zookeeper:zk3')
+    # ensure_process(u'zookeeper:zk2')
+    # ensure_process(u'zookeeper:zk3')
     cleanup_zookeeper()
     ensure_process(u'queuey')
     ensure_process(u'nginx')

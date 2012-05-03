@@ -25,7 +25,11 @@ def configure(settings, debug=False):
     """
     global _metlogger
     if debug:
-        _metlogger = MetlogClient(DebugCaptureSender(), logger=u'qdo-worker')
+        _metlogger = MetlogClient(DebugCaptureSender(), logger=u'qdo-logger')
     elif _metlogger is None:
         # don't reconfigure an already configured logger
         _metlogger = client_from_dict_config(settings)
+        import os
+        import socket
+        name = u'%s-%s' % (socket.getfqdn(), os.getpid())
+        _metlogger.logger = name

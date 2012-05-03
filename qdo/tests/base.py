@@ -38,7 +38,7 @@ class ZKBase(object):
 
     @classmethod
     def _make_zk_conn(cls,
-            hosts=u'127.0.0.1:2181,127.0.0.1:2184,127.0.0.1:2187'):
+            hosts=u'127.0.0.1:2181'):
         return ZooKeeper(hosts + cls.zk_root, wait=True)
 
     @classmethod
