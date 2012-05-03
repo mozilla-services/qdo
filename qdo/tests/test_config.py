@@ -33,3 +33,14 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(qdo_section[u'wait_interval'], 30)
         queuey_section = settings.getsection(u'queuey')
         self.assertEqual(queuey_section[u'url'], u'https://10.0.0.1:2345')
+
+    def test_manual_partition(self):
+        extra = {
+            u'partitions.policy': u'manual',
+            u'partitions.ids': [u'a4bb2fb6dcda4b68aad743a4746d7f58-1'],
+            }
+        settings = self._make_one(extra)
+        p_section = settings.getsection(u'partitions')
+        self.assertEqual(p_section[u'policy'], u'manual')
+        self.assertEqual(
+            p_section[u'ids'], [u'a4bb2fb6dcda4b68aad743a4746d7f58-1'])

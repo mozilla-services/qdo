@@ -4,7 +4,6 @@ TODO
 worker
 ------
 
-- read queues from ini file
 - specify 'admin/status' queue
 - specify 'failed' queue
 - add 'storage policy'

@@ -34,6 +34,24 @@ wait_interval
     Interval in seconds for which the worker pauses if it has no messages to
     work on. Defaults to 5 seconds.
 
+[partitions]
+------------
+
+policy
+    Specifies how to get all partition ids for this worker. Defaults to
+    `manual`, in which case an explicit list of `ids` has to be specified.
+    The other value is `all`, which gets a list of all partitions from
+    Queuey and assigns them to this worker.
+
+ids
+    Only used when the policy is `manual`. A new-line separated list of
+    partitions, for example::
+
+        ids =
+            a4bb2fb6dcda4b68aad743a4746d7f58-1
+            a4bb2fb6dcda4b68aad743a4746d7f58-2
+            958f8c0643484f13b7fb32f27a4a2a9f-1
+
 [queuey]
 --------
 

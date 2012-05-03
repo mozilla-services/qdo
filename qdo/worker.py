@@ -36,6 +36,7 @@ class Worker(object):
         self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
         self.job = None
         self.job_context = dict_context
+        self.partition_policy = u'manual'
         self.partitions = {}
         self.configure()
 
@@ -56,6 +57,18 @@ class Worker(object):
         self.queuey_conn = QueueyConnection(
             queuey_section[u'app_key'],
             connection=queuey_section[u'connection'])
+        partitions_section = self.settings.getsection(u'partitions')
+        self.configure_partitions(partitions_section)
+
+    def configure_partitions(self, section):
+        self.partition_policy = policy = section[u'policy']
+        partition_ids = []
+        if policy == u'manual':
+            partition_ids = section[u'ids']
+        elif policy == u'all':
+            partition_ids = self.queuey_conn._partitions()
+        for pid in partition_ids:
+            self.partitions[pid] = Partition(self.queuey_conn, pid)
 
     def _assign_partitions(self):
         for name in self.queuey_conn._partitions():

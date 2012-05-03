@@ -249,6 +249,9 @@ class QdoSettings(SettingsDict):
         self[u'qdo-worker.job'] = None
         self[u'qdo-worker.job_context'] = u'qdo.worker:dict_context'
 
+        self[u'partitions.policy'] = u'manual'
+        self[u'partitions.ids'] = []
+
         self[u'queuey.connection'] = u'https://127.0.0.1:5001/v1/queuey/'
         self[u'queuey.app_key'] = None
 
