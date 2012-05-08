@@ -31,12 +31,8 @@ class TestWorker(BaseTestCase):
         if extra is not None:
             settings.update(extra)
         self.worker = Worker(settings)
-        error = self.worker.queuey_conn._create_queue()
-        status = self.worker.queuey_conn._create_queue()
         self.queue_name = self.worker.queuey_conn._create_queue()
-        self.worker.configure_partitions(dict(policy=u'all',
-            error_queue=error,
-            status_queue=status))
+        self.worker.configure_partitions(dict(policy=u'all'))
         return self.worker
 
     def _post_message(self, data, queue_name=None):
@@ -46,13 +42,11 @@ class TestWorker(BaseTestCase):
 
     def test_special_queues(self):
         worker = self._make_one()
-        name1 = self.worker.queuey_conn._create_queue()
-        name2 = self.worker.queuey_conn._create_queue()
-        worker.configure_partitions(dict(policy=u'all',
-            error_queue=name1,
-            status_queue=name2))
-        self.assertEqual(worker.error_queue, name1)
-        self.assertEqual(worker.status_queue, name2)
+        worker.configure_partitions(dict(policy=u'all'))
+        worker.assign_partitions()
+        partitions = self.worker.queuey_conn._partitions()
+        self.assertTrue(worker.error_queue + u'-1' in partitions)
+        self.assertTrue(worker.status_queue + u'-1' in partitions)
 
     def test_work_no_job(self):
         worker = self._make_one()

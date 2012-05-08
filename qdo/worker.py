@@ -30,6 +30,9 @@ class Worker(object):
     :type settings: dict
     """
 
+    error_queue = u'qdo_error'
+    status_queue = u'qdo_status'
+
     def __init__(self, settings):
         self.settings = settings
         self.shutdown = False
@@ -38,8 +41,7 @@ class Worker(object):
         self.job_context = dict_context
         self.partition_policy = u'manual'
         self.partitions = {}
-        self.error_queue = None
-        self.status_queue = None
+        self._all_partitions = None
         self.configure()
 
     def configure(self):
@@ -64,20 +66,28 @@ class Worker(object):
 
     def configure_partitions(self, section):
         self.partition_policy = policy = section[u'policy']
-        self.error_queue = section[u'error_queue']
-        self.status_queue = section[u'status_queue']
-
         partition_ids = []
         if policy == u'manual':
             partition_ids = section[u'ids']
         elif policy == u'all':
-            partition_ids = self.queuey_conn._partitions()
+            self._all_partitions = self.queuey_conn._partitions()
+            partition_ids = self._all_partitions
         for pid in partition_ids:
             if pid.startswith((self.error_queue, self.status_queue)):
                 continue
             self.partitions[pid] = Partition(self.queuey_conn, pid)
 
-    def _assign_partitions(self):
+    def assign_partitions(self):
+        if self._all_partitions is None:
+            self._all_partitions = self.queuey_conn._partitions()
+
+        def cond_create(queue_name):
+            if queue_name + u'-1' not in self._all_partitions:
+                self.queuey_conn._create_queue(queue_name=queue_name)
+        cond_create(self.error_queue)
+        cond_create(self.status_queue)
+        self._all_partitions = None
+
         for name in self.queuey_conn._partitions():
             self.partitions[name] = Partition(self.queuey_conn, name)
 
@@ -92,7 +102,7 @@ class Worker(object):
         # Try Queuey heartbeat connection
         self.queuey_conn.connect()
         # Assign partitions
-        self._assign_partitions()
+        self.assign_partitions()
         with self.job_context() as context:
             while 1:
                 if self.shutdown:
