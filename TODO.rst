@@ -22,3 +22,4 @@ future
 - smart host selection for queuey (prefer localhost), instead of random
 - look over design.rst - integrate into docs
 - add build rpm structure
+- add jitter to worker wait_interval
