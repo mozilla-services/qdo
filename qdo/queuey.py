@@ -169,6 +169,6 @@ class QueueyConnection(object):
         for q in queues:
             name = q[u'queue_name']
             part = q[u'partitions']
-            for i in xrange(1, part+1):
+            for i in xrange(1, part + 1):
                 partitions.append(u'%s-%s' % (name, i))
         return partitions
