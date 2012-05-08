@@ -168,6 +168,14 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
         info = [q for q in queues if q[u'queue_name'] == name][0]
         self.assertEqual(info[u'partitions'], 3)
 
+    def test_create_queue_name(self):
+        conn = self._make_one()
+        name = conn._create_queue(queue_name=u'test-queue')
+        response = ujson.decode(conn.get(params={u'details': True}).text)
+        queues = response[u'queues']
+        info = [q for q in queues if q[u'queue_name'] == name][0]
+        self.assertEqual(info[u'partitions'], 1)
+
     def test_partitions(self):
         conn = self._make_one()
         queue_name = conn._create_queue(partitions=3)

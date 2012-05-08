@@ -153,9 +153,12 @@ class QueueyConnection(object):
         return self.session.delete(url,
             params=params, timeout=self.timeout)
 
-    def _create_queue(self, partitions=1):
+    def _create_queue(self, partitions=1, queue_name=None):
         # helper method to create a new queue and return its name
-        response = self.post(data={u'partitions': partitions})
+        data = {u'partitions': partitions}
+        if queue_name is not None:
+            data[u'queue_name'] = queue_name
+        response = self.post(data=data)
         return ujson.decode(response.text)[u'queue_name']
 
     def _partitions(self):
