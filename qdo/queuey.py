@@ -156,16 +156,41 @@ class QueueyConnection(object):
         return self.session.delete(url,
             params=params, timeout=self.timeout)
 
-    def _create_queue(self, partitions=1, queue_name=None):
-        # helper method to create a new queue and return its name
+    def create_queue(self, partitions=1, queue_name=None):
+        """Create a new queue and return its name.
+
+        :param partitions: Number of partitions to create, defaults to 1.
+        :type partitions: int
+        :param queue_name: Optional explicit queue name, otherwise Queuey
+            will auto-generate one.
+        :type queue_name: unicode
+        :rtype: unicode
+        """
         data = {u'partitions': partitions}
         if queue_name is not None:
             data[u'queue_name'] = queue_name
         response = self.post(data=data)
         return ujson.decode(response.text)[u'queue_name']
 
-    def _messages(self, queue_name, partition=1, since=0.0, limit=100,
+    def messages(self, queue_name, partition=1, since=0.0, limit=100,
                   order='ascending'):
+        """Returns messages for a queue, by default from oldest to
+           newest.
+
+        :param queue_name: Queue name
+        :type queue_name: unicode
+        :param partition: Partition number, defaults to 1.
+        :type partition: int
+        :param since: Only return messages since a given timestamp, defaults
+            to no restriction.
+        :type since: float
+        :param limit: Only return N number of messages, defaults to 100.
+        :type limit: int
+        :param order: 'descending' or 'ascending', defaults to ascending
+        :type order: str
+        :raises: :py:exc:`qdo.exceptions.HTTPError`
+        :rtype: list
+        """
         params = {
             u'limit': limit,
             u'order': order,
@@ -185,9 +210,7 @@ class QueueyConnection(object):
         raise qdo.exceptions.HTTPError(response.status_code, response)
 
     def _partitions(self):
-        # Prototype for listing all partitions, in the final code partition
-        # names will be taken from ZK under /partitions
-        # A helper method to populate ZK from Queuey might be nice
+        # List all partitions
         with get_logger().timer(u'queuey.get_partitions'):
             response = self.get(params={u'details': True})
         queues = ujson.decode(response.text)[u'queues']

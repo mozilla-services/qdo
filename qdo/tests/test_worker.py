@@ -31,7 +31,7 @@ class TestWorker(BaseTestCase):
         if extra is not None:
             settings.update(extra)
         self.worker = Worker(settings)
-        self.queue_name = self.worker.queuey_conn._create_queue()
+        self.queue_name = self.worker.queuey_conn.create_queue()
         self.worker.settings[u'partitions.policy'] = u'all'
         return self.worker
 
@@ -126,7 +126,7 @@ class TestWorker(BaseTestCase):
 
     def test_work_multiple_queues(self):
         worker = self._make_one()
-        queue2 = self.worker.queuey_conn._create_queue()
+        queue2 = self.worker.queuey_conn.create_queue()
         self._post_message(u'queue1-1')
         self._post_message(u'queue1-2')
         self._post_message(u'queue2-1', queue_name=queue2)
@@ -147,9 +147,9 @@ class TestWorker(BaseTestCase):
 
     def test_work_multiple_empty_queues(self):
         worker = self._make_one()
-        self.worker.queuey_conn._create_queue()
-        self.worker.queuey_conn._create_queue()
-        queue2 = self.worker.queuey_conn._create_queue()
+        self.worker.queuey_conn.create_queue()
+        self.worker.queuey_conn.create_queue()
+        queue2 = self.worker.queuey_conn.create_queue()
         self._post_message(u'queue1-1')
         self._post_message(u'queue1-2')
         self._post_message(u'queue2-1', queue_name=queue2)
@@ -169,7 +169,7 @@ class TestWorker(BaseTestCase):
     def test_work_multiple_queues_and_partitions(self):
         worker = self._make_one()
         queuey_conn = worker.queuey_conn
-        queue2 = queuey_conn._create_queue(partitions=3)
+        queue2 = queuey_conn.create_queue(partitions=3)
         self._post_message([u'1', u'2'])
         # post messages to fill multiple partitions
         response = self._post_message(
@@ -200,7 +200,7 @@ class TestRealWorker(BaseTestCase):
         cls.supervisor = testing.processes[u'supervisor']
 
     def test_work_real_process(self):
-        self._queuey_conn._create_queue(partitions=2)
+        self._queuey_conn.create_queue(partitions=2)
         try:
             self.supervisor.startProcess(u'qdo:qdo1')
             time.sleep(0.5)
@@ -209,9 +209,9 @@ class TestRealWorker(BaseTestCase):
 
     def test_work_real_processes(self):
         queuey_conn = self._queuey_conn
-        queue1 = queuey_conn._create_queue(partitions=1)
-        queue2 = queuey_conn._create_queue(partitions=2)
-        queue3 = queuey_conn._create_queue(partitions=3)
+        queue1 = queuey_conn.create_queue(partitions=1)
+        queue2 = queuey_conn.create_queue(partitions=2)
+        queue3 = queuey_conn.create_queue(partitions=3)
         data = [u'%s' % i for i in xrange(9)]
         for name in (queue1, queue2, queue3):
             queuey_conn.post(name, data=data)

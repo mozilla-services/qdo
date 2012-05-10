@@ -73,7 +73,7 @@ class Worker(object):
 
         def cond_create(queue_name):
             if queue_name + u'-1' not in all_partitions:
-                queuey_conn._create_queue(queue_name=queue_name)
+                queuey_conn.create_queue(queue_name=queue_name)
         cond_create(self.error_queue)
         cond_create(self.status_queue)
         self.assign_partitions(partition_ids)

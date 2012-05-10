@@ -120,7 +120,7 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
 
     def test_delete(self):
         conn = self._make_one()
-        name = conn._create_queue()
+        name = conn.create_queue()
         response = conn.delete(name)
         self.assertEqual(response.status_code, 200)
         response = conn.get()
@@ -129,7 +129,7 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
 
     def test_delete_timeout(self):
         conn = self._make_one()
-        name = conn._create_queue()
+        name = conn.create_queue()
         metlog = get_logger()
         before = len(metlog.sender.msgs)
         with mock.patch(u'requests.sessions.Session.delete') as delete_mock:
@@ -141,13 +141,13 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
     def test_delete_multiple_first_unreachable(self):
         conn = self._make_one(connection=u'https://127.0.0.1:9/,'
             u'https://127.0.0.1:5002/v1/queuey/')
-        name = conn._create_queue()
+        name = conn.create_queue()
         response = conn.delete(name)
         self.assertEqual(response.status_code, 200)
 
     def test_post_messages(self):
         conn = self._make_one()
-        name = conn._create_queue()
+        name = conn.create_queue()
         response = conn.post(name, data=[u'a', u'b', u'c'])
         self.assertEqual(response.status_code, 201)
         result = ujson.decode(response.text)
@@ -155,7 +155,7 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
 
     def test_create_queue(self):
         conn = self._make_one()
-        name = conn._create_queue()
+        name = conn.create_queue()
         response = ujson.decode(conn.get(params={u'details': True}).text)
         queues = response[u'queues']
         info = [q for q in queues if q[u'queue_name'] == name][0]
@@ -163,7 +163,7 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
 
     def test_create_queue_partitions(self):
         conn = self._make_one()
-        name = conn._create_queue(partitions=3)
+        name = conn.create_queue(partitions=3)
         response = ujson.decode(conn.get(params={u'details': True}).text)
         queues = response[u'queues']
         info = [q for q in queues if q[u'queue_name'] == name][0]
@@ -171,7 +171,7 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
 
     def test_create_queue_name(self):
         conn = self._make_one()
-        name = conn._create_queue(queue_name=u'test-queue')
+        name = conn.create_queue(queue_name=u'test-queue')
         response = ujson.decode(conn.get(params={u'details': True}).text)
         queues = response[u'queues']
         info = [q for q in queues if q[u'queue_name'] == name][0]
@@ -179,29 +179,29 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
 
     def test_messages(self):
         conn = self._make_one()
-        name = conn._create_queue()
+        name = conn.create_queue()
         # add test message
         conn.post(url=name, data=u'Hello world!')
         # query
-        messages = conn._messages(name)
+        messages = conn.messages(name)
         bodies = [m[u'body'] for m in messages]
         self.assertTrue(u'Hello world!' in bodies)
 
     def test_messages_since(self):
         conn = self._make_one()
-        name = conn._create_queue()
+        name = conn.create_queue()
         # add test message
         conn.post(url=name, data=u'Hello')
         # query messages in the future
-        messages = conn._messages(name, since=time.time() + 1000)
+        messages = conn.messages(name, since=time.time() + 1000)
         self.assertEqual(len(messages), 0)
 
     def test_messages_error(self):
         from qdo.exceptions import HTTPError
         conn = self._make_one()
-        name = conn._create_queue()
+        name = conn.create_queue()
         try:
-            conn._messages(name, order=u'undefined')
+            conn.messages(name, order=u'undefined')
         except HTTPError, e:
             self.assertEqual(e.args[0], 400)
             messages = ujson.decode(e.args[1].text)[u'error_msg']
@@ -211,7 +211,7 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
 
     def test_partitions(self):
         conn = self._make_one()
-        queue_name = conn._create_queue(partitions=3)
+        queue_name = conn.create_queue(partitions=3)
         partitions = conn._partitions()
         expected = [queue_name + u'-' + unicode(i) for i in range(1, 4)]
         self.assertTrue(set(expected).issubset(set(partitions)))

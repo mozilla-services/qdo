@@ -39,7 +39,7 @@ class Partition(object):
         :raises: :py:exc:`qdo.exceptions.HTTPError`
         :rtype: list
         """
-        return self.queuey_conn._messages(self.queue_name,
+        return self.queuey_conn.messages(self.queue_name,
             partition=self.partition, since=self.timestamp, limit=limit,
             order=order)
 

@@ -11,7 +11,7 @@ class TestPartition(BaseTestCase):
     def _make_one(self):
         from qdo.partition import Partition
         self.conn = self._make_queuey_conn()
-        self.queue_name = self.conn._create_queue()
+        self.queue_name = self.conn.create_queue()
         self.partition = Partition(self.conn, self.queue_name)
         return self.partition
 

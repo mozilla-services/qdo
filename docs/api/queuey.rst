@@ -14,9 +14,9 @@ inactive status.
 
 The connection uses a connection pool as provided by the
 `requests <http://docs.python-requests.org>`_ library and turns on keep alive
-connections by default. SSL is supported by default and certificates will be
-checked for validity. If you want to use a private certificate, you can
-configure the path to it via the `ca_bundle` option in the configuration file.
+connections. SSL is supported by default and certificates will be checked for
+validity. If you want to use a private certificate, you can configure the
+path to it via the `ca_bundle` option in the configuration file.
 
 .. automodule:: qdo.queuey
 
@@ -29,6 +29,8 @@ Classes
     .. automethod:: get(url='', params=None)
     .. automethod:: post(url='', params=None, data='')
     .. automethod:: delete(url='', params=None)
+    .. automethod:: create_queue(partitions=1, queue_name=None)
+    .. automethod:: messages(queue_name, partition=1, since=0.0, limit=100, order='ascending')
 
 Functions
 ~~~~~~~~~
