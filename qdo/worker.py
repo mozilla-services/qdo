@@ -84,6 +84,9 @@ class Worker(object):
         # get all status messages, starting with the newest ones
         status_messages = self.queuey_conn.messages(
             STATUS_QUEUE, limit=100, order='descending')
+        if len(status_messages) >= 100:
+            # XXX deal with more than 100 status messages / partitions
+            raise RuntimeError(u'More than 100 status messages detected!')
         for message in status_messages:
             body = ujson_decode(message[u'body'])
             partition = body[u'partition']
