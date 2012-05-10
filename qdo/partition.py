@@ -3,6 +3,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from ujson import decode
+from ujson import encode
+
 from qdo.config import STATUS_QUEUE
 from qdo.log import get_logger
 
@@ -16,9 +19,14 @@ class Partition(object):
     :param name: The queue name (a uuid4 hash) or the combined queue name and
         partition id, separated by a dash.
     :type name: str
+    :param msgid: The timestamp of the message in the status queue, holding
+        information about the processing state of this partition.
+    :type msgid: unicode
+    :param timestamp: The last processed timestamp in this partition.
+    :type timestamp: unicode
     """
 
-    def __init__(self, queuey_conn, name):
+    def __init__(self, queuey_conn, name, msgid=None, timestamp=0.0):
         self.queuey_conn = queuey_conn
         if '-' in name:
             self.name = name
@@ -28,6 +36,16 @@ class Partition(object):
             self.queue_name, self.partition = (name, 1)
         self.timer = get_logger().timer
         self.value = '0.0'
+        self.msgid = msgid
+        if msgid is None:
+            self._create_status_message(timestamp)
+            self.timestamp = timestamp
+
+    def _create_status_message(self, timestamp):
+        result = self.queuey_conn.post(STATUS_QUEUE, data=encode(dict(
+            partition=self.name, processed=repr(timestamp), last_worker=u''
+            )))
+        self.msgid = decode(result.text)[u'messages'][0][u'timestamp']
 
     def messages(self, limit=100, order='ascending'):
         """Returns messages for the partition, by default from oldest to
