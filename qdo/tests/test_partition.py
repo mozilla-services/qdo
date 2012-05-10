@@ -3,11 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import time
-
-from requests.exceptions import HTTPError
-import ujson
-
 from qdo.tests.base import BaseTestCase
 
 
@@ -32,26 +27,6 @@ class TestPartition(BaseTestCase):
         messages = partition.messages()
         bodies = [m[u'body'] for m in messages]
         self.assertTrue(u'Hello world!' in bodies)
-
-    def test_messages_since(self):
-        partition = self._make_one()
-        # add test message
-        self.conn.post(url=self.queue_name, data=u'Hello')
-        # query messages in the future
-        partition.timestamp = time.time() + 1000
-        messages = partition.messages()
-        self.assertEqual(len(messages), 0)
-
-    def test_messages_error(self):
-        partition = self._make_one()
-        try:
-            partition.messages(order=u'undefined')
-        except HTTPError, e:
-            self.assertEqual(e.args[0], 400)
-            messages = ujson.decode(e.args[1].text)[u'error_msg']
-            self.assertTrue(u'order' in messages, messages)
-        else:
-            self.fail(u'HTTPError not raised')
 
     def test_timestamp_get(self):
         partition = self._make_one()

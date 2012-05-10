@@ -3,9 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from ujson import decode as ujson_decode
-
-import qdo.exceptions
 from qdo.log import get_logger
 
 
@@ -42,23 +39,9 @@ class Partition(object):
         :raises: :py:exc:`qdo.exceptions.HTTPError`
         :rtype: list
         """
-        since = self.timestamp
-        params = {
-            u'limit': limit,
-            u'order': order,
-            u'partitions': self.partition,
-            # use the repr, to avoid a float getting clobbered by implicit
-            # str() calls in the URL generation
-            u'since': repr(since),
-        }
-        with self.timer(u'queuey.get_messages'):
-            response = self.queuey_conn.get(self.queue_name, params=params)
-        if response.ok:
-            messages = ujson_decode(response.text)[u'messages']
-            # filter out exact timestamp matches
-            return [m for m in messages if float(str(m[u'timestamp'])) > since]
-        # failure
-        raise qdo.exceptions.HTTPError(response.status_code, response)
+        return self.queuey_conn._messages(self.queue_name,
+            partition=self.partition, since=self.timestamp, limit=limit,
+            order=order)
 
     @property
     def timestamp(self):

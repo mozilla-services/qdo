@@ -8,6 +8,7 @@ if not testing.CASSANDRA:
     import nose
     raise nose.SkipTest
 
+import time
 import unittest
 
 import mock
@@ -175,6 +176,38 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
         queues = response[u'queues']
         info = [q for q in queues if q[u'queue_name'] == name][0]
         self.assertEqual(info[u'partitions'], 1)
+
+    def test_messages(self):
+        conn = self._make_one()
+        name = conn._create_queue()
+        # add test message
+        conn.post(url=name, data=u'Hello world!')
+        # query
+        messages = conn._messages(name)
+        bodies = [m[u'body'] for m in messages]
+        self.assertTrue(u'Hello world!' in bodies)
+
+    def test_messages_since(self):
+        conn = self._make_one()
+        name = conn._create_queue()
+        # add test message
+        conn.post(url=name, data=u'Hello')
+        # query messages in the future
+        messages = conn._messages(name, since=time.time() + 1000)
+        self.assertEqual(len(messages), 0)
+
+    def test_messages_error(self):
+        from qdo.exceptions import HTTPError
+        conn = self._make_one()
+        name = conn._create_queue()
+        try:
+            conn._messages(name, order=u'undefined')
+        except HTTPError, e:
+            self.assertEqual(e.args[0], 400)
+            messages = ujson.decode(e.args[1].text)[u'error_msg']
+            self.assertTrue(u'order' in messages, messages)
+        else:
+            self.fail(u'HTTPError not raised')
 
     def test_partitions(self):
         conn = self._make_one()

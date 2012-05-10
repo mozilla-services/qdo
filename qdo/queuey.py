@@ -12,7 +12,9 @@ from requests.exceptions import ConnectionError
 from requests.exceptions import SSLError
 from requests.exceptions import Timeout
 import ujson
+from ujson import decode as ujson_decode
 
+import qdo.exceptions
 from qdo.log import get_logger
 
 
@@ -81,6 +83,7 @@ class QueueyConnection(object):
         # cycle through them one after the other
         self.session = session(headers=headers, timeout=self.timeout,
             config={u'pool_maxsize': 1, u'keep_alive': True}, prefetch=True)
+        self.timer = get_logger().timer
 
     @fallback
     @retry
@@ -160,6 +163,26 @@ class QueueyConnection(object):
             data[u'queue_name'] = queue_name
         response = self.post(data=data)
         return ujson.decode(response.text)[u'queue_name']
+
+    def _messages(self, queue_name, partition=1, since=0.0, limit=100,
+                  order='ascending'):
+        params = {
+            u'limit': limit,
+            u'order': order,
+            u'partitions': partition,
+        }
+        if since:
+            # use the repr, to avoid a float getting clobbered by implicit
+            # str() calls in the URL generation
+            params[u'since'] = repr(since)
+        with self.timer(u'queuey.get_messages'):
+            response = self.get(queue_name, params=params)
+        if response.ok:
+            messages = ujson_decode(response.text)[u'messages']
+            # filter out exact timestamp matches
+            return [m for m in messages if float(str(m[u'timestamp'])) > since]
+        # failure
+        raise qdo.exceptions.HTTPError(response.status_code, response)
 
     def _partitions(self):
         # Prototype for listing all partitions, in the final code partition
