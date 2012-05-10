@@ -234,6 +234,9 @@ class SettingsDict(dict):
         for k, v in kwds.iteritems():
             self.setdefault(k, v)
 
+ERROR_QUEUE = u'qdo_error'
+STATUS_QUEUE = u'qdo_status'
+
 
 class QdoSettings(SettingsDict):
     """Settings representation including default values"""

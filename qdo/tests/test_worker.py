@@ -8,7 +8,9 @@ import time
 
 import ujson
 
+from qdo.config import ERROR_QUEUE
 from qdo.config import QdoSettings
+from qdo.config import STATUS_QUEUE
 from qdo import testing
 from qdo.tests.base import BaseTestCase
 
@@ -44,8 +46,8 @@ class TestWorker(BaseTestCase):
         worker = self._make_one()
         worker.configure_partitions(dict(policy=u'all'))
         partitions = self.worker.queuey_conn._partitions()
-        self.assertTrue(worker.error_queue + u'-1' in partitions)
-        self.assertTrue(worker.status_queue + u'-1' in partitions)
+        self.assertTrue(ERROR_QUEUE + u'-1' in partitions)
+        self.assertTrue(STATUS_QUEUE + u'-1' in partitions)
         self.assertEqual(self.worker.partitions.keys(),
             [self.queue_name + u'-1'])
         worker.configure_partitions(

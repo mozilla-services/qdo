@@ -9,6 +9,8 @@ import os
 import time
 import socket
 
+from qdo.config import ERROR_QUEUE
+from qdo.config import STATUS_QUEUE
 from qdo.partition import Partition
 from qdo.queuey import QueueyConnection
 from qdo.log import get_logger
@@ -29,9 +31,6 @@ class Worker(object):
     :param settings: Configuration settings
     :type settings: dict
     """
-
-    error_queue = u'qdo_error'
-    status_queue = u'qdo_status'
 
     def __init__(self, settings):
         self.settings = settings
@@ -74,8 +73,8 @@ class Worker(object):
         def cond_create(queue_name):
             if queue_name + u'-1' not in all_partitions:
                 queuey_conn.create_queue(queue_name=queue_name)
-        cond_create(self.error_queue)
-        cond_create(self.status_queue)
+        cond_create(ERROR_QUEUE)
+        cond_create(STATUS_QUEUE)
         self.assign_partitions(partition_ids)
 
     def assign_partitions(self, partition_ids):
@@ -83,7 +82,7 @@ class Worker(object):
             if pid not in partition_ids:
                 del self.partitions[pid]
         for pid in partition_ids:
-            if pid.startswith((self.error_queue, self.status_queue)):
+            if pid.startswith((ERROR_QUEUE, STATUS_QUEUE)):
                 continue
             self.partitions[pid] = Partition(self.queuey_conn, pid)
 

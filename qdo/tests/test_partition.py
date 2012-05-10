@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from qdo.config import STATUS_QUEUE
 from qdo.tests.base import BaseTestCase
 
 
@@ -12,6 +13,7 @@ class TestPartition(BaseTestCase):
         from qdo.partition import Partition
         self.conn = self._make_queuey_conn()
         self.queue_name = self.conn.create_queue()
+        self.conn.create_queue(queue_name=STATUS_QUEUE)
         self.partition = Partition(self.conn, self.queue_name)
         return self.partition
 
