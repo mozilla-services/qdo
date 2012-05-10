@@ -22,11 +22,9 @@ class Partition(object):
     :param msgid: The timestamp of the message in the status queue, holding
         information about the processing state of this partition.
     :type msgid: unicode
-    :param timestamp: The last processed timestamp in this partition.
-    :type timestamp: unicode
     """
 
-    def __init__(self, queuey_conn, name, msgid=None, timestamp=0.0):
+    def __init__(self, queuey_conn, name, msgid=None):
         self.queuey_conn = queuey_conn
         if '-' in name:
             self.name = name
@@ -38,12 +36,11 @@ class Partition(object):
         self.value = '0.0'
         self.msgid = msgid
         if msgid is None:
-            self._create_status_message(timestamp)
-            self.timestamp = timestamp
+            self._create_status_message()
 
-    def _create_status_message(self, timestamp):
+    def _create_status_message(self):
         result = self.queuey_conn.post(STATUS_QUEUE, data=encode(dict(
-            partition=self.name, processed=repr(timestamp), last_worker=u''
+            partition=self.name, processed=u'0.0', last_worker=u''
             )))
         self.msgid = decode(result.text)[u'messages'][0][u'timestamp']
 
