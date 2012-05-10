@@ -39,6 +39,7 @@ class Partition(object):
             self._create_status_message()
 
     def _create_status_message(self):
+        # XXX increase message TTL!
         result = self.queuey_conn.post(STATUS_QUEUE, data=encode(dict(
             partition=self.name, processed=u'0.0', last_worker=u''
             )))
