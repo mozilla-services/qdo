@@ -79,6 +79,9 @@ class Worker(object):
         self.assign_partitions(partition_ids)
 
     def assign_partitions(self, partition_ids):
+        for pid in list(self.partitions.keys()):
+            if pid not in partition_ids:
+                del self.partitions[pid]
         for pid in partition_ids:
             if pid.startswith((self.error_queue, self.status_queue)):
                 continue

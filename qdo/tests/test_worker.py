@@ -46,6 +46,12 @@ class TestWorker(BaseTestCase):
         partitions = self.worker.queuey_conn._partitions()
         self.assertTrue(worker.error_queue + u'-1' in partitions)
         self.assertTrue(worker.status_queue + u'-1' in partitions)
+        self.assertEqual(self.worker.partitions.keys(),
+            [self.queue_name + u'-1'])
+        worker.configure_partitions(
+            dict(policy=u'manual', ids=[self.queue_name + u'-2']))
+        self.assertEqual(self.worker.partitions.keys(),
+            [self.queue_name + u'-2'])
 
     def test_work_no_job(self):
         worker = self._make_one()
