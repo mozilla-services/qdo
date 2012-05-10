@@ -32,7 +32,7 @@ class TestWorker(BaseTestCase):
             settings.update(extra)
         self.worker = Worker(settings)
         self.queue_name = self.worker.queuey_conn._create_queue()
-        self.worker.configure_partitions(dict(policy=u'all'))
+        self.worker.settings[u'partitions.policy'] = u'all'
         return self.worker
 
     def _post_message(self, data, queue_name=None):
@@ -43,7 +43,6 @@ class TestWorker(BaseTestCase):
     def test_special_queues(self):
         worker = self._make_one()
         worker.configure_partitions(dict(policy=u'all'))
-        worker.assign_partitions()
         partitions = self.worker.queuey_conn._partitions()
         self.assertTrue(worker.error_queue + u'-1' in partitions)
         self.assertTrue(worker.status_queue + u'-1' in partitions)

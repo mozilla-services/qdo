@@ -41,7 +41,6 @@ class Worker(object):
         self.job_context = dict_context
         self.partition_policy = u'manual'
         self.partitions = {}
-        self._all_partitions = None
         self.configure()
 
     def configure(self):
@@ -61,35 +60,29 @@ class Worker(object):
         self.queuey_conn = QueueyConnection(
             queuey_section[u'app_key'],
             connection=queuey_section[u'connection'])
-        partitions_section = self.settings.getsection(u'partitions')
-        self.configure_partitions(partitions_section)
 
     def configure_partitions(self, section):
         self.partition_policy = policy = section[u'policy']
         partition_ids = []
+        queuey_conn = self.queuey_conn
+        all_partitions = queuey_conn._partitions()
         if policy == u'manual':
             partition_ids = section[u'ids']
         elif policy == u'all':
-            self._all_partitions = self.queuey_conn._partitions()
-            partition_ids = self._all_partitions
+            partition_ids = all_partitions
+
+        def cond_create(queue_name):
+            if queue_name + u'-1' not in all_partitions:
+                queuey_conn._create_queue(queue_name=queue_name)
+        cond_create(self.error_queue)
+        cond_create(self.status_queue)
+        self.assign_partitions(partition_ids)
+
+    def assign_partitions(self, partition_ids):
         for pid in partition_ids:
             if pid.startswith((self.error_queue, self.status_queue)):
                 continue
             self.partitions[pid] = Partition(self.queuey_conn, pid)
-
-    def assign_partitions(self):
-        if self._all_partitions is None:
-            self._all_partitions = self.queuey_conn._partitions()
-
-        def cond_create(queue_name):
-            if queue_name + u'-1' not in self._all_partitions:
-                self.queuey_conn._create_queue(queue_name=queue_name)
-        cond_create(self.error_queue)
-        cond_create(self.status_queue)
-        self._all_partitions = None
-
-        for name in self.queuey_conn._partitions():
-            self.partitions[name] = Partition(self.queuey_conn, name)
 
     def work(self):
         """Work on jobs.
@@ -98,11 +91,11 @@ class Worker(object):
         """
         if not self.job:
             return
-        atexit.register(self.stop)
         # Try Queuey heartbeat connection
         self.queuey_conn.connect()
-        # Assign partitions
-        self.assign_partitions()
+        partitions_section = self.settings.getsection(u'partitions')
+        self.configure_partitions(partitions_section)
+        atexit.register(self.stop)
         with self.job_context() as context:
             while 1:
                 if self.shutdown:
