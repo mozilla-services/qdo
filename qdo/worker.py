@@ -9,6 +9,8 @@ import os
 import time
 import socket
 
+from ujson import decode as ujson_decode
+
 from qdo.config import ERROR_QUEUE
 from qdo.config import STATUS_QUEUE
 from qdo.partition import Partition
@@ -77,14 +79,29 @@ class Worker(object):
         cond_create(STATUS_QUEUE)
         self.assign_partitions(partition_ids)
 
+    def track_partitions(self):
+        status = {}
+        # get all status messages, starting with the newest ones
+        status_messages = self.queuey_conn.messages(
+            STATUS_QUEUE, limit=100, order='descending')
+        for message in status_messages:
+            body = ujson_decode(message[u'body'])
+            partition = body[u'partition']
+            if partition not in status:
+                # don't overwrite newer messages with older status
+                status[partition] = message[u'timestamp']
+        return status
+
     def assign_partitions(self, partition_ids):
         for pid in list(self.partitions.keys()):
             if pid not in partition_ids:
                 del self.partitions[pid]
+        status = self.track_partitions()
         for pid in partition_ids:
             if pid.startswith((ERROR_QUEUE, STATUS_QUEUE)):
                 continue
-            self.partitions[pid] = Partition(self.queuey_conn, pid)
+            self.partitions[pid] = Partition(
+                self.queuey_conn, pid, msgid=status.get(pid, None))
 
     def work(self):
         """Work on jobs.
