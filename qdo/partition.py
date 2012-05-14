@@ -70,6 +70,7 @@ class Partition(object):
     def timestamp(self):
         """Property for the timestamp of the last processed message.
         """
+        # XXX get value from status message
         return float(self.value)
 
     @timestamp.setter
