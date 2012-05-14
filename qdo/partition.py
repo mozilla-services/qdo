@@ -39,10 +39,12 @@ class Partition(object):
             self._create_status_message()
 
     def _create_status_message(self):
-        # XXX increase message TTL!
         result = self.queuey_conn.post(STATUS_QUEUE, data=encode(dict(
-            partition=self.name, processed=u'0.0', last_worker=u''
-            )))
+            partition=self.name, processed=u'0.0', last_worker=u'')),
+            # XXX increase ttl after queuey allows for more
+            # https://github.com/mozilla-services/queuey/issues/4
+            headers={u'X-TTL': u'259200'},  # three days
+            )
         self.msgid = decode(result.text)[u'messages'][0][u'timestamp']
 
     def messages(self, limit=100, order='ascending'):
