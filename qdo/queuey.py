@@ -170,7 +170,10 @@ class QueueyConnection(object):
         if queue_name is not None:
             data[u'queue_name'] = queue_name
         response = self.post(data=data)
-        return ujson.decode(response.text)[u'queue_name']
+        if response.ok:
+            return ujson.decode(response.text)[u'queue_name']
+        # failure
+        raise qdo.exceptions.HTTPError(response.status_code, response)
 
     def messages(self, queue_name, partition=1, since=0.0, limit=100,
                   order='ascending'):

@@ -177,6 +177,11 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
         info = [q for q in queues if q[u'queue_name'] == name][0]
         self.assertEqual(info[u'partitions'], 1)
 
+    def test_create_queue_error(self):
+        from qdo.exceptions import HTTPError
+        conn = self._make_one()
+        self.assertRaises(HTTPError, conn.create_queue, **dict(partitions=-1))
+
     def test_messages(self):
         conn = self._make_one()
         name = conn.create_queue()
