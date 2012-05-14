@@ -39,13 +39,17 @@ class Partition(object):
             self._create_status_message()
 
     def _create_status_message(self):
+        result = self._post_status_message(value=u'0.0')
+        self.msgid = decode(result.text)[u'messages'][0][u'timestamp']
+
+    def _post_status_message(self, value):
         result = self.queuey_conn.post(STATUS_QUEUE, data=encode(dict(
-            partition=self.name, processed=u'0.0', last_worker=u'')),
+            partition=self.name, processed=value, last_worker=u'')),
             # XXX increase ttl after queuey allows for more
             # https://github.com/mozilla-services/queuey/issues/4
             headers={u'X-TTL': u'259200'},  # three days
             )
-        self.msgid = decode(result.text)[u'messages'][0][u'timestamp']
+        return result
 
     def messages(self, limit=100, order='ascending'):
         """Returns messages for the partition, by default from oldest to
