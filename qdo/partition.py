@@ -82,3 +82,5 @@ class Partition(object):
         if isinstance(value, basestring):
             value = float(str(value))
         self.value = repr(value)
+        # XXX convert to PUT with self.msgid
+        self._post_status_message(repr(value))
