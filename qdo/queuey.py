@@ -134,7 +134,7 @@ class QueueyConnection(object):
             # support message batches
             messages = []
             for d in data:
-                messages.append({u'body': d, u'ttl': 3600})
+                messages.append({u'body': d, u'ttl': 259200})  # three days
             data = ujson.encode({u'messages': messages})
             headers = {u'content-type': u'application/json'}
         return self.session.post(url, headers=headers,
