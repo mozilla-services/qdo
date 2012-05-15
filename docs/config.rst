@@ -60,8 +60,12 @@ ids
 connection
     Which :term:`Queuey` instance(s) to connect to. Defaults to
     `https://127.0.0.1:5001/v1/queuey/`. Multiple instances can be specified
-    as a comma separated list: `https://127.0.0.1:5001/v1/queuey/,https://127.0.0.1:5002/v1/queuey/`. With multiple servers, one will be selected at random
-    and the others will serve as transparent fallback.
+    as a comma separated list: `https://127.0.0.1:5001/v1/queuey/,https://localhost:5002/v1/queuey/`.
+
+    If multiple servers are specified, one will be selected as default and
+    the others serve as transparent fallback options. The selection prefers a
+    local server (127.0.0.*, localhost or ::1) and chooses at random among
+    multiple candidates.
 
 app_key
     The application key used for authorization.

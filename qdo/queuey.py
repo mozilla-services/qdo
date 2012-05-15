@@ -3,7 +3,7 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from functools import wraps
-from random import randint
+from random import choice
 from urlparse import urljoin
 from urlparse import urlsplit
 
@@ -71,11 +71,6 @@ class QueueyConnection(object):
         self.app_key = app_key
         self.retries = retries
         self.timeout = timeout
-        self.connection = [c.strip() for c in connection.split(',')]
-        rand_index = randint(0, len(self.connection))
-        self.app_url = self.connection[rand_index - 1]
-        self.fallback_urls = self.connection[:(rand_index - 1)] + \
-            self.connection[rand_index:]
         self.failed_urls = []
         headers = {u'Authorization': u'Application %s' % app_key}
         # Setting pool_maxsize to 1 ensures we re-use the same connection.
@@ -84,6 +79,29 @@ class QueueyConnection(object):
         self.session = session(headers=headers, timeout=self.timeout,
             config={u'pool_maxsize': 1, u'keep_alive': True}, prefetch=True)
         self.timer = get_logger().timer
+        self._configure_connection(connection)
+
+    def _configure_connection(self, connection):
+        self.connection = [c.strip() for c in connection.split(',')]
+        if len(self.connection) == 1:
+            self.app_url = self.connection[0]
+            self.fallback_urls = []
+        else:
+            # choose random server, but prefer local ones
+            local = []
+            remote = []
+            for c in self.connection:
+                netloc = urlsplit(c).netloc
+                if netloc.startswith((u'127.0.0.', u'localhost', u'::1')):
+                    local.append(c)
+                else:
+                    remote.append(c)
+            all_servers = preferred = local + remote
+            if len(local) > 0:
+                preferred = local
+            self.app_url = choice(preferred)
+            all_servers.remove(self.app_url)
+            self.fallback_urls = all_servers
 
     @fallback
     @retry

@@ -36,6 +36,39 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
     def _make_one(self, connection=u'https://127.0.0.1:5001/v1/queuey/'):
         return self._make_queuey_conn(connection=connection)
 
+    def test_configure_connection(self):
+        conn = self._make_one()
+        self.assertEqual(conn.app_url, u'https://127.0.0.1:5001/v1/queuey/')
+
+    def test_configure_connection_multiple(self):
+        servers = [u'127.0.0.1:5001', u'127.0.0.1:5002', u'127.0.0.1:5003']
+        servers = [u'https://%s/v1/queuey/' % s for s in servers]
+        conn = self._make_one(u','.join(servers))
+        self.assertTrue(conn.app_url in servers)
+
+    def test_configure_connection_multiple_nonlocal(self):
+        servers = [u'10.0.0.1:5001', u'10.0.0.1:5002', u'10.0.0.1:5003']
+        servers = [u'https://%s/v1/queuey/' % s for s in servers]
+        conn = self._make_one(u','.join(servers))
+        self.assertTrue(conn.app_url in servers)
+
+    def test_configure_connection_multiple_preferlocal(self):
+        servers = [u'10.0.0.1:5001', u'10.0.0.1:5002', u'127.0.0.1:5001']
+        servers = [u'https://%s/v1/queuey/' % s for s in servers]
+        conn = self._make_one(u','.join(servers))
+        self.assertEqual(conn.app_url, u'https://127.0.0.1:5001/v1/queuey/')
+
+    def test_configure_connection_multiple_preferlocal_many(self):
+        local = [u'127.0.0.1:5001', u'localhost:5002', u'::1:5001']
+        local = [u'https://%s/v1/queuey/' % s for s in local]
+        remote = [u'svc1.mozilla.org:5001', u'10.0.0.1:5001']
+        remote = [u'https://%s/v1/queuey/' % s for s in remote]
+        servers = local + remote
+        conn = self._make_one(u','.join(servers))
+        self.assertTrue(conn.app_url in local, conn.app_url)
+        servers.remove(conn.app_url)
+        self.assertEqual(conn.fallback_urls, servers)
+
     def test_connect(self):
         conn = self._make_one()
         response = conn.connect()
