@@ -38,8 +38,10 @@ Helpers
 
 To check for new releases of all Python dependencies, run::
 
-    bin/checkversions
+    bin/checkversions -i http://c.pypi.python.org/simple
 
 or if you only want bug-fix (level 2 in 0.1.2) releases::
 
-    bin/checkversions -l 2
+    bin/checkversions -l 2 -i http://c.pypi.python.org/simple
+
+Choose a PyPi mirror that's close to you.
