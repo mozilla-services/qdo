@@ -3,11 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from metlog.config import client_from_dict_config
-from metlog.client import MetlogClient
-from metlog.senders import DebugCaptureSender
-
-_metlogger = None
+from metlog.holder import get_client
+from metlog.senders.dev import DebugCaptureSender
 
 
 def get_logger():
@@ -15,17 +12,19 @@ def get_logger():
 
     :rtype: :py:class:`metlog.client.MetlogClient`
     """
-    global _metlogger
-    return _metlogger
+    return get_client(u'qdo-worker')
 
 
 def configure(settings, debug=False):
     """Configure a :term:`metlog` client and sender, either based on the
     passed in :py:attr:`settings` or as a debug sender.
     """
-    global _metlogger
     if debug:
-        _metlogger = MetlogClient(DebugCaptureSender(), logger=u'qdo-worker')
-    elif _metlogger is None:
-        # don't reconfigure an already configured logger
-        _metlogger = client_from_dict_config(settings)
+        debug_config = {u'sender': {
+            u'class': u'metlog.senders.dev.DebugCaptureSender'}}
+        get_client(u'qdo-worker', debug_config)
+    else:
+        logger = get_client(u'qdo-worker')
+        # don't reconfigure an already configured debug logger
+        if not isinstance(logger.sender, DebugCaptureSender):
+            get_client(u'qdo-worker', settings)
