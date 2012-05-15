@@ -6,6 +6,7 @@
 import atexit
 from contextlib import contextmanager
 import os
+import random
 import time
 import socket
 
@@ -133,8 +134,12 @@ class Worker(object):
                     self.job(context, message)
                     partition.timestamp = timestamp
                 if no_messages == len(self.partitions):
-                    get_logger().incr(u'worker.wait_for_jobs')
-                    time.sleep(self.wait_interval)
+                    self.wait()
+
+    def wait(self):
+        get_logger().incr(u'worker.wait_for_jobs')
+        jitter = random.uniform(0.8, 1.2)
+        time.sleep(self.wait_interval * jitter)
 
     def stop(self):
         """Stop the worker loop. Used in an `atexit` hook."""
