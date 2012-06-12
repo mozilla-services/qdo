@@ -28,7 +28,7 @@ def dict_context():
         del context
 
 
-def default_failure(exc):
+def default_failure(context, exc, queuey_conn):
     pass
 
 
@@ -140,7 +140,10 @@ class Worker(object):
                         continue
                     message = messages[0]
                     timestamp = message[u'timestamp']
-                    self.job(context, message)
+                    try:
+                        self.job(context, message)
+                    except Exception as exc:
+                        self.job_failure(context, exc, self.queuey_conn)
                     partition.timestamp = timestamp
                 if no_messages == len(self.partitions):
                     self.wait()
