@@ -32,12 +32,12 @@ def default_failure(exc, context, queuey_conn):
     pass
 
 
-def resolve(section, name):
+def resolve(worker, section, name):
     if section[name]:
         mod, func_name = section[name].split(u':')
         result = __import__(mod, globals(), locals(), func_name)
-        return getattr(result, func_name)
-    return None
+        func = getattr(result, func_name)
+        setattr(worker, name, func)
 
 
 class Worker(object):
@@ -63,15 +63,9 @@ class Worker(object):
         """
         qdo_section = self.settings.getsection(u'qdo-worker')
         self.wait_interval = qdo_section[u'wait_interval']
-        func = resolve(qdo_section, u'job')
-        if func is not None:
-            self.job = func
-        func = resolve(qdo_section, u'job_context')
-        if func is not None:
-            self.job_context = func
-        func = resolve(qdo_section, u'job_failure')
-        if func is not None:
-            self.job_failure = func
+        resolve(self, qdo_section, u'job')
+        resolve(self, qdo_section, u'job_context')
+        resolve(self, qdo_section, u'job_failure')
         queuey_section = self.settings.getsection(u'queuey')
         self.queuey_conn = QueueyConnection(
             queuey_section[u'app_key'],
