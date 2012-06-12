@@ -251,7 +251,7 @@ class QdoSettings(SettingsDict):
         self[u'qdo-worker.ca_bundle'] = None
         self[u'qdo-worker.job'] = None
         self[u'qdo-worker.job_context'] = u'qdo.worker:dict_context'
-        self[u'qdo-worker.job_failure'] = u'qdo.worker:default_failure'
+        self[u'qdo-worker.job_failure'] = u'qdo.worker:log_failure'
 
         self[u'partitions.policy'] = u'manual'
         self[u'partitions.ids'] = []

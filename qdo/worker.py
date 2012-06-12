@@ -28,7 +28,7 @@ def dict_context():
         del context
 
 
-def default_failure(exc, context, queuey_conn):
+def log_failure(exc, context, queuey_conn):
     logger = get_logger()
     raven = getattr(logger, u'raven', None)
     if raven is not None:
@@ -56,7 +56,7 @@ class Worker(object):
         self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
         self.job = None
         self.job_context = dict_context
-        self.job_failure = default_failure
+        self.job_failure = log_failure
         self.partition_policy = u'manual'
         self.partitions = {}
         self.configure()

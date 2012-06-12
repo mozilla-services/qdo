@@ -28,7 +28,7 @@ job_context
 
 job_failure
     The :term:`resource specification` for a Python exception handler. For
-    example `qdo.worker.default_failure`.
+    example `qdo.worker.log_failure`.
 
 ca_bundle
     Path to a private certificate used for SSL connections, in addition to all
