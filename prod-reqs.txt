@@ -26,7 +26,7 @@ pyzmq==2.2.0
 repoze.lru==0.5
 repoze.profile==1.4
 repoze.who==2.0
-simplejson==2.5.2
+simplejson==2.4.0
 supervisor==3.0a12
 thrift==0.8.0
 translationstring==1.1

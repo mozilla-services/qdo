@@ -47,6 +47,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'metlog-py',
+        'metlog-raven',
         'requests',
         'ujson',
     ] + install_requires,

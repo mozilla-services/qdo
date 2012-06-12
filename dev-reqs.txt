@@ -13,7 +13,10 @@ metlog-py==0.8.5
 mock==0.8.0
 nose==1.1.2
 nose-setenv==0.1-1
+raven==1.9.4
 requests==0.12.1
 ujson==1.18
 unittest2==0.5.1
 z3c.checkversions==0.4.1
+
+-e git://github.com/mozilla-services/metlog-raven.git#egg=metlog-raven
