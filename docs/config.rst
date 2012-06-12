@@ -26,6 +26,10 @@ job_context
     The :term:`resource specification` for a Python job context (manager).
     For example: `qdo.worker:dict_context`
 
+job_failure
+    The :term:`resource specification` for a Python exception handler. For
+    example `qdo.worker.default_failure`.
+
 ca_bundle
     Path to a private certificate used for SSL connections, in addition to all
     officially signed ones.

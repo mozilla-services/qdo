@@ -28,6 +28,10 @@ def dict_context():
         del context
 
 
+def default_failure(exc):
+    pass
+
+
 class Worker(object):
     """A Worker works on jobs.
 
@@ -41,6 +45,7 @@ class Worker(object):
         self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
         self.job = None
         self.job_context = dict_context
+        self.job_failure = default_failure
         self.partition_policy = u'manual'
         self.partitions = {}
         self.configure()
@@ -58,6 +63,10 @@ class Worker(object):
             mod, fun = qdo_section[u'job_context'].split(u':')
             result = __import__(mod, globals(), locals(), fun)
             self.job_context = getattr(result, fun)
+        if qdo_section[u'job_failure']:
+            mod, fun = qdo_section[u'job_failure'].split(u':')
+            result = __import__(mod, globals(), locals(), fun)
+            self.job_failure = getattr(result, fun)
         queuey_section = self.settings.getsection(u'queuey')
         self.queuey_conn = QueueyConnection(
             queuey_section[u'app_key'],
