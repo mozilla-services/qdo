@@ -29,7 +29,7 @@ vardir = os.path.join(maindir, 'var')
 processes = {}
 
 
-def example_job(context, message):
+def example_job(message, context):
     body = message[u'body']
     if body == u'stop':
         raise KeyboardInterrupt

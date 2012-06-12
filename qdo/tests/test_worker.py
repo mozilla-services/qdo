@@ -71,7 +71,7 @@ class TestWorker(BaseTestCase):
     def test_work(self):
         worker = self._make_one()
 
-        def job(context, message):
+        def job(message, context):
             raise KeyboardInterrupt
 
         worker.job = job
@@ -91,7 +91,7 @@ class TestWorker(BaseTestCase):
             finally:
                 context[u'done'] = True
 
-        def job(context, message):
+        def job(message, context):
             context[u'counter'] += 1
             if message[u'body'] == u'end':
                 raise KeyboardInterrupt
@@ -109,7 +109,7 @@ class TestWorker(BaseTestCase):
         worker = self._make_one()
         counter = [0]
 
-        def job(context, message, counter=counter):
+        def job(message, context, counter=counter):
             counter[0] += 1
             if counter[0] > 5:
                 raise ValueError
@@ -142,7 +142,7 @@ class TestWorker(BaseTestCase):
         self._post_message(u'queue2-3', queue_name=queue2)
         counter = [0]
 
-        def job(context, message, counter=counter):
+        def job(message, context, counter=counter):
             counter[0] += 1
             if counter[0] == 5:
                 raise KeyboardInterrupt
@@ -163,7 +163,7 @@ class TestWorker(BaseTestCase):
         self._post_message(u'queue2-1', queue_name=queue2)
         counter = [0]
 
-        def job(context, message, counter=counter):
+        def job(message, context, counter=counter):
             counter[0] += 1
             if counter[0] == 3:
                 raise KeyboardInterrupt
@@ -188,7 +188,7 @@ class TestWorker(BaseTestCase):
         self.assertTrue(len(partitions) > 1, partitions)
         counter = [0]
 
-        def job(context, message, counter=counter):
+        def job(message, context, counter=counter):
             counter[0] += 1
             if counter[0] == 10:
                 raise KeyboardInterrupt

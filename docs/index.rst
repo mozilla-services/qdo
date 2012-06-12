@@ -32,7 +32,7 @@ you need at least one Python module named for example `hello.py`::
             print(u'Messages processed: ', context[u'counter'])
 
 
-    def job(context, message):
+    def job(message, context):
         context[u'counter'] += 1
         print(message[u'body'])
 
