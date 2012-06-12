@@ -29,7 +29,10 @@ def dict_context():
 
 
 def default_failure(exc, context, queuey_conn):
-    pass
+    logger = get_logger()
+    raven = getattr(logger, u'raven', None)
+    if raven is not None:
+        raven()
 
 
 def resolve(worker, section, name):

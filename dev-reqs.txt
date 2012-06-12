@@ -9,7 +9,7 @@ chardet==1.0.1
 coverage==3.5.2
 distribute==0.6.26
 docutils==0.9
-metlog-py==0.8.5
+metlog-py==0.9.1
 mock==0.8.0
 nose==1.1.2
 nose-setenv==0.1-1
