@@ -9,7 +9,9 @@ if not testing.CASSANDRA:
     raise nose.SkipTest
 
 import time
+import urllib
 import unittest
+import uuid
 
 import mock
 from requests.exceptions import ConnectionError
@@ -150,6 +152,18 @@ class TestQueueyConnection(unittest.TestCase, QueueyBase):
             u'https://127.0.0.1:5002/v1/queuey/')
         response = conn.post()
         self.assertEqual(response.status_code, 201)
+
+    def test_put(self):
+        conn = self._make_one()
+        name = conn.create_queue()
+        msg_id = uuid.uuid1().hex
+        q = urllib.quote_plus(u'1:' + msg_id)
+        response = conn.put(name + u'/' + q, data=u'hello')
+        self.assertEqual(response.status_code, 200)
+        messages = conn.messages(name)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(messages[0][u'body'], u'hello')
+        self.assertEqual(messages[0][u'message_id'], msg_id)
 
     def test_delete(self):
         conn = self._make_one()

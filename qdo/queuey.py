@@ -160,6 +160,26 @@ class QueueyConnection(object):
 
     @fallback
     @retry
+    def put(self, url='', params=None, data='', headers=None):
+        """Perform a PUT request against :term:`Queuey`, retry
+        up to :py:attr:`retries` times on connection timeout.
+
+        :param url: Relative URL for put, without a leading slash.
+        :type url: str
+        :param params: Additional query string parameters.
+        :type params: dict
+        :param data: The body payload as a single message string.
+        :type data: str
+        :param headers: Additional request headers.
+        :type headers: dict
+        :rtype: :py:class:`requests.models.Response`
+        """
+        url = urljoin(self.app_url, url)
+        return self.session.put(url, headers=headers,
+            params=params, timeout=self.timeout, data=data)
+
+    @fallback
+    @retry
     def delete(self, url='', params=None):
         """Perform a DELETE request against :term:`Queuey`, retry
         up to :py:attr:`retries` times on connection timeout.
