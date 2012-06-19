@@ -36,7 +36,6 @@ class Partition(object):
             self.name = name + u'-1'
             self.queue_name, self.partition = (name, 1)
         self.timer = get_logger().timer
-        self.value = '0.0'
         self.msgid = msgid
         if msgid is None:
             self.msgid = uuid.uuid1().hex
@@ -44,6 +43,15 @@ class Partition(object):
 
     def _create_status_message(self):
         return self._update_status_message(u'0.0')
+
+    def _get_status_message(self):
+        # XXX add new API to Queuey to get one explicit message id, instead
+        # of hoping to have it included inside the last 100 messages
+        messages = self.queuey_conn.messages(STATUS_QUEUE, order=u'descending')
+        for msg in messages:
+            if msg[u'message_id'] == self.msgid:
+                return decode(msg[u'body'])
+        return None
 
     def _update_status_message(self, value):
         q = STATUS_QUEUE + u'/' + quote_plus(u'1:' + self.msgid)
@@ -74,8 +82,10 @@ class Partition(object):
     def timestamp(self):
         """Property for the timestamp of the last processed message.
         """
-        # XXX get value from status message
-        return float(self.value)
+        msg = self._get_status_message()
+        if msg is None:
+            return 0.0
+        return float(msg[u'processed'])
 
     @timestamp.setter
     def timestamp(self, value):
@@ -86,6 +96,4 @@ class Partition(object):
         """
         if isinstance(value, basestring):
             value = float(str(value))
-        self.value = repr(value)
-        # XXX convert to PUT with self.msgid
         self._update_status_message(repr(value))
