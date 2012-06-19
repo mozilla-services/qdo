@@ -3,6 +3,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from urllib import quote_plus
+import uuid
+
 from ujson import decode
 from ujson import encode
 
@@ -19,7 +22,7 @@ class Partition(object):
     :param name: The queue name (a uuid4 hash) or the combined queue name and
         partition id, separated by a dash.
     :type name: str
-    :param msgid: The timestamp of the message in the status queue, holding
+    :param msgid: The key of the message in the status queue, holding
         information about the processing state of this partition.
     :type msgid: unicode
     """
@@ -36,14 +39,15 @@ class Partition(object):
         self.value = '0.0'
         self.msgid = msgid
         if msgid is None:
+            self.msgid = uuid.uuid1().hex
             self._create_status_message()
 
     def _create_status_message(self):
-        result = self._post_status_message(value=u'0.0')
-        self.msgid = decode(result.text)[u'messages'][0][u'timestamp']
+        return self._update_status_message(u'0.0')
 
-    def _post_status_message(self, value):
-        result = self.queuey_conn.post(STATUS_QUEUE, data=encode(dict(
+    def _update_status_message(self, value):
+        q = STATUS_QUEUE + u'/' + quote_plus(u'1:' + self.msgid)
+        result = self.queuey_conn.put(q, data=encode(dict(
             partition=self.name, processed=value, last_worker=u'')),
             # XXX increase ttl after queuey allows for more
             # https://github.com/mozilla-services/queuey/issues/4
@@ -84,4 +88,4 @@ class Partition(object):
             value = float(str(value))
         self.value = repr(value)
         # XXX convert to PUT with self.msgid
-        self._post_status_message(repr(value))
+        self._update_status_message(repr(value))
