@@ -38,4 +38,4 @@ zope.deprecation==3.5.1
 zope.event==3.5.2
 zope.interface==3.8.0
 
--e git://github.com/hannosch/queuey.git@update_message#egg=queuey
+-e git://github.com/hannosch/queuey.git@get_message#egg=queuey
