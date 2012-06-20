@@ -104,7 +104,7 @@ class Worker(object):
             partition = body[u'partition']
             if partition not in status:
                 # don't overwrite newer messages with older status
-                status[partition] = message[u'timestamp']
+                status[partition] = message[u'message_id']
         return status
 
     def assign_partitions(self, partition_ids):
