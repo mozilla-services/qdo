@@ -4,6 +4,9 @@ TODO
 worker
 ------
 
+- use time uuids instead of timestamps for progress tracking
+- increase default status/error partitions to 7
+
 - use 'admin/status' queue
 - add 'storage policy'
 - add instructions for consumer-dev environment, with memory-based queuey
