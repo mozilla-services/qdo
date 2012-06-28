@@ -24,7 +24,7 @@ INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) \
 	--use-mirrors -f https://github.com/mozilla-services/qdo/downloads \
 	-f https://github.com/hannosch/clint/downloads
 CASSANDRA_VERSION = 1.0.9
-NGINX_VERSION = 1.1.19
+NGINX_VERSION = 1.2.1
 
 ifdef PYPIEXTRAS
 	PYPIOPTIONS += -e $(PYPIEXTRAS)
