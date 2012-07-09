@@ -57,9 +57,7 @@ class Partition(object):
         q = STATUS_QUEUE + u'/' + quote_plus(u'1:' + self.msgid)
         result = self.queuey_conn.put(q, data=encode(dict(
             partition=self.name, processed=value, last_worker=u'')),
-            # XXX increase ttl after queuey allows for more
-            # https://github.com/mozilla-services/queuey/issues/4
-            headers={u'X-TTL': u'259200'},  # three days
+            headers={u'X-TTL': u'2592000'},  # thirty days
             )
         return result
 
