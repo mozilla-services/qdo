@@ -229,6 +229,12 @@ class TestRealWorker(BaseTestCase):
             testing.ensure_process(u'qdo:qdo3', noisy=False)
             # stop second worker
             self.supervisor.stopProcess(u'qdo:qdo2')
-            # XXX
+            status_messages = queuey_conn.messages(
+                STATUS_QUEUE, order=u'descending')
+            partitions = set([ujson.decode(sm[u'body'])[u'partition']
+                for sm in status_messages])
+            expected = set([queue1 + u'-1', queue2 + u'-1', queue2 + u'-2',
+                queue3 + u'-1', queue3 + u'-2', queue3 + u'-3'])
+            self.assertEqual(expected, partitions)
         finally:
             self.supervisor.stopProcessGroup(u'qdo')
