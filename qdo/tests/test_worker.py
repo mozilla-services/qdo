@@ -128,9 +128,8 @@ class TestWorker(BaseTestCase):
 
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(counter[0], 5)
-        # XXX
-        # value = float(self.zk_conn.get(u'/partitions/' + partition_id)[0])
-        # self.assertEqual(value, last_timestamp)
+        value = worker.partitions.values()[0].timestamp
+        self.assertEqual(value, last_timestamp)
 
     def test_work_multiple_queues(self):
         worker = self._make_one()
