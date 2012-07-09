@@ -45,12 +45,10 @@ class Partition(object):
         return self._update_status_message(u'0.0')
 
     def _get_status_message(self):
-        # XXX add new API to Queuey to get one explicit message id, instead
-        # of hoping to have it included inside the last 100 messages
-        messages = self.queuey_conn.messages(STATUS_QUEUE, order=u'descending')
-        for msg in messages:
-            if msg[u'message_id'] == self.msgid:
-                return decode(msg[u'body'])
+        response = self.queuey_conn.get(STATUS_QUEUE + '/1%3A' + self.msgid)
+        messages = decode(response.text)[u'messages']
+        if messages:
+            return decode(messages[0][u'body'])
         return None
 
     def _update_status_message(self, value):
