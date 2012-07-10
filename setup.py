@@ -48,6 +48,7 @@ setup(
     install_requires=[
         'metlog-py',
         'metlog-raven',
+        'queuey-py',
         'requests',
         'ujson',
     ] + install_requires,

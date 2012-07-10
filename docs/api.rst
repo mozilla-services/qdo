@@ -12,5 +12,4 @@ organized alphabetically by module name.
    api/exceptions
    api/log
    api/partition
-   api/queuey
    api/worker
