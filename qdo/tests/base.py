@@ -28,7 +28,7 @@ class QueueyBase(object):
 
     @classmethod
     def _make_queuey_conn(cls,
-            connection=u'https://127.0.0.1:5001/v1/queuey/'):
+            connection=u'http://127.0.0.1:5000/v1/queuey/'):
         return QueueyConnection(cls.queuey_app_key, connection=connection)
 
     @classmethod
