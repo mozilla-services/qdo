@@ -21,7 +21,7 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(qdo_section[u'wait_interval'], 30)
         queuey_section = settings.getsection(u'queuey')
         self.assertEqual(queuey_section[u'connection'],
-            u'https://127.0.0.1:5001/v1/queuey/')
+            u'http://127.0.0.1:5000/v1/queuey/')
 
     def test_configure(self):
         extra = {

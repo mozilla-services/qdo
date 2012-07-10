@@ -14,7 +14,6 @@ metlog-py==0.9.1
 metlog-raven==0.1
 mock==0.8.0
 nose==1.1.2
-nose-setenv==0.1-1
 raven==1.9.4
 requests==0.12.1
 queuey-py==0.1

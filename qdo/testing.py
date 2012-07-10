@@ -8,12 +8,6 @@ import os.path
 import time
 import xmlrpclib
 
-CASSANDRA = True
-try:
-    import pycassa
-except ImportError:
-    CASSANDRA = False
-
 SUPERVISOR = True
 try:
     import supervisor
@@ -35,24 +29,6 @@ def example_job(message, context):
         raise KeyboardInterrupt
     elif body == u'wait':
         time.sleep(0.01)
-
-
-def setup_cassandra_schema():
-    hosts = ['127.0.0.1:9160']
-    while 1:
-        try:
-            pycassa.ConnectionPool(keyspace=u'MessageStore', server_list=hosts)
-            break
-        except pycassa.InvalidRequestException as e:
-            if u'Keyspace MessageStore does not exist' in e.why:
-                lhost = hosts[0].split(u':')[0]
-                os.system(u'bin/cassandra/bin/cassandra-cli -host %s '
-                    u'--file etc/cassandra/message_schema.txt' % lhost)
-                os.system(u'bin/cassandra/bin/cassandra-cli -host %s '
-                    u'--file etc/cassandra/metadata_schema.txt' % lhost)
-            break
-        except pycassa.AllServersUnavailable:
-            time.sleep(1)
 
 
 def ensure_process(name, timeout=30, noisy=True):
@@ -90,12 +66,8 @@ def setup():
     log.configure(None, debug=True)
     if SUPERVISOR:
         setup_supervisor()
-    if CASSANDRA:
-        ensure_process(u'cassandra')
-        setup_cassandra_schema()
     if SUPERVISOR:
         ensure_process(u'queuey')
-        ensure_process(u'nginx')
 
 
 def teardown():

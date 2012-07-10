@@ -1,1 +1,0 @@
-All passwords are `localhost`.

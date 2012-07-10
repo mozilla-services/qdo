@@ -256,7 +256,7 @@ class QdoSettings(SettingsDict):
         self[u'partitions.policy'] = u'manual'
         self[u'partitions.ids'] = []
 
-        self[u'queuey.connection'] = u'https://127.0.0.1:5001/v1/queuey/'
+        self[u'queuey.connection'] = u'http://127.0.0.1:5000/v1/queuey/'
         self[u'queuey.app_key'] = None
 
         self[u'metlog.logger'] = u'qdo-worker'
