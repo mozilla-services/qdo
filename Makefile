@@ -59,8 +59,6 @@ $(BIN)/pip: $(BIN)/python
 lib: $(BIN)/pip
 	@echo "Installing package pre-requisites..."
 	$(INSTALL) -r dev-reqs.txt
-	@echo "Installing production pre-requisites..."
-	$(INSTALL) -r prod-reqs.txt
 
 clean-env:
 	rm -rf $(BUILD_DIRS)
