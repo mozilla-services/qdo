@@ -25,10 +25,13 @@ class Partition(object):
     :param msgid: The key of the message in the status queue, holding
         information about the processing state of this partition.
     :type msgid: unicode
+    :param worker_id: An id for the current worker process, used for logging.
+    :type name: unicode
     """
 
-    def __init__(self, queuey_conn, name, msgid=None):
+    def __init__(self, queuey_conn, name, msgid=None, worker_id=u''):
         self.queuey_conn = queuey_conn
+        self.worker_id = worker_id
         if '-' in name:
             self.name = name
             parts = name.split(u'-')
@@ -61,7 +64,7 @@ class Partition(object):
 
     def _update_status_message(self, value):
         result = self.queuey_conn.put(self._status_url, data=encode(dict(
-            partition=self.name, processed=value, last_worker=u'')),
+            partition=self.name, processed=value, last_worker=self.worker_id)),
             headers={u'X-TTL': u'2592000'},  # thirty days
             )
         return result

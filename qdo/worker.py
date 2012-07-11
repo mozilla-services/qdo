@@ -131,8 +131,8 @@ class Worker(object):
         for pid in partition_ids:
             if pid.startswith((ERROR_QUEUE, STATUS_QUEUE)):
                 continue
-            self.partitions[pid] = Partition(
-                self.queuey_conn, pid, msgid=status.get(pid, None))
+            self.partitions[pid] = Partition(self.queuey_conn, pid,
+                msgid=status.get(pid, None), worker_id=self.name)
 
     def work(self):
         """Work on jobs.
