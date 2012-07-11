@@ -4,11 +4,11 @@ TODO
 worker
 ------
 
-- add 'storage policy'
 - add instructions for consumer-dev environment
 - rewrite/update internals.txt
 - add job error handling hook / use 'failed' queue
 
+- add zookeeper-based work partitioner
 - deal with more than 100 status messages (worker.track_partitions)
 
 future
