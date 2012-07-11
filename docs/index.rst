@@ -5,17 +5,15 @@ qdo: Python worker library for Mozilla Services' message queuing
 qdo
     pronounced `qu-doe`
 
-This is a worker library implemented in Python used for processing
-queued messages from a :term:`Mozilla Services` message queue. More soon, in
-the meantime, you can read the
-`specification <https://wiki.mozilla.org/Services/Sagrada/Queuey>`_ on the
-Mozilla wiki or look at the message queue implementation called
-:term:`Queuey` itself.
+This is a Python implementation of a worker library used for processing
+queued messages from a Mozilla Services message queue. The message queue is
+called `Queuey <https://github.com/mozilla-services/queuey>`_ and is
+implemented as a :term:`Pyramid` based web service on top of :term:`Cassandra`.
 
 Quick intro
 ===========
 
-Assuming you have a working installation and setup of Queuey,
+Assuming you have a working installation and setup of :term:`Queuey`,
 you need at least one Python module named for example `hello.py`::
 
     from contextlib import contextmanager

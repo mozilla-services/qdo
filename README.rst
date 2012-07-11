@@ -12,15 +12,14 @@ qdo
     pronounced `qu-doe`
 
 This is a Python implementation of a worker library used for processing
-queued messages from a MozSvc message queue. More soon, in the meantime,
-you can read the `spec <https://wiki.mozilla.org/Services/Sagrada/Queuey>`_
-on the Mozilla wiki or look at the message queue implementation called
-`Queuey <https://github.com/mozilla-services/queuey>`_ itself.
+queued messages from a Mozilla Services message queue. The message queue is
+called `Queuey <https://github.com/mozilla-services/queuey>`_ and is
+implemented as a :term:`Pyramid` based web service on top of :term:`Cassandra`.
 
 
-.. note:: This code is not yet stable. Please contact
-          `Hanno Schlichting <hschlichting@mozilla.com>`_ if you are
-          interested.
+.. note:: This code is still a bit experimental. Please contact
+          `Hanno Schlichting <hschlichting@mozilla.com>`_ if you have any
+          questions.
 
 Documentation
 =============
