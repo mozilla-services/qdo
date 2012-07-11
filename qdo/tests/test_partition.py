@@ -9,6 +9,8 @@ from qdo.tests.base import BaseTestCase
 
 class TestPartition(BaseTestCase):
 
+    dummy_uuid = u'a8f70ab3cb7411e19621b88d120c81de'
+
     def _make_one(self):
         from qdo.partition import Partition
         self.conn = self._make_queuey_conn()
@@ -30,21 +32,16 @@ class TestPartition(BaseTestCase):
         bodies = [m[u'body'] for m in messages]
         self.assertTrue(u'Hello world!' in bodies)
 
-    def test_timestamp_get(self):
+    def test_last_message_get(self):
         partition = self._make_one()
-        self.assertEqual(partition.timestamp, 0.0)
+        self.assertEqual(partition.last_message, u'')
 
-    def test_timestamp_set(self):
+    def test_last_message_set(self):
         partition = self._make_one()
-        partition.timestamp = 1331231353.762148
-        self.assertEqual(partition.timestamp, 1331231353.762148)
+        partition.last_message = self.dummy_uuid
+        self.assertEqual(partition.last_message, self.dummy_uuid)
 
-    def test_timestamp_set_string(self):
+    def test_last_message_set_string(self):
         partition = self._make_one()
-        partition.timestamp = u'1331231353.762148'.encode(u'utf-8')
-        self.assertEqual(partition.timestamp, 1331231353.762148)
-
-    def test_timestamp_set_unicode(self):
-        partition = self._make_one()
-        partition.timestamp = u'1331231353.762148'
-        self.assertEqual(partition.timestamp, 1331231353.762148)
+        partition.last_message = self.dummy_uuid.encode(u'utf-8')
+        self.assertEqual(partition.last_message, self.dummy_uuid)

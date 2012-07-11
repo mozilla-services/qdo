@@ -42,7 +42,7 @@ class Partition(object):
             self._create_status_message()
 
     def _create_status_message(self):
-        return self._update_status_message(u'0.0')
+        return self._update_status_message(u'')
 
     def _get_status_message(self):
         response = self.queuey_conn.get(STATUS_QUEUE + '/1%3A' + self.msgid)
@@ -71,25 +71,23 @@ class Partition(object):
         :rtype: list
         """
         return self.queuey_conn.messages(self.queue_name,
-            partition=self.partition, since=self.timestamp, limit=limit,
+            partition=self.partition, since=self.last_message, limit=limit,
             order=order)
 
     @property
-    def timestamp(self):
-        """Property for the timestamp of the last processed message.
+    def last_message(self):
+        """Property for the message id of the last processed message.
         """
         msg = self._get_status_message()
         if msg is None:
-            return 0.0
-        return float(msg[u'processed'])
+            return u''
+        return msg[u'processed']
 
-    @timestamp.setter
-    def timestamp(self, value):
-        """Sets the timestamp of the last processed message.
+    @last_message.setter
+    def last_message(self, value):
+        """Sets the message id of the last processed message.
 
-        :param value: New timestamp value as a float.
-        :type value: float
+        :param value: New message id value.
+        :type value: str
         """
-        if isinstance(value, basestring):
-            value = float(str(value))
-        self._update_status_message(repr(value))
+        self._update_status_message(value)

@@ -155,12 +155,12 @@ class Worker(object):
                         no_messages += 1
                         continue
                     message = messages[0]
-                    timestamp = message[u'timestamp']
+                    message_id = message[u'message_id']
                     try:
                         self.job(message, context)
                     except Exception as exc:
                         self.job_failure(exc, context, self.queuey_conn)
-                    partition.timestamp = timestamp
+                    partition.last_message = message_id
                 if no_messages == len(self.partitions):
                     self.wait()
 
