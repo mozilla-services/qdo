@@ -10,12 +10,12 @@ import random
 import time
 import socket
 
+from queuey_py import Client
 from ujson import decode as ujson_decode
 
 from qdo.config import ERROR_QUEUE
 from qdo.config import STATUS_QUEUE
 from qdo.partition import Partition
-from qdo.queuey import QueueyConnection
 from qdo.log import get_logger
 
 
@@ -70,7 +70,7 @@ class Worker(object):
         resolve(self, qdo_section, u'job_context')
         resolve(self, qdo_section, u'job_failure')
         queuey_section = self.settings.getsection(u'queuey')
-        self.queuey_conn = QueueyConnection(
+        self.queuey_conn = Client(
             queuey_section[u'app_key'],
             connection=queuey_section[u'connection'])
 

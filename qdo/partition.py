@@ -17,7 +17,7 @@ class Partition(object):
     """Represents a specific partition in a message queue.
 
     :param queuey_conn: A
-        :py:class:`QueueyConnection <qdo.queue.QueueyConnection>` instance.
+        :py:class:`Queuey client <queuey_py.Client>` instance.
     :type queuey_conn: object
     :param name: The queue name (a uuid4 hash) or the combined queue name and
         partition id, separated by a dash.
