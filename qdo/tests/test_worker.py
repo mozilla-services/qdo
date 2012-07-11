@@ -45,7 +45,7 @@ class TestWorker(BaseTestCase):
     def test_special_queues(self):
         worker = self._make_one()
         worker.configure_partitions(dict(policy=u'all'))
-        partitions = self.worker.queuey_conn._partitions()
+        partitions = self.worker._partitions()
         self.assertTrue(ERROR_QUEUE + u'-1' in partitions)
         self.assertTrue(STATUS_QUEUE + u'-1' in partitions)
         self.assertEqual(self.worker.partitions.keys(),

@@ -6,7 +6,6 @@ from queuey_py import Client
 from ujson import decode as ujson_decode
 
 import qdo.exceptions
-from qdo.log import get_logger
 
 
 class QueueyConnection(Client):
@@ -46,16 +45,3 @@ class QueueyConnection(Client):
             return [m for m in messages if float(str(m[u'timestamp'])) > since]
         # failure
         raise qdo.exceptions.HTTPError(response.status_code, response)
-
-    def _partitions(self):
-        # List all partitions
-        with get_logger().timer(u'queuey.get_partitions'):
-            response = self.get(params={u'details': True})
-        queues = ujson_decode(response.text)[u'queues']
-        partitions = []
-        for q in queues:
-            name = q[u'queue_name']
-            part = q[u'partitions']
-            for i in xrange(1, part + 1):
-                partitions.append(u'%s-%s' % (name, i))
-        return partitions

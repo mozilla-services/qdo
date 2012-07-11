@@ -74,11 +74,25 @@ class Worker(object):
             queuey_section[u'app_key'],
             connection=queuey_section[u'connection'])
 
+    def _partitions(self):
+        # List all partitions
+        queuey_conn = self.queuey_conn
+        with get_logger().timer(u'queuey.get_partitions'):
+            response = queuey_conn.get(params={u'details': True})
+        queues = ujson_decode(response.text)[u'queues']
+        partitions = []
+        for q in queues:
+            name = q[u'queue_name']
+            part = q[u'partitions']
+            for i in xrange(1, part + 1):
+                partitions.append(u'%s-%s' % (name, i))
+        return partitions
+
     def configure_partitions(self, section):
         self.partition_policy = policy = section[u'policy']
         partition_ids = []
         queuey_conn = self.queuey_conn
-        all_partitions = queuey_conn._partitions()
+        all_partitions = self._partitions()
         if policy == u'manual':
             partition_ids = section[u'ids']
         elif policy == u'all':
