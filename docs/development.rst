@@ -8,11 +8,11 @@ https://github.com/mozilla-services/qdo
 Tests
 =====
 
-Start Cassandra, Nginx and a Queuey instance via supervisor::
+Start a Queuey instance via supervisor::
 
     bin/supervisord
 
-To shut them down::
+To shut it down::
 
     bin/supervisorctl shutdown
 
@@ -20,18 +20,13 @@ To run the tests call::
 
     make test
 
-If you don't start supervisor yourself, `make test` will do so for you. Note,
-that the tests use the Cassandra instance and will recursively delete any
-data in it as part of the test tear down.
+If you don't start supervisor yourself, `make test` will do so for you.
 
-There's a good number of services being started during the tests. Currently
-those are hard-coded to the following ports (on 127.0.0.1):
+There's some services being started during the tests. Currently those are
+hard-coded to the following ports (on 127.0.0.1):
 
     - 4999 Supervisor
     - 5000 Queuey
-    - 5001-5003 Nginx
-    - 7000 Cassandra
-    - 9160 Cassandra
 
 Helpers
 =======
