@@ -9,6 +9,8 @@ worker
 - rewrite/update internals.txt
 - add job error handling hook / use 'failed' queue
 
+- deal with more than 100 status messages (worker.track_partitions)
+
 future
 ------
 
