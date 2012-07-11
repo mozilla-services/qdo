@@ -236,6 +236,7 @@ class SettingsDict(dict):
 
 ERROR_QUEUE = u'qdo_error'
 STATUS_QUEUE = u'qdo_status'
+STATUS_PARTITIONS = 7
 
 
 class QdoSettings(SettingsDict):

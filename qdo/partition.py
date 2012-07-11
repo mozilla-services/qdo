@@ -8,6 +8,7 @@ import uuid
 from ujson import decode
 from ujson import encode
 
+from qdo.config import STATUS_PARTITIONS
 from qdo.config import STATUS_QUEUE
 from qdo.log import get_logger
 
@@ -30,10 +31,13 @@ class Partition(object):
         self.queuey_conn = queuey_conn
         if '-' in name:
             self.name = name
-            self.queue_name, self.partition = name.split(u'-')
+            parts = name.split(u'-')
+            self.queue_name, self.partition = parts[0], int(parts[1])
         else:
             self.name = name + u'-1'
             self.queue_name, self.partition = (name, 1)
+        # map partition to one in 1 to max status partitions
+        self.status_partition = ((self.partition - 1) % STATUS_PARTITIONS) + 1
         self.timer = get_logger().timer
         self.msgid = msgid
         if msgid is None:
@@ -42,7 +46,8 @@ class Partition(object):
 
     @property
     def _status_url(self):
-        return STATUS_QUEUE + u'/1%3A' + self.msgid
+        sp = unicode(self.status_partition)
+        return STATUS_QUEUE + u'/' + sp + u'%3A' + self.msgid
 
     def _create_status_message(self):
         return self._update_status_message(u'')

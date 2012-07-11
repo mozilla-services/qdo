@@ -10,6 +10,7 @@ import ujson
 
 from qdo.config import ERROR_QUEUE
 from qdo.config import QdoSettings
+from qdo.config import STATUS_PARTITIONS
 from qdo.config import STATUS_QUEUE
 from qdo import testing
 from qdo.tests.base import BaseTestCase
@@ -229,8 +230,10 @@ class TestRealWorker(BaseTestCase):
             testing.ensure_process(u'qdo:qdo3', noisy=False)
             # stop second worker
             self.supervisor.stopProcess(u'qdo:qdo2')
+            partition_spec = ','.join(
+                [unicode(i + 1) for i in range(STATUS_PARTITIONS)])
             status_messages = queuey_conn.messages(
-                STATUS_QUEUE, order=u'descending')
+                STATUS_QUEUE, partition=partition_spec, order=u'descending')
             partitions = set([ujson.decode(sm[u'body'])[u'partition']
                 for sm in status_messages])
             expected = set([queue1 + u'-1', queue2 + u'-1', queue2 + u'-2',

@@ -14,6 +14,7 @@ from queuey_py import Client
 from ujson import decode as ujson_decode
 
 from qdo.config import ERROR_QUEUE
+from qdo.config import STATUS_PARTITIONS
 from qdo.config import STATUS_QUEUE
 from qdo.partition import Partition
 from qdo.log import get_logger
@@ -100,7 +101,8 @@ class Worker(object):
 
         def cond_create(queue_name):
             if queue_name + u'-1' not in all_partitions:
-                queuey_conn.create_queue(queue_name=queue_name)
+                queuey_conn.create_queue(
+                    queue_name=queue_name, partitions=STATUS_PARTITIONS)
         cond_create(ERROR_QUEUE)
         cond_create(STATUS_QUEUE)
         self.assign_partitions(partition_ids)
