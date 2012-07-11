@@ -12,15 +12,6 @@ Counter
 
 The following metrics are sent as incrementing counter events.
 
-queuey.conn_error
-    Sent when there's a connection error reaching the :term:`Queuey` server.
-
-queuey.conn_ssl_error
-    Sent when there's a SSL error reaching the :term:`Queuey` server.
-
-queuey.conn_timeout
-    Sent when the connection to the :term:`Queuey` server times out.
-
 worker.wait_for_jobs
     Sent when a worker has no more messages to process and sits idle. Sent
     once per configured `wait_interval`.
@@ -30,8 +21,8 @@ Timer
 
 The following metrics are sent as timing data.
 
-queuey.get_messages
-    Time for each request getting any number of messages.
+worker.job_time
+    Time for a job to process a single message.
 
-queuey.get_partitions
-    Time for each request getting the list of all queues and partitions.
+worker.job_failure_time
+    Time to process each job failure.

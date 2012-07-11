@@ -10,7 +10,6 @@ from ujson import encode
 
 from qdo.config import STATUS_PARTITIONS
 from qdo.config import STATUS_QUEUE
-from qdo.log import get_logger
 
 
 class Partition(object):
@@ -41,7 +40,6 @@ class Partition(object):
             self.queue_name, self.partition = (name, 1)
         # map partition to one in 1 to max status partitions
         self.status_partition = ((self.partition - 1) % STATUS_PARTITIONS) + 1
-        self.timer = get_logger().timer
         self.msgid = msgid
         if msgid is None:
             self.msgid = uuid.uuid1().hex

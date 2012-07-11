@@ -78,8 +78,7 @@ class Worker(object):
     def _partitions(self):
         # List all partitions
         queuey_conn = self.queuey_conn
-        with get_logger().timer(u'queuey.get_partitions'):
-            response = queuey_conn.get(params={u'details': True})
+        response = queuey_conn.get(params={u'details': True})
         queues = ujson_decode(response.text)[u'queues']
         partitions = []
         for q in queues:
@@ -146,6 +145,7 @@ class Worker(object):
         partitions_section = self.settings.getsection(u'partitions')
         self.configure_partitions(partitions_section)
         atexit.register(self.stop)
+        timer = get_logger().timer
         with self.job_context() as context:
             while 1:
                 if self.shutdown:
@@ -159,9 +159,11 @@ class Worker(object):
                     message = messages[0]
                     message_id = message[u'message_id']
                     try:
-                        self.job(message, context)
+                        with timer(u'worker.job_time'):
+                            self.job(message, context)
                     except Exception as exc:
-                        self.job_failure(exc, context, self.queuey_conn)
+                        with timer(u'worker.job_failure_time'):
+                            self.job_failure(exc, context, self.queuey_conn)
                     partition.last_message = message_id
                 if no_messages == len(self.partitions):
                     self.wait()
