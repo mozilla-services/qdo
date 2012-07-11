@@ -3,7 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this file,
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from urllib import quote_plus
 import uuid
 
 from ujson import decode
@@ -41,19 +40,22 @@ class Partition(object):
             self.msgid = uuid.uuid1().hex
             self._create_status_message()
 
+    @property
+    def _status_url(self):
+        return STATUS_QUEUE + u'/1%3A' + self.msgid
+
     def _create_status_message(self):
         return self._update_status_message(u'')
 
     def _get_status_message(self):
-        response = self.queuey_conn.get(STATUS_QUEUE + '/1%3A' + self.msgid)
+        response = self.queuey_conn.get(self._status_url)
         messages = decode(response.text)[u'messages']
         if messages:
             return decode(messages[0][u'body'])
         return None
 
     def _update_status_message(self, value):
-        q = STATUS_QUEUE + u'/' + quote_plus(u'1:' + self.msgid)
-        result = self.queuey_conn.put(q, data=encode(dict(
+        result = self.queuey_conn.put(self._status_url, data=encode(dict(
             partition=self.name, processed=value, last_worker=u'')),
             headers={u'X-TTL': u'2592000'},  # thirty days
             )
