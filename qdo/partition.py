@@ -74,7 +74,7 @@ class Partition(object):
         :type limit: int
         :param order: 'descending' or 'ascending', defaults to ascending
         :type order: str
-        :raises: :py:exc:`qdo.exceptions.HTTPError`
+        :raises: :py:exc:`queuey_py.HTTPError`
         :rtype: list
         """
         return self.queuey_conn.messages(self.queue_name,

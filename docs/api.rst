@@ -9,7 +9,6 @@ organized alphabetically by module name.
 .. toctree::
    :maxdepth: 1
 
-   api/exceptions
    api/log
    api/partition
    api/worker
