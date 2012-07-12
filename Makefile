@@ -21,7 +21,7 @@ endif
 INSTALL = $(HERE)/bin/pip install
 PIP_DOWNLOAD_CACHE ?= /tmp/pip_cache
 INSTALLOPTIONS = --download-cache $(PIP_DOWNLOAD_CACHE) -U -i $(PYPI) \
-	--use-mirrors -f https://github.com/mozilla-services/qdo/downloads
+	--use-mirrors
 
 ifdef PYPIEXTRAS
 	PYPIOPTIONS += -e $(PYPIEXTRAS)
@@ -59,6 +59,8 @@ $(BIN)/pip: $(BIN)/python
 lib: $(BIN)/pip
 	@echo "Installing package pre-requisites..."
 	$(INSTALL) -r dev-reqs.txt
+	echo "Running setup.py develop"
+	$(PYTHON) setup.py develop
 
 clean-env:
 	rm -rf $(BUILD_DIRS)
