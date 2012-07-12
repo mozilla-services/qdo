@@ -15,10 +15,12 @@ argparse==1.2.1
 cdecimal==2.3
 cef==0.3
 colander==0.9.8
+coverage==3.5.2
 distribute==0.6.27
 docutils==0.9.1
 flake8==1.4
 gunicorn==0.14.5
+meld3==0.6.8
 metlog-py==0.9.2
 metlog-raven==0.1
 mozsvc==0.4
@@ -31,9 +33,11 @@ raven==2.0.0
 repoze.lru==0.5
 requests==0.13.2
 simplejson==2.4.0
+supervisor==3.0a12
 thrift==0.8.0
 translationstring==1.1
 ujson==1.19
+unittest2==0.5.1
 venusian==1.0a6
 virtualenv==1.7.2
 wsgiref==0.1.2
