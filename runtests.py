@@ -8,7 +8,7 @@ import sys
 
 
 def main():
-    ret = 0
+    ret = 1
     started_supervisor = False
     if not os.path.exists(os.path.join('var', 'supervisor.sock')):
         started_supervisor = True
