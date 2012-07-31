@@ -24,36 +24,33 @@ class TestWorker(BaseTestCase):
         if testing.SUPERVISOR:
             cls.supervisor = testing.processes[u'supervisor']
 
-    def tearDown(self):
-        del self.worker
-
     def _make_one(self, extra=None):
         from qdo.worker import Worker
         settings = QdoSettings()
         settings[u'queuey.app_key'] = self.queuey_app_key
         if extra is not None:
             settings.update(extra)
-        self.worker = Worker(settings)
-        self.queue_name = self.worker.queuey_conn.create_queue()
-        self.worker.settings[u'partitions.policy'] = u'all'
-        return self.worker
+        worker = Worker(settings)
+        self.queue_name = worker.queuey_conn.create_queue()
+        worker.settings[u'partitions.policy'] = u'all'
+        return worker
 
-    def _post_message(self, data, queue_name=None):
-        queuey_conn = self.worker.queuey_conn
+    def _post_message(self, worker, data, queue_name=None):
+        queuey_conn = worker.queuey_conn
         return queuey_conn.post(
             queue_name and queue_name or self.queue_name, data=data)
 
     def test_special_queues(self):
         worker = self._make_one()
         worker.configure_partitions(dict(policy=u'all'))
-        partitions = self.worker._partitions()
+        partitions = worker._partitions()
         self.assertTrue(ERROR_QUEUE + u'-1' in partitions)
         self.assertTrue(STATUS_QUEUE + u'-1' in partitions)
-        self.assertEqual(self.worker.partitions.keys(),
+        self.assertEqual(worker.partitions.keys(),
             [self.queue_name + u'-1'])
         worker.configure_partitions(
             dict(policy=u'manual', ids=[self.queue_name + u'-2']))
-        self.assertEqual(self.worker.partitions.keys(),
+        self.assertEqual(worker.partitions.keys(),
             [self.queue_name + u'-2'])
 
     def test_work_no_job(self):
@@ -76,7 +73,7 @@ class TestWorker(BaseTestCase):
             raise KeyboardInterrupt
 
         worker.job = job
-        self._post_message(u'Hello')
+        self._post_message(worker, u'Hello')
         self.assertRaises(KeyboardInterrupt, worker.work)
 
     def test_work_context(self):
@@ -100,8 +97,8 @@ class TestWorker(BaseTestCase):
         worker.job = job
         worker.job_context = job_context
 
-        self._post_message(u'work')
-        self._post_message(u'end')
+        self._post_message(worker, u'work')
+        self._post_message(worker, u'end')
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(context[u'counter'], 2)
         self.assertEqual(context[u'done'], True)
@@ -118,12 +115,12 @@ class TestWorker(BaseTestCase):
                 raise KeyboardInterrupt
 
         worker.job = job
-        self._post_message(u'work')
-        self._post_message(u'work')
-        self._post_message(u'work')
+        self._post_message(worker, u'work')
+        self._post_message(worker, u'work')
+        self._post_message(worker, u'work')
         time.sleep(0.02)
-        last = self._post_message(u'work')
-        self._post_message(u'end')
+        last = self._post_message(worker, u'work')
+        self._post_message(worker, u'end')
         last_message = ujson.decode(
             last.text)[u'messages'][0][u'key']
 
@@ -134,12 +131,12 @@ class TestWorker(BaseTestCase):
 
     def test_work_multiple_queues(self):
         worker = self._make_one()
-        queue2 = self.worker.queuey_conn.create_queue()
-        self._post_message(u'queue1-1')
-        self._post_message(u'queue1-2')
-        self._post_message(u'queue2-1', queue_name=queue2)
-        self._post_message(u'queue2-2', queue_name=queue2)
-        self._post_message(u'queue2-3', queue_name=queue2)
+        queue2 = worker.queuey_conn.create_queue()
+        self._post_message(worker, u'queue1-1')
+        self._post_message(worker, u'queue1-2')
+        self._post_message(worker, u'queue2-1', queue_name=queue2)
+        self._post_message(worker, u'queue2-2', queue_name=queue2)
+        self._post_message(worker, u'queue2-3', queue_name=queue2)
         counter = [0]
 
         def job(message, context, counter=counter):
@@ -155,12 +152,12 @@ class TestWorker(BaseTestCase):
 
     def test_work_multiple_empty_queues(self):
         worker = self._make_one()
-        self.worker.queuey_conn.create_queue()
-        self.worker.queuey_conn.create_queue()
-        queue2 = self.worker.queuey_conn.create_queue()
-        self._post_message(u'queue1-1')
-        self._post_message(u'queue1-2')
-        self._post_message(u'queue2-1', queue_name=queue2)
+        worker.queuey_conn.create_queue()
+        worker.queuey_conn.create_queue()
+        queue2 = worker.queuey_conn.create_queue()
+        self._post_message(worker, u'queue1-1')
+        self._post_message(worker, u'queue1-2')
+        self._post_message(worker, u'queue2-1', queue_name=queue2)
         counter = [0]
 
         def job(message, context, counter=counter):
@@ -178,9 +175,9 @@ class TestWorker(BaseTestCase):
         worker = self._make_one()
         queuey_conn = worker.queuey_conn
         queue2 = queuey_conn.create_queue(partitions=3)
-        self._post_message([u'1', u'2'])
+        self._post_message(worker, [u'1', u'2'])
         # post messages to fill multiple partitions
-        response = self._post_message(
+        response = self._post_message(worker,
             ['%s' % i for i in xrange(8)], queue_name=queue2)
         partitions = set([m[u'partition'] for m in
             ujson.decode(response.text)[u'messages']])
