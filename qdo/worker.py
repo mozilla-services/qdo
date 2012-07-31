@@ -12,6 +12,7 @@ import socket
 
 from queuey_py import Client
 from ujson import decode as ujson_decode
+from ujson import encode as ujson_encode
 
 from qdo.config import ERROR_QUEUE
 from qdo.config import STATUS_PARTITIONS
@@ -29,15 +30,27 @@ def dict_context():
         del context
 
 
-def log_failure(message, context, exc, queuey_conn):
+def _log_raven():
     logger = get_logger()
     raven = getattr(logger, u'raven', None)
     if raven is not None:
         raven()
 
 
-def save_failed_message(message, context, exc, queuey_conn):
-    log_failure(message, context, exc, queuey_conn)
+def log_failure(message, context, queue, exc, queuey_conn):
+    _log_raven()
+
+
+def save_failed_message(message, context, queue, exc, queuey_conn):
+    _log_raven()
+    # record <queue>-<partition> of the failed message
+    message[u'queue'] = queue
+    try:
+        queuey_conn.post(ERROR_QUEUE, data=ujson_encode(message),
+            headers={u'X-TTL': u'2592000'})  # thirty days
+    except Exception:  # pragma: no cover
+        # never fail in the failure handler itself
+        _log_raven()
 
 
 def resolve(worker, section, name):
@@ -168,7 +181,7 @@ class Worker(object):
                     except Exception as exc:
                         with timer(u'worker.job_failure_time'):
                             self.job_failure(message, context,
-                                exc, self.queuey_conn)
+                                name, exc, self.queuey_conn)
                     partition.last_message = message_id
                 if no_messages == len(self.partitions):
                     self.wait()

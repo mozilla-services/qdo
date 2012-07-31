@@ -204,7 +204,7 @@ class TestWorker(BaseTestCase):
             else:
                 raise KeyboardInterrupt
 
-        def job_failure(message, context, exc, queuey_conn):
+        def job_failure(message, context, name, exc, queuey_conn):
             context[u'errors'].append(exc)
 
         worker.job = job
@@ -236,6 +236,22 @@ class TestWorker(BaseTestCase):
 
         worker.job = job
         self.assertRaises(KeyboardInterrupt, worker.work)
+
+        partition_spec = ','.join(
+            [unicode(i + 1) for i in range(STATUS_PARTITIONS)])
+        failed_messages = worker.queuey_conn.messages(
+            ERROR_QUEUE, partition=partition_spec)
+        self.assertEqual(len(failed_messages), 20)
+        error_partitions = [m[u'partition'] for m in failed_messages]
+        # multiple error partitions are used, 20 messages aren't enough to
+        # guarantee all 7 partitions get randomly selected
+        self.assertTrue(len(set(error_partitions)) > 3)
+        failures = [ujson.decode(m[u'body']) for m in failed_messages]
+        # the first 20 of 22 failures get saved, two random ones aren't
+        # processed
+        data = set([int(f[u'body']) for f in failures])
+        possible = set(xrange(-2, 20))
+        self.assertTrue(data.issubset(possible))
 
 
 class TestRealWorker(BaseTestCase):
