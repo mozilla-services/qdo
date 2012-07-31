@@ -187,6 +187,37 @@ class TestWorker(BaseTestCase):
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(counter[0], 10)
 
+    def test_job_failure_handler(self):
+        worker, queue_name = self._make_one()
+        context = {}
+
+        @contextmanager
+        def job_context(context=context):
+            context[u'counter'] = 0
+            context[u'errors'] = []
+            yield context
+
+        def job(message, context):
+            context[u'counter'] += 1
+            if context[u'counter'] == 1:
+                raise ValueError(u'job failed')
+            else:
+                raise KeyboardInterrupt
+
+        def job_failure(exc, context, queuey_conn):
+            context[u'errors'].append(exc)
+
+        worker.job = job
+        worker.job_context = job_context
+        worker.job_failure = job_failure
+        self._post_message(worker, queue_name, u'Fail')
+        self._post_message(worker, queue_name, u'Finish')
+        self.assertRaises(KeyboardInterrupt, worker.work)
+        errors = context[u'errors']
+        self.assertEqual(len(errors), 1)
+        self.assertTrue(isinstance(errors[0], ValueError))
+        self.assertEqual(errors[0].args, (u'job failed', ))
+
 
 class TestRealWorker(BaseTestCase):
 
