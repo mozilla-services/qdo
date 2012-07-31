@@ -29,15 +29,15 @@ def dict_context():
         del context
 
 
-def log_failure(exc, context, queuey_conn):
+def log_failure(message, context, exc, queuey_conn):
     logger = get_logger()
     raven = getattr(logger, u'raven', None)
     if raven is not None:
         raven()
 
 
-def save_failed_message(exc, context, queuey_conn):
-    log_failure(exc, context, queuey_conn)
+def save_failed_message(message, context, exc, queuey_conn):
+    log_failure(message, context, exc, queuey_conn)
 
 
 def resolve(worker, section, name):
@@ -167,7 +167,8 @@ class Worker(object):
                             self.job(message, context)
                     except Exception as exc:
                         with timer(u'worker.job_failure_time'):
-                            self.job_failure(exc, context, self.queuey_conn)
+                            self.job_failure(message, context,
+                                exc, self.queuey_conn)
                     partition.last_message = message_id
                 if no_messages == len(self.partitions):
                     self.wait()

@@ -204,7 +204,7 @@ class TestWorker(BaseTestCase):
             else:
                 raise KeyboardInterrupt
 
-        def job_failure(exc, context, queuey_conn):
+        def job_failure(message, context, exc, queuey_conn):
             context[u'errors'].append(exc)
 
         worker.job = job
