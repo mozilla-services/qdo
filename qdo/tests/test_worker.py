@@ -18,12 +18,6 @@ from qdo.tests.base import BaseTestCase
 
 class TestWorker(BaseTestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        BaseTestCase.setUpClass()
-        if testing.SUPERVISOR:
-            cls.supervisor = testing.processes[u'supervisor']
-
     def _make_one(self, extra=None):
         from qdo.worker import Worker
         settings = QdoSettings()
