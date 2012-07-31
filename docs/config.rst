@@ -27,8 +27,11 @@ job_context
     For example: `qdo.worker:dict_context`
 
 job_failure
-    The :term:`resource specification` for a Python exception handler. For
-    example `qdo.worker.log_failure`.
+    The :term:`resource specification` for a Python exception handler. The
+    default is `qdo.worker:log_failure`, which logs full tracebacks of job
+    failures using `metlog-raven`. Another built-in alternative is
+    `qdo.worker:save_failed_message`, which logs in the same way, but also
+    copies the failed message to an error queue for later inspection.
 
 ca_bundle
     Path to a private certificate used for SSL connections, in addition to all

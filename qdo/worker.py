@@ -36,6 +36,10 @@ def log_failure(exc, context, queuey_conn):
         raven()
 
 
+def save_failed_message(exc, context, queuey_conn):
+    log_failure(exc, context, queuey_conn)
+
+
 def resolve(worker, section, name):
     if section[name]:
         mod, func_name = section[name].split(u':')

@@ -218,6 +218,25 @@ class TestWorker(BaseTestCase):
         self.assertTrue(isinstance(errors[0], ValueError))
         self.assertEqual(errors[0].args, (u'job failed', ))
 
+    def test_job_failure_save_handler(self):
+        worker, queue_name = self._make_one(extra={
+            u'qdo-worker.job_failure': u'qdo.worker:save_failed_message'})
+        queue2 = worker.queuey_conn.create_queue(partitions=10)
+        self._post_message(worker, queue_name, [u'-1', u'-2'])
+        self._post_message(worker, queue2,
+            ['%s' % i for i in xrange(20)])
+        counter = [0]
+
+        def job(message, context, counter=counter):
+            counter[0] += 1
+            if counter[0] <= 20:
+                raise ValueError(u'job failed: %s' % counter[0])
+            else:
+                raise KeyboardInterrupt
+
+        worker.job = job
+        self.assertRaises(KeyboardInterrupt, worker.work)
+
 
 class TestRealWorker(BaseTestCase):
 
