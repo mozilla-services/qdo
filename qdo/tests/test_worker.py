@@ -29,10 +29,9 @@ class TestWorker(BaseTestCase):
         worker.settings[u'partitions.policy'] = u'all'
         return worker
 
-    def _post_message(self, worker, data, queue_name=None):
+    def _post_message(self, worker, queue_name, data):
         queuey_conn = worker.queuey_conn
-        return queuey_conn.post(
-            queue_name and queue_name or self.queue_name, data=data)
+        return queuey_conn.post(queue_name, data=data)
 
     def test_special_queues(self):
         worker = self._make_one()
@@ -67,7 +66,7 @@ class TestWorker(BaseTestCase):
             raise KeyboardInterrupt
 
         worker.job = job
-        self._post_message(worker, u'Hello')
+        self._post_message(worker, self.queue_name, u'Hello')
         self.assertRaises(KeyboardInterrupt, worker.work)
 
     def test_work_context(self):
@@ -91,8 +90,8 @@ class TestWorker(BaseTestCase):
         worker.job = job
         worker.job_context = job_context
 
-        self._post_message(worker, u'work')
-        self._post_message(worker, u'end')
+        self._post_message(worker, self.queue_name, u'work')
+        self._post_message(worker, self.queue_name, u'end')
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(context[u'counter'], 2)
         self.assertEqual(context[u'done'], True)
@@ -109,12 +108,12 @@ class TestWorker(BaseTestCase):
                 raise KeyboardInterrupt
 
         worker.job = job
-        self._post_message(worker, u'work')
-        self._post_message(worker, u'work')
-        self._post_message(worker, u'work')
+        self._post_message(worker, self.queue_name, u'work')
+        self._post_message(worker, self.queue_name, u'work')
+        self._post_message(worker, self.queue_name, u'work')
         time.sleep(0.02)
-        last = self._post_message(worker, u'work')
-        self._post_message(worker, u'end')
+        last = self._post_message(worker, self.queue_name, u'work')
+        self._post_message(worker, self.queue_name, u'end')
         last_message = ujson.decode(
             last.text)[u'messages'][0][u'key']
 
@@ -126,11 +125,11 @@ class TestWorker(BaseTestCase):
     def test_work_multiple_queues(self):
         worker = self._make_one()
         queue2 = worker.queuey_conn.create_queue()
-        self._post_message(worker, u'queue1-1')
-        self._post_message(worker, u'queue1-2')
-        self._post_message(worker, u'queue2-1', queue_name=queue2)
-        self._post_message(worker, u'queue2-2', queue_name=queue2)
-        self._post_message(worker, u'queue2-3', queue_name=queue2)
+        self._post_message(worker, self.queue_name, u'queue1-1')
+        self._post_message(worker, self.queue_name, u'queue1-2')
+        self._post_message(worker, queue2, u'queue2-1')
+        self._post_message(worker, queue2, u'queue2-2')
+        self._post_message(worker, queue2, u'queue2-3')
         counter = [0]
 
         def job(message, context, counter=counter):
@@ -149,9 +148,9 @@ class TestWorker(BaseTestCase):
         worker.queuey_conn.create_queue()
         worker.queuey_conn.create_queue()
         queue2 = worker.queuey_conn.create_queue()
-        self._post_message(worker, u'queue1-1')
-        self._post_message(worker, u'queue1-2')
-        self._post_message(worker, u'queue2-1', queue_name=queue2)
+        self._post_message(worker, self.queue_name, u'queue1-1')
+        self._post_message(worker, self.queue_name, u'queue1-2')
+        self._post_message(worker, queue2, u'queue2-1')
         counter = [0]
 
         def job(message, context, counter=counter):
@@ -169,10 +168,10 @@ class TestWorker(BaseTestCase):
         worker = self._make_one()
         queuey_conn = worker.queuey_conn
         queue2 = queuey_conn.create_queue(partitions=3)
-        self._post_message(worker, [u'1', u'2'])
+        self._post_message(worker, self.queue_name, [u'1', u'2'])
         # post messages to fill multiple partitions
-        response = self._post_message(worker,
-            ['%s' % i for i in xrange(8)], queue_name=queue2)
+        response = self._post_message(worker, queue2,
+            ['%s' % i for i in xrange(8)])
         partitions = set([m[u'partition'] for m in
             ujson.decode(response.text)[u'messages']])
         # messages ended up in different partitions
