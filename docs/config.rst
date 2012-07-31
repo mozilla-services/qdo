@@ -73,3 +73,13 @@ connection
 
 app_key
     The application key used for authorization.
+
+
+[metlog]
+--------
+
+For detailed information see the metlog docs.
+
+qdo uses the standard metlog configuration for timing and counter data. In
+addition you can configure the `metlog_plugin_raven` section, if you want to
+get full tracebacks logged for job failures.

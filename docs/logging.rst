@@ -16,6 +16,12 @@ worker.wait_for_jobs
     Sent when a worker has no more messages to process and sits idle. Sent
     once per configured `wait_interval`.
 
+Exceptions
+----------
+
+By default failed jobs will be logged and skipped. The job failure will be
+logged using `metlog-raven` including a full Python traceback.
+
 Timer
 -----
 
