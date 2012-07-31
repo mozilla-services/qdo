@@ -24,7 +24,7 @@ job
 
 job_context
     The :term:`resource specification` for a Python job context (manager).
-    For example: `qdo.worker:dict_context`
+    Defaults to: `qdo.worker:dict_context`
 
 job_failure
     The :term:`resource specification` for a Python exception handler. The

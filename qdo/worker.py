@@ -23,6 +23,8 @@ from qdo.log import get_logger
 
 @contextmanager
 def dict_context():
+    """The default job context manager. It sets context to be a dict.
+    """
     context = dict()
     try:
         yield context
@@ -38,10 +40,23 @@ def _log_raven():
 
 
 def log_failure(message, context, queue, exc, queuey_conn):
+    """A simple job failure handler. It logs a full traceback for any failed
+    job using `metlog-raven`.
+    """
     _log_raven()
 
 
 def save_failed_message(message, context, queue, exc, queuey_conn):
+    """A job failure handler. It does the same as the `log_failure` handler
+    and in addition saves a copy of each failed message in a special error
+    queue named `qdo_error` in Queuey.
+
+    Failed messages get a TTL of 30 days to provide some more time for
+    debugging purposes. The failed messages are left in their original queues
+    untouched, but will be purged after the shorter but configurable Queuey
+    default TTL (3 days).
+    """
+
     _log_raven()
     # record <queue>-<partition> of the failed message
     message[u'queue'] = queue

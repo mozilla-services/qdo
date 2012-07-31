@@ -7,6 +7,14 @@ Contains the worker class including the main loop.
 
 .. automodule:: qdo.worker
 
+Functions
+~~~~~~~~~
+
+.. autofunction:: dict_context()
+.. autofunction:: log_failure
+.. autofunction:: save_failed_message
+
+
 Classes
 ~~~~~~~
 
