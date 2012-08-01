@@ -27,7 +27,7 @@ you need at least one Python module named for example `hello.py`::
             yield context
         finally:
             # tear things down
-            print(u'Messages processed: ', context[u'counter'])
+            print(u'Messages processed: %s' % context[u'counter'])
 
 
     def job(message, context):
