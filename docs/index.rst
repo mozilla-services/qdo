@@ -62,6 +62,7 @@ Contents
    api
    logging
    development
+   design
    internals
    changelog
 
