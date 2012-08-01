@@ -36,5 +36,5 @@ Monitoring (metlog)
 -------------------
 
 qdo uses Mozilla Services metlog libraries to provide logging and metrics
-gathering. No logging or metric data is kept on local physical machines, but
-all data is sent to dedicated logging and metric services.
+gathering. No logging or metric data is kept on local machines, but all data
+is sent to dedicated logging and metric services.
