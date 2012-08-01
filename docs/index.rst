@@ -32,7 +32,7 @@ you need at least one Python module named for example `hello.py`::
 
     def job(message, context):
         context[u'counter'] += 1
-        print(message[u'body'])
+        print(u'%s: %s' % (message[u'message_id'], message[u'body']))
 
 And one config file named `hello.conf`:
 
