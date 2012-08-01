@@ -31,3 +31,8 @@ Glossary
 
    Queuey
      Yet another message queue. See http://queuey.readthedocs.org/.
+
+   Zookeeper
+     `Apache Zookeeper <http://zookeeper.apache.org/>`_ is a centralized
+     service for maintaining configuration information, naming, providing
+     distributed synchronization, and providing group services.
