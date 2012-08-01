@@ -61,10 +61,10 @@ Contents
 
    install
    config
-   api
    logging
-   development
+   api
    design
+   development
    internals
    changelog
 
