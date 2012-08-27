@@ -20,7 +20,7 @@ distribute==0.6.28
 docutils==0.9.1
 flake8==1.4
 gunicorn==0.14.6
-kazoo==0.2
+kazoo==0.3
 meld3==0.6.8
 metlog-py==0.9.5
 metlog-raven==0.2
@@ -42,7 +42,7 @@ unittest2==0.5.1
 venusian==1.0a6
 virtualenv==1.7.2
 wsgiref==0.1.2
-zc-zookeeper-static==3.4.3-4
+zc-zookeeper-static==3.4.3-5
 zope.deprecation==4.0.0
 zope.interface==4.0.1
 
