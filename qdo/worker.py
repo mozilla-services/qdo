@@ -95,8 +95,7 @@ class Worker(object):
         self.configure()
 
     def configure(self):
-        """Configure the worker based on the configuration settings.
-        """
+        # Configure the worker based on the configuration settings.
         qdo_section = self.settings.getsection(u'qdo-worker')
         self.wait_interval = qdo_section[u'wait_interval']
         resolve(self, qdo_section, u'job')
