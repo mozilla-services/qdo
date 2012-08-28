@@ -9,7 +9,7 @@ Make sure you have the following software already installed before
 proceeding:
 
 - Make
-- Python 2.6 (with virtualenv installed, available as `virtualenv-2.6`)
+- Python 2.7
 - Java 1.6
 - Zero MQ (zmq-dev)
 
