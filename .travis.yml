@@ -1,6 +1,7 @@
 language: python
 python:
     - "2.6"
+    - "2.7"
 
 branches:
   only:
@@ -11,7 +12,6 @@ notifications:
     - hschlichting@mozilla.com
 
 before_install:
-    - sudo apt-get -q update >/dev/null 2>&1
     - sudo apt-get -q install libevent-dev >/dev/null 2>&1
 
 install:
