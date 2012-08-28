@@ -41,7 +41,8 @@ wait_interval
     Interval in seconds for which the worker pauses if it has no messages to
     work on. Defaults to 30 seconds. The actual wait time adds some jitter
     of 20%, to avoid multiple workers hitting the Queuey back-end at exactly
-    the same times.
+    the same times. It also uses exponential back-off up to a factor of 1024.
+    The back-off factor is reset whenever any message is actually processed.
 
 [partitions]
 ------------

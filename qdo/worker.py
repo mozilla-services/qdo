@@ -179,6 +179,7 @@ class Worker(object):
         atexit.register(self.stop)
         timer = get_logger().timer
         with self.job_context() as context:
+            waited = 0
             while 1:
                 if self.shutdown:
                     break
@@ -199,12 +200,15 @@ class Worker(object):
                                 name, exc, self.queuey_conn)
                     partition.last_message = message_id
                 if no_messages == len(self.partitions):
-                    self.wait()
+                    self.wait(waited)
+                    waited += 1
+                else:
+                    waited = 0
 
-    def wait(self):
+    def wait(self, waited=1):
         get_logger().incr(u'worker.wait_for_jobs')
         jitter = random.uniform(0.8, 1.2)
-        time.sleep(self.wait_interval * jitter)
+        time.sleep(self.wait_interval * jitter * 2 ** min(waited, 10))
 
     def stop(self):
         """Stop the worker loop. Used in an `atexit` hook."""
