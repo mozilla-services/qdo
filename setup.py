@@ -26,7 +26,7 @@ setup(
     description="Queuey worker library",
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
