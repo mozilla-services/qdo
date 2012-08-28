@@ -61,6 +61,7 @@ Contents
 
    install
    config
+   jobs
    logging
    api
    design
