@@ -14,7 +14,7 @@ The following metrics are sent as incrementing counter events.
 
 worker.wait_for_jobs
     Sent when a worker has no more messages to process and sits idle. Sent
-    once per configured `wait_interval`.
+    once per configured wait period.
 
 Exceptions
 ----------
