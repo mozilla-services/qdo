@@ -81,7 +81,8 @@ app_key
 [metlog]
 --------
 
-For detailed information see the metlog docs.
+For detailed information see the
+`metlog docs <http://metlog-py.readthedocs.org/en/latest/config.html>`_.
 
 qdo uses the standard metlog configuration for timing and counter data. In
 addition you can configure the `metlog_plugin_raven` section, if you want to
