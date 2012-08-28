@@ -13,13 +13,8 @@ qdo
 
 This is a Python implementation of a worker library used for processing
 queued messages from a Mozilla Services message queue. The message queue is
-called `Queuey <https://github.com/mozilla-services/queuey>`_ and is
-implemented as a :term:`Pyramid` based web service on top of :term:`Cassandra`.
-
-
-.. note:: This code is still a bit experimental. Please contact
-          `Hanno Schlichting <hschlichting@mozilla.com>`_ if you have any
-          questions.
+called `Queuey <http://queuey.readthedocs.org/>`_ and is implemented as a
+:term:`Pyramid` based web service on top of :term:`Cassandra`.
 
 Documentation
 =============
