@@ -64,9 +64,9 @@ Contents
    jobs
    logging
    api
+   zookeeper
    design
    development
-   internals
    changelog
 
 Index and Glossary
