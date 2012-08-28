@@ -20,8 +20,8 @@ when the cluster is started up again.
 
 All parts of Queuey and qdo are optimized for a cluster setup of at least
 three nodes for each component. It's possible to use a single instance
-setup for development purposes though. This is for example reflected in all
-parts supporting configuration of multiple back-end nodes and random selection
+setup for development purposes though. This is reflected in all parts
+supporting configuration of multiple back-end nodes and random selection
 of nodes and automatic fail-over amongst nodes. It's assumed that the exact
 same on-disk configuration files will be used for configuring multiple nodes
 (as they are likely put in place by tools like Puppet or Chef). The entire
