@@ -248,6 +248,7 @@ class QdoSettings(SettingsDict):
 
     def load_defaults(self):
         """Populate settings with default values"""
+        self[u'qdo-worker.name'] = u''
         self[u'qdo-worker.wait_interval'] = 30
         self[u'qdo-worker.ca_bundle'] = None
         self[u'qdo-worker.job'] = None

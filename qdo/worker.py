@@ -86,7 +86,6 @@ class Worker(object):
     def __init__(self, settings):
         self.settings = settings
         self.shutdown = False
-        self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
         self.job = None
         self.job_context = dict_context
         self.job_failure = log_failure
@@ -97,6 +96,10 @@ class Worker(object):
     def configure(self):
         # Configure the worker based on the configuration settings.
         qdo_section = self.settings.getsection(u'qdo-worker')
+        self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
+        identifier = qdo_section[u'name']
+        if identifier:
+            self.name = self.name + u'-' + identifier
         self.wait_interval = qdo_section[u'wait_interval']
         resolve(self, qdo_section, u'job')
         resolve(self, qdo_section, u'job_context')

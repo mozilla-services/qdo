@@ -19,6 +19,7 @@ class TestConfig(unittest.TestCase):
         settings = self._make_one()
         qdo_section = settings.getsection(u'qdo-worker')
         self.assertEqual(qdo_section[u'wait_interval'], 30)
+        self.assertEqual(qdo_section[u'name'], u'')
         queuey_section = settings.getsection(u'queuey')
         self.assertEqual(queuey_section[u'connection'],
             u'http://127.0.0.1:5000/v1/queuey/')

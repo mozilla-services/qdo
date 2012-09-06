@@ -33,6 +33,10 @@ job_failure
     `qdo.worker:save_failed_message`, which logs in the same way, but also
     copies the failed message to an error queue for later inspection.
 
+name
+    An optional identifier used in addition to the current host name and
+    process id to identify the worker process.
+
 ca_bundle
     Path to a private certificate used for SSL connections, in addition to all
     officially signed ones.
