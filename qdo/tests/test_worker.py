@@ -13,7 +13,6 @@ from qdo.config import ERROR_QUEUE
 from qdo.config import QdoSettings
 from qdo.config import STATUS_PARTITIONS
 from qdo.config import STATUS_QUEUE
-from qdo import testing
 from qdo.tests.base import BaseTestCase
 
 
@@ -299,46 +298,3 @@ class TestWorker(BaseTestCase):
             processed = workers[i].partitions.values()[0].last_message
             msgs = queuey_conn.messages(queues[i])
             self.assertEqual(msgs[-2]['message_id'], processed)
-
-
-class TestRealWorker(BaseTestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        BaseTestCase.setUpClass()
-        cls.supervisor = testing.processes[u'supervisor']
-
-    def test_work_real_process(self):
-        self._queuey_conn.create_queue(partitions=2)
-        try:
-            self.supervisor.startProcess(u'qdo:qdo1')
-            time.sleep(0.5)
-        finally:
-            self.supervisor.stopProcess(u'qdo:qdo1')
-
-    def test_work_real_processes(self):
-        queuey_conn = self._queuey_conn
-        queue1 = queuey_conn.create_queue(partitions=1)
-        queue2 = queuey_conn.create_queue(partitions=2)
-        queue3 = queuey_conn.create_queue(partitions=3)
-        data = [u'%s' % i for i in xrange(9)]
-        for name in (queue1, queue2, queue3):
-            queuey_conn.post(name, data=data)
-        try:
-            # start workers
-            testing.ensure_process(u'qdo:qdo1', noisy=False)
-            testing.ensure_process(u'qdo:qdo2', noisy=False)
-            testing.ensure_process(u'qdo:qdo3', noisy=False)
-            # stop second worker
-            self.supervisor.stopProcess(u'qdo:qdo2')
-            partition_spec = ','.join(
-                [unicode(i + 1) for i in range(STATUS_PARTITIONS)])
-            status_messages = queuey_conn.messages(
-                STATUS_QUEUE, partition=partition_spec, order=u'descending')
-            partitions = set([ujson.decode(sm[u'body'])[u'partition']
-                for sm in status_messages])
-            expected = set([queue1 + u'-1', queue2 + u'-1', queue2 + u'-2',
-                queue3 + u'-1', queue3 + u'-2', queue3 + u'-3'])
-            self.assertEqual(expected, partitions)
-        finally:
-            self.supervisor.stopProcessGroup(u'qdo')

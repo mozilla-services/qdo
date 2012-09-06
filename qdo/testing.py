@@ -8,12 +8,7 @@ import os.path
 import time
 import xmlrpclib
 
-SUPERVISOR = True
-try:
-    import supervisor
-    supervisor  # pyflakes
-except ImportError:
-    SUPERVISOR = False
+import supervisor
 
 from qdo import log
 
@@ -64,10 +59,8 @@ def setup_supervisor():
 def setup():
     """Shared one-time test setup, called from tests/__init__.py"""
     log.configure(None, debug=True)
-    if SUPERVISOR:
-        setup_supervisor()
-    if SUPERVISOR:
-        ensure_process(u'queuey')
+    setup_supervisor()
+    ensure_process(u'queuey')
 
 
 def teardown():

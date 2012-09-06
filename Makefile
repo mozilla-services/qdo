@@ -99,12 +99,7 @@ html:
 	cd docs && make html
 
 test:
-	@echo "Running tests..."
-	rm -f $(HERE)/.coverage*
 	$(PYTHON) runtests.py
-	$(HERE)/bin/coverage combine
-	$(HERE)/bin/coverage report -m --omit="qdo/test*" --include="qdo/*"
-	@echo "Finished running tests"
 
 test-python:
 	$(NOSE) --with-coverage --cover-package=$(APPNAME) \
