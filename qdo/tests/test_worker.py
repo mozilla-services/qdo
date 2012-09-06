@@ -4,6 +4,7 @@
 # You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from contextlib import contextmanager
+import threading
 import time
 
 import ujson
@@ -22,11 +23,11 @@ class TestWorker(BaseTestCase):
         from qdo.worker import Worker
         settings = QdoSettings()
         settings[u'queuey.app_key'] = self.queuey_app_key
+        settings[u'partitions.policy'] = u'all'
         if extra is not None:
             settings.update(extra)
         worker = Worker(settings)
         queue_name = worker.queuey_conn.create_queue()
-        worker.settings[u'partitions.policy'] = u'all'
         return worker, queue_name
 
     def _post_message(self, worker, queue_name, data):
@@ -252,6 +253,52 @@ class TestWorker(BaseTestCase):
         data = set([int(f[u'body']) for f in failures])
         possible = set(xrange(-2, 20))
         self.assertTrue(data.issubset(possible))
+
+    def test_multiple_workers(self):
+        queuey_conn = self._queuey_conn
+        events = []
+        queues = []
+        threads = []
+        workers = []
+
+        def job(message, context):
+            if message[u'body'] == u'stop':
+                raise KeyboardInterrupt
+
+        for i in range(3):
+            queue = queuey_conn.create_queue()
+            queues.append(queue)
+            worker, _ = self._make_one(extra={
+                u'qdo-worker.name': u'worker%s' % i,
+                u'partitions.policy': u'manual',
+                u'partitions.ids': [queue + u'-1'],
+                })
+            worker.job = job
+            workers.append(worker)
+
+            self._post_message(worker, queue,
+                [u'%s' % i for i in xrange(11)])
+            self._post_message(worker, queue, u'stop')
+
+            event = threading.Event()
+            events.append(event)
+
+            def run(event):
+                try:
+                    worker.work()
+                except KeyboardInterrupt:
+                    pass
+                event.set()
+
+            thread = threading.Thread(target=run, args=(event, ))
+            thread.start()
+            threads.append(thread)
+
+        for i in range(3):
+            events[i].wait()
+            processed = workers[i].partitions.values()[0].last_message
+            msgs = queuey_conn.messages(queues[i])
+            self.assertEqual(msgs[-2]['message_id'], processed)
 
 
 class TestRealWorker(BaseTestCase):
