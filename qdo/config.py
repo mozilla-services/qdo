@@ -237,6 +237,10 @@ class SettingsDict(dict):
 ERROR_QUEUE = u'qdo_error'
 STATUS_QUEUE = u'qdo_status'
 STATUS_PARTITIONS = 7
+ZOO_DEFAULT_NS = u'mozilla-qdo'
+ZOO_DEFAULT_ROOT = u'/' + ZOO_DEFAULT_NS
+ZOO_DEFAULT_HOST = u'127.0.0.1:2181'
+ZOO_DEFAULT_CONN = ZOO_DEFAULT_HOST + ZOO_DEFAULT_ROOT
 
 
 class QdoSettings(SettingsDict):
@@ -260,6 +264,8 @@ class QdoSettings(SettingsDict):
 
         self[u'queuey.connection'] = u'http://127.0.0.1:5000/v1/queuey/'
         self[u'queuey.app_key'] = None
+
+        self[u'zookeeper.connection'] = ZOO_DEFAULT_CONN
 
         self[u'metlog.logger'] = u'qdo-worker'
         self[u'metlog.sender'] = {}

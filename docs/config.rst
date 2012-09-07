@@ -54,8 +54,9 @@ wait_interval
 policy
     Specifies how to get all partition ids for this worker. Defaults to
     `manual`, in which case an explicit list of `ids` has to be specified.
-    The other value is `all`, which gets a list of all partitions from
-    Queuey and assigns them to this worker.
+    The other values are `all`, which gets a list of all partitions from
+    Queuey and assigns them to this worker. The third option is `automatic`,
+    which uses Zookeeper to distribute partitions across workers.
 
 ids
     Only used when the policy is `manual`. A new-line separated list of
@@ -81,6 +82,16 @@ connection
 
 app_key
     The application key used for authorization.
+
+
+[zookeeper]
+-----------
+
+connection
+    Which :term:`Zookeeper` servers to connect to when the `automatic` policy
+    is used. Defaults to `127.0.0.1:2181/mozilla-qdo`, using `mozilla-qdo` as
+    the top-level namespace. If multiple servers are specified, one will be
+    selected at random and the others will serve as transparent fallback.
 
 
 [metlog]

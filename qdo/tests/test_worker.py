@@ -8,6 +8,7 @@ import threading
 import time
 
 import ujson
+from kazoo.testing import KazooTestHarness
 
 from qdo.config import ERROR_QUEUE
 from qdo.config import QdoSettings
@@ -16,18 +17,22 @@ from qdo.config import STATUS_QUEUE
 from qdo.tests.base import BaseTestCase
 
 
+def _make_worker(app_key, extra=None):
+    from qdo.worker import Worker
+    settings = QdoSettings()
+    settings[u'queuey.app_key'] = app_key
+    settings[u'partitions.policy'] = u'all'
+    if extra is not None:
+        settings.update(extra)
+    worker = Worker(settings)
+    queue_name = worker.queuey_conn.create_queue()
+    return worker, queue_name
+
+
 class TestWorker(BaseTestCase):
 
     def _make_one(self, extra=None):
-        from qdo.worker import Worker
-        settings = QdoSettings()
-        settings[u'queuey.app_key'] = self.queuey_app_key
-        settings[u'partitions.policy'] = u'all'
-        if extra is not None:
-            settings.update(extra)
-        worker = Worker(settings)
-        queue_name = worker.queuey_conn.create_queue()
-        return worker, queue_name
+        return _make_worker(self.queuey_app_key, extra=extra)
 
     def _post_message(self, worker, queue_name, data):
         queuey_conn = worker.queuey_conn
@@ -298,3 +303,37 @@ class TestWorker(BaseTestCase):
             processed = workers[i].partitions.values()[0].last_message
             msgs = queuey_conn.messages(queues[i])
             self.assertEqual(msgs[-2]['message_id'], processed)
+
+
+class TestKazooWorker(BaseTestCase, KazooTestHarness):
+
+    def setUp(self):
+        BaseTestCase.setUp(self)
+        self.setup_zookeeper()
+
+    def tearDown(self):
+        self.teardown_zookeeper()
+        BaseTestCase.tearDown(self)
+
+    def _make_one(self, extra=None):
+        extra = {} if not extra else extra
+        extra[u'zookeeper.connection'] = self.hosts
+        return _make_worker(self.queuey_app_key, extra=extra)
+
+    def _post_message(self, worker, queue_name, data):
+        queuey_conn = worker.queuey_conn
+        return queuey_conn.post(queue_name, data=data)
+
+    def test_work(self):
+        worker, queue_name = self._make_one(extra={
+            u'partitions.policy': u'automatic'})
+        counter = [0]
+
+        def job(message, context):
+            counter[0] += 1
+            if counter[0] > 1:
+                raise KeyboardInterrupt
+
+        worker.job = job
+        self._post_message(worker, queue_name, [u'1', u'2'])
+        self.assertRaises(KeyboardInterrupt, worker.work)

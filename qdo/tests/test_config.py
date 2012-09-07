@@ -16,6 +16,7 @@ class TestConfig(unittest.TestCase):
         return settings
 
     def test_defaults(self):
+        from qdo import config
         settings = self._make_one()
         qdo_section = settings.getsection(u'qdo-worker')
         self.assertEqual(qdo_section[u'wait_interval'], 30)
@@ -23,17 +24,22 @@ class TestConfig(unittest.TestCase):
         queuey_section = settings.getsection(u'queuey')
         self.assertEqual(queuey_section[u'connection'],
             u'http://127.0.0.1:5000/v1/queuey/')
+        zk_section = settings.getsection(u'zookeeper')
+        self.assertEqual(zk_section[u'connection'], config.ZOO_DEFAULT_CONN)
 
     def test_configure(self):
         extra = {
             u'qdo-worker.wait_interval': 1,
             u'queuey.url': u'https://10.0.0.1:2345',
+            u'zookeeper.connection': u'10.0.0.2:3456/qdo',
             }
         settings = self._make_one(extra)
         qdo_section = settings.getsection(u'qdo-worker')
         self.assertEqual(qdo_section[u'wait_interval'], 1)
         queuey_section = settings.getsection(u'queuey')
         self.assertEqual(queuey_section[u'url'], u'https://10.0.0.1:2345')
+        zk_section = settings.getsection(u'zookeeper')
+        self.assertEqual(zk_section[u'connection'], u'10.0.0.2:3456/qdo')
 
     def test_manual_partition(self):
         extra = {

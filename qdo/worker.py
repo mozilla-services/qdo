@@ -10,6 +10,7 @@ import random
 import time
 import socket
 
+from kazoo.client import KazooClient
 from queuey_py import Client
 from ujson import decode as ujson_decode
 from ujson import encode as ujson_encode
@@ -91,6 +92,8 @@ class Worker(object):
         self.job_failure = log_failure
         self.partition_policy = u'manual'
         self.partitions = {}
+        self.queuey_conn = None
+        self.zk_client = None
         self.configure()
 
     def configure(self):
@@ -108,6 +111,12 @@ class Worker(object):
         self.queuey_conn = Client(
             queuey_section[u'app_key'],
             connection=queuey_section[u'connection'])
+        zk_section = self.settings.getsection(u'zookeeper')
+        self.zk_hosts = zk_section[u'connection']
+
+    def setup_zookeeper(self):
+        self.zk_client = KazooClient(hosts=self.zk_hosts, max_retries=1)
+        self.zk_client.start()
 
     def _partitions(self):
         # List all partitions
@@ -130,6 +139,10 @@ class Worker(object):
         if policy == u'manual':
             partition_ids = section[u'ids']
         elif policy == u'all':
+            partition_ids = all_partitions
+        elif policy == u'automatic':
+            self.setup_zookeeper()
+            # XXX we don't want all partitions
             partition_ids = all_partitions
 
         def cond_create(queue_name):
@@ -214,6 +227,8 @@ class Worker(object):
 
     def stop(self):
         """Stop the worker loop. Used in an `atexit` hook."""
+        if self.zk_client is not None:
+            self.zk_client.stop()
         self.shutdown = True
 
 
