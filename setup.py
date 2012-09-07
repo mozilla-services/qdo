@@ -46,6 +46,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'kazoo',
         'metlog-py',
         'metlog-raven',
         'queuey-py',
