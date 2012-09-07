@@ -3,18 +3,16 @@ python:
     - "2.6"
     - "2.7"
 
-branches:
-  only:
-    - master
-
 notifications:
   email:
     - hschlichting@mozilla.com
 
 before_install:
-    - sudo apt-get -q install libevent-dev >/dev/null 2>&1
+    - sudo apt-get install zookeeper
 
 install:
     - make build
 
-script: make test
+script:
+    - export ZOOKEEPER_PATH=/usr/share/java
+    - make test
