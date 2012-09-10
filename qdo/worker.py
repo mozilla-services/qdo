@@ -120,7 +120,6 @@ class Worker(object):
         self.job_context = dict_context
         self.job_failure = log_failure
         self.partition_policy = u'manual'
-        self.partitions = {}
         self.queuey_conn = None
         self.zk_client = None
         self.partitioner = None
@@ -208,16 +207,6 @@ class Worker(object):
                 status[partition] = message[u'message_id']
         return status
 
-    def assign_partitions(self):
-        partition_ids = self.partition_ids
-        for pid in list(self.partitions.keys()):
-            if pid not in partition_ids:
-                del self.partitions[pid]
-        status = self.status
-        for pid in partition_ids:
-            self.partitions[pid] = Partition(self.queuey_conn, pid,
-                msgid=status.get(pid, None), worker_id=self.name)
-
     def work(self):
         """Work on jobs.
 
@@ -229,38 +218,50 @@ class Worker(object):
         self.queuey_conn.connect()
         partitions_section = self.settings.getsection(u'partitions')
         self.configure_partitions(partitions_section)
-        self.assign_partitions()
         atexit.register(self.stop)
         timer = get_logger().timer
         partitioner = self.partitioner
+        partition_cache = {}
         with self.job_context() as context:
             if partitioner.allocating:
                 partitioner.wait_for_acquire(self.zk_party_wait)
             waited = 0
             while 1:
-                if self.shutdown:
+                if self.shutdown or partitioner.failed:
                     break
-                no_messages = 0
-                for name, partition in self.partitions.items():
-                    messages = partition.messages(limit=2)
-                    if not messages:
-                        no_messages += 1
-                        continue
-                    message = messages[0]
-                    message_id = message[u'message_id']
-                    try:
-                        with timer(u'worker.job_time'):
-                            self.job(message, context)
-                    except Exception as exc:
-                        with timer(u'worker.job_failure_time'):
-                            self.job_failure(message, context,
-                                name, exc, self.queuey_conn)
-                    partition.last_message = message_id
-                if no_messages == len(self.partitions):
-                    self.wait(waited)
-                    waited += 1
-                else:
-                    waited = 0
+                if partitioner.release:
+                    partitioner.release_set()
+                elif partitioner.allocating:
+                    partitioner.wait_for_acquire(self.zk_party_wait)
+                elif partitioner.acquired:
+                    no_messages = 0
+                    partitions = list(self.partitioner)
+                    for name in partitions:
+                        partition = partition_cache.get(name, None)
+                        if partition is None:
+                            partition_cache[name] = partition = Partition(
+                                self.queuey_conn, name,
+                                msgid=self.status.get(name, None),
+                                worker_id=self.name)
+                        messages = partition.messages(limit=2)
+                        if not messages:
+                            no_messages += 1
+                            continue
+                        message = messages[0]
+                        message_id = message[u'message_id']
+                        try:
+                            with timer(u'worker.job_time'):
+                                self.job(message, context)
+                        except Exception as exc:
+                            with timer(u'worker.job_failure_time'):
+                                self.job_failure(message, context,
+                                    name, exc, self.queuey_conn)
+                        partition.last_message = message_id
+                    if no_messages == len(partitions):
+                        self.wait(waited)
+                        waited += 1
+                    else:
+                        waited = 0
 
     def wait(self, waited=1):
         get_logger().incr(u'worker.wait_for_jobs')
