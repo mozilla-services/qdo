@@ -135,13 +135,13 @@ class Worker(object):
 
     def configure_partitions(self, section):
         self.partition_policy = policy = section[u'policy']
-        partition_ids = []
+        self.partition_ids = []
         queuey_conn = self.queuey_conn
         all_partitions = self._partitions()
         if policy == u'manual':
-            partition_ids = section[u'ids']
+            self.partition_ids = section[u'ids']
         elif policy == u'all':
-            partition_ids = all_partitions
+            self.partition_ids = all_partitions
         elif policy == u'automatic':
             self.setup_zookeeper()
             self.zk_part = self.zk_client.SetPartitioner(
@@ -149,7 +149,7 @@ class Worker(object):
                 time_boundary=self.zk_party_wait)
 
             # XXX we don't want all partitions
-            partition_ids = all_partitions
+            self.partition_ids = all_partitions
 
         def cond_create(queue_name):
             if queue_name + u'-1' not in all_partitions:
@@ -157,9 +157,9 @@ class Worker(object):
                     queue_name=queue_name, partitions=STATUS_PARTITIONS)
         cond_create(ERROR_QUEUE)
         cond_create(STATUS_QUEUE)
-        self.assign_partitions(partition_ids)
+        self.status = self.status_partitions()
 
-    def track_partitions(self):
+    def status_partitions(self):
         status = {}
         # get all status messages, starting with the newest ones
         status_messages = self.queuey_conn.messages(
@@ -175,11 +175,12 @@ class Worker(object):
                 status[partition] = message[u'message_id']
         return status
 
-    def assign_partitions(self, partition_ids):
+    def assign_partitions(self):
+        partition_ids = self.partition_ids
         for pid in list(self.partitions.keys()):
             if pid not in partition_ids:
                 del self.partitions[pid]
-        status = self.track_partitions()
+        status = self.status
         for pid in partition_ids:
             if pid.startswith((ERROR_QUEUE, STATUS_QUEUE)):
                 continue
@@ -197,6 +198,7 @@ class Worker(object):
         self.queuey_conn.connect()
         partitions_section = self.settings.getsection(u'partitions')
         self.configure_partitions(partitions_section)
+        self.assign_partitions()
         atexit.register(self.stop)
         timer = get_logger().timer
         zk_part = self.zk_part
