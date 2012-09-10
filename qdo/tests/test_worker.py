@@ -111,19 +111,13 @@ class TestWorker(BaseTestCase):
                 raise KeyboardInterrupt
 
         worker.job = job
-        self._post_message(worker, queue_name, u'work')
-        self._post_message(worker, queue_name, u'work')
-        self._post_message(worker, queue_name, u'work')
+        for i in range(4):
+            self._post_message(worker, queue_name, u'work')
         time.sleep(0.02)
-        last = self._post_message(worker, queue_name, u'work')
         self._post_message(worker, queue_name, u'end')
-        last_message = ujson.decode(
-            last.text)[u'messages'][0][u'key']
 
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(counter[0], 5)
-        value = worker.partitions.values()[0].last_message
-        self.assertEqual(value, last_message)
 
     def test_work_multiple_queues(self):
         worker, queue_name = self._make_one()
