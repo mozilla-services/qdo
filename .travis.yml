@@ -14,5 +14,4 @@ install:
     - make build
 
 script:
-    - export ZOOKEEPER_PATH=/usr/share/java
-    - make test
+    - make ZOOKEEPER_PATH=/usr/share/java test
