@@ -94,6 +94,7 @@ class Worker(object):
         self.partitions = {}
         self.queuey_conn = None
         self.zk_client = None
+        self.zk_part = None
         self.configure()
 
     def configure(self):
@@ -143,6 +144,10 @@ class Worker(object):
             partition_ids = all_partitions
         elif policy == u'automatic':
             self.setup_zookeeper()
+            self.zk_part = self.zk_client.SetPartitioner(
+                u'/worker', set=tuple(all_partitions), identifier=self.name,
+                time_boundary=self.zk_party_wait)
+
             # XXX we don't want all partitions
             partition_ids = all_partitions
 
