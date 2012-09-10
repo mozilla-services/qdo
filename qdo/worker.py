@@ -177,6 +177,9 @@ class Worker(object):
             partitioner_class = self.zk_client.SetPartitioner
             self.partition_ids = all_partitions
 
+        self.partition_ids = [p for p in self.partition_ids if not
+            p.startswith((ERROR_QUEUE, STATUS_QUEUE))]
+
         self.partitioner = partitioner_class(
             u'/worker', set=tuple(self.partition_ids), identifier=self.name,
             time_boundary=self.zk_party_wait)
@@ -212,8 +215,6 @@ class Worker(object):
                 del self.partitions[pid]
         status = self.status
         for pid in partition_ids:
-            if pid.startswith((ERROR_QUEUE, STATUS_QUEUE)):
-                continue
             self.partitions[pid] = Partition(self.queuey_conn, pid,
                 msgid=status.get(pid, None), worker_id=self.name)
 
