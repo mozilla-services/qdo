@@ -64,7 +64,6 @@ Contents
    jobs
    logging
    api
-   zookeeper
    design
    development
    changelog
