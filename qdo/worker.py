@@ -199,7 +199,11 @@ class Worker(object):
         self.configure_partitions(partitions_section)
         atexit.register(self.stop)
         timer = get_logger().timer
+        zk_part = self.zk_part
         with self.job_context() as context:
+            if zk_part is not None:
+                if zk_part.allocating:
+                    zk_part.wait_for_acquire(self.zk_party_wait)
             waited = 0
             while 1:
                 if self.shutdown:
@@ -234,6 +238,8 @@ class Worker(object):
     def stop(self):
         """Stop the worker loop. Used in an `atexit` hook."""
         if self.zk_client is not None:
+            if self.zk_part is not None:
+                self.zk_part.finish()
             self.zk_client.stop()
         self.shutdown = True
 
