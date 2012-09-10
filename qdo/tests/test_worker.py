@@ -318,6 +318,7 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
     def _make_one(self, extra=None):
         extra = {} if not extra else extra
         extra[u'zookeeper.connection'] = self.hosts
+        extra[u'zookeeper.party_wait'] = 0.1
         return _make_worker(self.queuey_app_key, extra=extra)
 
     def _post_message(self, worker, queue_name, data):

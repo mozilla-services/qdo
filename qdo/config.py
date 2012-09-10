@@ -266,6 +266,7 @@ class QdoSettings(SettingsDict):
         self[u'queuey.app_key'] = None
 
         self[u'zookeeper.connection'] = ZOO_DEFAULT_CONN
+        self[u'zookeeper.party_wait'] = 10
 
         self[u'metlog.logger'] = u'qdo-worker'
         self[u'metlog.sender'] = {}

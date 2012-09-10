@@ -93,6 +93,12 @@ connection
     the top-level namespace. If multiple servers are specified, one will be
     selected at random and the others will serve as transparent fallback.
 
+party_wait
+    How long does the set partitioner wait for the list of workers to become
+    stable before actually starting any work. Defaults to 10 seconds. This
+    prevents the system from having to reconfigure itself a number of times
+    while worker processes are restarted or new processes come online.
+
 
 [metlog]
 --------

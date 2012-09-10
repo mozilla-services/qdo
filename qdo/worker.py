@@ -113,6 +113,7 @@ class Worker(object):
             connection=queuey_section[u'connection'])
         zk_section = self.settings.getsection(u'zookeeper')
         self.zk_hosts = zk_section[u'connection']
+        self.zk_party_wait = zk_section[u'party_wait']
 
     def setup_zookeeper(self):
         self.zk_client = KazooClient(hosts=self.zk_hosts, max_retries=1)
