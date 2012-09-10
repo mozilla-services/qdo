@@ -340,4 +340,4 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
         worker.job = job
         self._post_message(worker, queue_name, [u'1', u'2'])
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual([queue_name + u'-1'], list(worker.zk_part))
+        self.assertEqual([queue_name + u'-1'], list(worker.partitioner))

@@ -77,6 +77,35 @@ def resolve(worker, section, name):
         setattr(worker, name, func)
 
 
+class StaticPartitioner(object):
+
+    failed = False
+    release = False
+    allocating = False
+    acquired = True
+
+    def __init__(self, path, set, identifier=None, time_boundary=0):
+        # path and time_boundary are ignored and only here for API
+        # compatibility with the kazoo version
+        self._set = set
+        self._identifier = identifier
+
+    def __iter__(self):
+        for s in self._set:
+            yield s
+
+    def wait_for_acquire(self, timeout=0):
+        pass
+
+    def release_set(self):
+        pass
+
+    def finish(self):
+        self.acquired = False
+        self.failed = True
+        self._set = ()
+
+
 class Worker(object):
     """A Worker works on jobs.
 
@@ -94,7 +123,7 @@ class Worker(object):
         self.partitions = {}
         self.queuey_conn = None
         self.zk_client = None
-        self.zk_part = None
+        self.partitioner = None
         self.configure()
 
     def configure(self):
@@ -138,18 +167,19 @@ class Worker(object):
         self.partition_ids = []
         queuey_conn = self.queuey_conn
         all_partitions = self._partitions()
+        partitioner_class = StaticPartitioner
         if policy == u'manual':
             self.partition_ids = section[u'ids']
         elif policy == u'all':
             self.partition_ids = all_partitions
         elif policy == u'automatic':
             self.setup_zookeeper()
-            self.zk_part = self.zk_client.SetPartitioner(
-                u'/worker', set=tuple(all_partitions), identifier=self.name,
-                time_boundary=self.zk_party_wait)
-
-            # XXX we don't want all partitions
+            partitioner_class = self.zk_client.SetPartitioner
             self.partition_ids = all_partitions
+
+        self.partitioner = partitioner_class(
+            u'/worker', set=tuple(self.partition_ids), identifier=self.name,
+            time_boundary=self.zk_party_wait)
 
         def cond_create(queue_name):
             if queue_name + u'-1' not in all_partitions:
@@ -201,11 +231,10 @@ class Worker(object):
         self.assign_partitions()
         atexit.register(self.stop)
         timer = get_logger().timer
-        zk_part = self.zk_part
+        partitioner = self.partitioner
         with self.job_context() as context:
-            if zk_part is not None:
-                if zk_part.allocating:
-                    zk_part.wait_for_acquire(self.zk_party_wait)
+            if partitioner.allocating:
+                partitioner.wait_for_acquire(self.zk_party_wait)
             waited = 0
             while 1:
                 if self.shutdown:
@@ -240,8 +269,7 @@ class Worker(object):
     def stop(self):
         """Stop the worker loop. Used in an `atexit` hook."""
         if self.zk_client is not None:
-            if self.zk_part is not None:
-                self.zk_part.finish()
+            self.partitioner.finish()
             self.zk_client.stop()
         self.shutdown = True
 
