@@ -64,7 +64,7 @@ class Partition(object):
         result = self.queuey_conn.put(self._status_url, data=encode(dict(
             partition=self.name, processed=value, last_worker=self.worker_id)),
             headers={u'X-TTL': u'2592000'},  # thirty days
-            )
+        )
         return result
 
     def messages(self, limit=100, order='ascending'):

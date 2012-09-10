@@ -278,7 +278,7 @@ class TestWorker(BaseTestCase):
                 u'qdo-worker.name': u'worker%s' % i,
                 u'partitions.policy': u'manual',
                 u'partitions.ids': [queue + u'-1'],
-                })
+            })
             worker.job = job
             workers.append(worker)
 

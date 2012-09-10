@@ -32,7 +32,7 @@ class TestConfig(unittest.TestCase):
             u'qdo-worker.wait_interval': 1,
             u'queuey.url': u'https://10.0.0.1:2345',
             u'zookeeper.connection': u'10.0.0.2:3456/qdo',
-            }
+        }
         settings = self._make_one(extra)
         qdo_section = settings.getsection(u'qdo-worker')
         self.assertEqual(qdo_section[u'wait_interval'], 1)
@@ -45,7 +45,7 @@ class TestConfig(unittest.TestCase):
         extra = {
             u'partitions.policy': u'manual',
             u'partitions.ids': [u'a4bb2fb6dcda4b68aad743a4746d7f58-1'],
-            }
+        }
         settings = self._make_one(extra)
         p_section = settings.getsection(u'partitions')
         self.assertEqual(p_section[u'policy'], u'manual')
