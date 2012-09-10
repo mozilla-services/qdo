@@ -92,7 +92,7 @@ html:
 	cd docs && make html
 
 test:
-	$(PYTHON) runtests.py
+	ZOOKEEPER_PATH=$(ZOOKEEPER_PATH) $(PYTHON) runtests.py
 
 test-python:
 	$(NOSE) --with-coverage --cover-package=$(APPNAME) \
