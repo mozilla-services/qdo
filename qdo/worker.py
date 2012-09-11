@@ -148,7 +148,7 @@ class Worker(object):
         self.zk_client = KazooClient(hosts=self.zk_hosts, max_retries=1)
         self.zk_client.start()
 
-    def _partitions(self):
+    def all_partitions(self):
         # List all partitions
         queuey_conn = self.queuey_conn
         response = queuey_conn.get(params={u'details': True})
@@ -165,7 +165,7 @@ class Worker(object):
         self.partition_policy = policy = section[u'policy']
         self.partition_ids = []
         queuey_conn = self.queuey_conn
-        all_partitions = self._partitions()
+        all_partitions = self.all_partitions()
         partitioner_class = StaticPartitioner
         if policy == u'manual':
             self.partition_ids = section[u'ids']
