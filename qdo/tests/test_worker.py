@@ -258,10 +258,13 @@ class TestWorker(BaseTestCase):
         queues = []
         threads = []
         workers = []
+        contexts = []
+        lasts = []
 
         def job(message, context):
             if message[u'body'] == u'stop':
                 raise KeyboardInterrupt
+            context.append(message[u'message_id'])
 
         for i in range(3):
             queue = queuey_conn.create_queue()
@@ -271,11 +274,22 @@ class TestWorker(BaseTestCase):
                 u'partitions.policy': u'manual',
                 u'partitions.ids': [queue + u'-1'],
             })
+
+            @contextmanager
+            def job_context(contexts=contexts):
+                context = []
+                contexts.append(context)
+                yield context
+
             worker.job = job
+            worker.job_context = job_context
             workers.append(worker)
 
             self._post_message(worker, queue,
                 [u'%s' % i for i in xrange(11)])
+            response = self._post_message(worker, queue, u'last')
+            last = ujson.decode(response.text)[u'messages'][0][u'key']
+            lasts.append(last)
             self._post_message(worker, queue, u'stop')
 
             event = threading.Event()
@@ -294,7 +308,7 @@ class TestWorker(BaseTestCase):
 
         for i in range(3):
             events[i].wait()
-            # TODO make some useful test assertion
+            self.assertEqual(contexts[i][-1], lasts[i])
 
 
 class TestKazooWorker(BaseTestCase, KazooTestHarness):
