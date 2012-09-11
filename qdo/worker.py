@@ -133,7 +133,7 @@ class Worker(object):
         self.job_failure = log_failure
         self.partition_policy = u'manual'
         self.queuey_conn = None
-        self.zk_client = None
+        self.zk = None
         self.partitioner = None
         self.partition_cache = PartitionCache(self)
         self.configure()
@@ -158,8 +158,8 @@ class Worker(object):
         self.zk_party_wait = zk_section[u'party_wait']
 
     def setup_zookeeper(self):
-        self.zk_client = KazooClient(hosts=self.zk_hosts, max_retries=1)
-        self.zk_client.start()
+        self.zk = KazooClient(hosts=self.zk_hosts, max_retries=1)
+        self.zk.start()
 
     def all_partitions(self):
         # List all partitions
@@ -183,7 +183,7 @@ class Worker(object):
             partition_ids = all_partitions
         if policy == u'automatic':
             self.setup_zookeeper()
-            partitioner_class = self.zk_client.SetPartitioner
+            partitioner_class = self.zk.SetPartitioner
         else:
             partitioner_class = StaticPartitioner
 
@@ -275,9 +275,9 @@ class Worker(object):
     def stop(self):
         """Stop the worker loop. Used in an `atexit` hook."""
         self.shutdown = True
-        if self.zk_client is not None:
+        if self.zk is not None:
             self.partitioner.finish()
-            self.zk_client.stop()
+            self.zk.stop()
 
 
 def run(settings):  # pragma: no cover
