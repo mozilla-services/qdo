@@ -81,8 +81,8 @@ class StaticPartitioner(object):
 
     failed = False
     release = False
-    allocating = False
-    acquired = True
+    allocating = True
+    acquired = False
 
     def __init__(self, path, set, identifier=None, time_boundary=0):
         # path and time_boundary are ignored and only here for API
@@ -95,9 +95,10 @@ class StaticPartitioner(object):
             yield s
 
     def wait_for_acquire(self, timeout=0):
-        pass
+        self.allocating = False
+        self.acquired = True
 
-    def release_set(self):
+    def release_set(self):  # pragma: no cover
         pass
 
     def finish(self):
