@@ -176,18 +176,16 @@ class Worker(object):
 
     def configure_partitions(self, section):
         self.partition_policy = policy = section[u'policy']
-        partition_ids = []
         queuey_conn = self.queuey_conn
         all_partitions = self.all_partitions()
-        partitioner_class = StaticPartitioner
-        if policy == u'manual':
-            partition_ids = section[u'ids']
-        elif policy == u'all':
+        partition_ids = section.get(u'ids')
+        if not partition_ids:
             partition_ids = all_partitions
-        elif policy == u'automatic':
+        if policy == u'automatic':
             self.setup_zookeeper()
             partitioner_class = self.zk_client.SetPartitioner
-            partition_ids = all_partitions
+        else:
+            partitioner_class = StaticPartitioner
 
         partition_ids = [p for p in partition_ids if not
             p.startswith((ERROR_QUEUE, STATUS_QUEUE))]

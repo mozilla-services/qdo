@@ -21,7 +21,6 @@ def _make_worker(app_key, extra=None, queue=True):
     from qdo.worker import Worker
     settings = QdoSettings()
     settings[u'queuey.app_key'] = app_key
-    settings[u'partitions.policy'] = u'all'
     if extra is not None:
         settings.update(extra)
     worker = Worker(settings)
@@ -43,7 +42,7 @@ class TestWorker(BaseTestCase):
 
     def test_special_queues(self):
         worker, queue_name = self._make_one()
-        worker.configure_partitions(dict(policy=u'all'))
+        worker.configure_partitions(dict(policy=u'manual'))
         partitions = worker.all_partitions()
         self.assertTrue(ERROR_QUEUE + u'-1' in partitions)
         self.assertTrue(STATUS_QUEUE + u'-1' in partitions)

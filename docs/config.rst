@@ -52,20 +52,20 @@ wait_interval
 ------------
 
 policy
-    Specifies how to get all partition ids for this worker. Defaults to
-    `manual`, in which case an explicit list of `ids` has to be specified.
-    The other values are `all`, which gets a list of all partitions from
-    Queuey and assigns them to this worker. The third option is `automatic`,
-    which uses Zookeeper to distribute partitions across workers.
+    Specifies how to distribute work across workers. Defaults to `manual`, in
+    which case each worker will work on all partitions it has been assigned to.
+    The other option is `automatic`, which uses Zookeeper to distribute
+    partitions across workers.
 
 ids
-    Only used when the policy is `manual`. A new-line separated list of
-    partitions, for example::
+    A new-line separated list of partitions, for example::
 
         ids =
             a4bb2fb6dcda4b68aad743a4746d7f58-1
             a4bb2fb6dcda4b68aad743a4746d7f58-2
             958f8c0643484f13b7fb32f27a4a2a9f-1
+
+    If no explicit list of ids is given, Queuey is queried for all partitions.
 
 [queuey]
 --------
