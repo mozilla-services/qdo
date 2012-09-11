@@ -17,7 +17,7 @@ from qdo.config import STATUS_QUEUE
 from qdo.tests.base import BaseTestCase
 
 
-def _make_worker(app_key, extra=None):
+def _make_worker(app_key, extra=None, queue=True):
     from qdo.worker import Worker
     settings = QdoSettings()
     settings[u'queuey.app_key'] = app_key
@@ -25,7 +25,10 @@ def _make_worker(app_key, extra=None):
     if extra is not None:
         settings.update(extra)
     worker = Worker(settings)
-    queue_name = worker.queuey_conn.create_queue()
+    if queue:
+        queue_name = worker.queuey_conn.create_queue()
+    else:
+        queue_name = None
     return worker, queue_name
 
 
@@ -321,19 +324,20 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
         self.teardown_zookeeper()
         BaseTestCase.tearDown(self)
 
-    def _make_one(self, extra=None):
+    def _make_one(self, extra=None, queue=True):
         extra = {} if not extra else extra
+        extra[u'qdo-worker.wait_interval'] = 0
         extra[u'zookeeper.connection'] = self.hosts
-        extra[u'zookeeper.party_wait'] = 0.1
-        return _make_worker(self.queuey_app_key, extra=extra)
+        extra[u'zookeeper.party_wait'] = 0.5
+        extra[u'partitions.policy'] = u'automatic'
+        return _make_worker(self.queuey_app_key, extra=extra, queue=queue)
 
     def _post_message(self, worker, queue_name, data):
         queuey_conn = worker.queuey_conn
         return queuey_conn.post(queue_name, data=data)
 
     def test_work(self):
-        worker, queue_name = self._make_one(extra={
-            u'partitions.policy': u'automatic'})
+        worker, queue_name = self._make_one()
         counter = [0]
 
         def job(message, context):
@@ -345,3 +349,58 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
         self._post_message(worker, queue_name, [u'1', u'2'])
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual([queue_name + u'-1'], list(worker.partitioner))
+
+    def test_multiple_workers(self):
+        queuey_conn = self._queuey_conn
+        events = []
+        queues = []
+        threads = []
+        workers = []
+
+        def job(message, context):
+            if message[u'body'] == u'stop':
+                raise KeyboardInterrupt
+
+        for i in range(3):
+            queue = queuey_conn.create_queue(partitions=9)
+            queues.append(queue)
+
+        # wait for all queues to be created
+        time.sleep(0.5)
+        for i in range(3):
+            worker, _ = self._make_one(extra={
+                u'qdo-worker.name': u'worker%s' % i}, queue=False)
+
+            worker.job = job
+            workers.append(worker)
+
+            self._post_message(worker, queues[i],
+                [u'%s' % j for j in xrange(20)])
+            self._post_message(worker, queues[i],
+                [u'stop' for j in xrange(20)])
+
+            event = threading.Event()
+            events.append(event)
+
+            def run(event):
+                try:
+                    worker.work()
+                except KeyboardInterrupt:
+                    pass
+                event.set()
+
+            thread = threading.Thread(target=run, args=(event, ))
+            thread.start()
+            threads.append(thread)
+
+        all_partitions = []
+        for i in range(3):
+            events[i].wait(2)
+            workers[i].shutdown = True
+            partitions = list(workers[i].partitioner)
+            threads[i].join()
+            self.assertTrue(len(partitions) > 3)
+            all_partitions.extend(partitions)
+
+        self.assertEqual(len(all_partitions), 27)
+        self.assertEqual(len(set(all_partitions)), 27)
