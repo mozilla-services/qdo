@@ -397,6 +397,7 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
             events[i].wait(2)
             workers[i].shutdown = True
             partitions = list(workers[i].partitioner)
+            workers[i].stop()
             threads[i].join()
             self.assertTrue(len(partitions) > 3)
             all_partitions.extend(partitions)
