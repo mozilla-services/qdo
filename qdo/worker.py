@@ -106,6 +106,18 @@ class StaticPartitioner(object):
         self._set = ()
 
 
+class PartitionCache(dict):
+
+    def __init__(self, worker):
+        self._worker = worker
+
+    def __missing__(self, key):
+        worker = self._worker
+        self[key] = partition = Partition(worker.queuey_conn, key,
+            msgid=worker.status.get(key, None), worker_id=worker.name)
+        return partition
+
+
 class Worker(object):
     """A Worker works on jobs.
 
@@ -123,6 +135,7 @@ class Worker(object):
         self.queuey_conn = None
         self.zk_client = None
         self.partitioner = None
+        self.partition_cache = PartitionCache(self)
         self.configure()
 
     def configure(self):
@@ -218,7 +231,6 @@ class Worker(object):
         atexit.register(self.stop)
         timer = get_logger().timer
         partitioner = self.partitioner
-        partition_cache = {}
         with self.job_context() as context:
             if partitioner.allocating:
                 partitioner.wait_for_acquire(self.zk_party_wait)
@@ -234,12 +246,7 @@ class Worker(object):
                     no_messages = 0
                     partitions = list(self.partitioner)
                     for name in partitions:
-                        partition = partition_cache.get(name, None)
-                        if partition is None:
-                            partition_cache[name] = partition = Partition(
-                                self.queuey_conn, name,
-                                msgid=self.status.get(name, None),
-                                worker_id=self.name)
+                        partition = self.partition_cache[name]
                         messages = partition.messages(limit=2)
                         if not messages:
                             no_messages += 1
