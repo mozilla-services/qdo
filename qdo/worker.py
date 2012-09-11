@@ -144,7 +144,7 @@ class Worker(object):
         self.name = u'%s-%s' % (socket.getfqdn(), os.getpid())
         identifier = qdo_section[u'name']
         if identifier:
-            self.name = self.name + u'-' + identifier
+            self.name += u'-' + identifier
         self.wait_interval = qdo_section[u'wait_interval']
         resolve(self, qdo_section, u'job')
         resolve(self, qdo_section, u'job_context')
