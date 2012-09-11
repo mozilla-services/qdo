@@ -174,7 +174,8 @@ class Worker(object):
                 partitions.append(u'%s-%s' % (name, i))
         return partitions
 
-    def configure_partitions(self, section):
+    def configure_partitions(self):
+        section = self.settings.getsection(u'partitions')
         self.partition_policy = policy = section[u'policy']
         queuey_conn = self.queuey_conn
         all_partitions = self.all_partitions()
@@ -224,8 +225,7 @@ class Worker(object):
             return
         # Try Queuey heartbeat connection
         self.queuey_conn.connect()
-        partitions_section = self.settings.getsection(u'partitions')
-        self.configure_partitions(partitions_section)
+        self.configure_partitions()
         atexit.register(self.stop)
         timer = get_logger().timer
         partitioner = self.partitioner

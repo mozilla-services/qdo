@@ -42,13 +42,13 @@ class TestWorker(BaseTestCase):
 
     def test_special_queues(self):
         worker, queue_name = self._make_one()
-        worker.configure_partitions(dict(policy=u'manual'))
+        worker.configure_partitions()
         partitions = worker.all_partitions()
         self.assertTrue(ERROR_QUEUE + u'-1' in partitions)
         self.assertTrue(STATUS_QUEUE + u'-1' in partitions)
         self.assertEqual(list(worker.partitioner), [queue_name + u'-1'])
-        worker.configure_partitions(
-            dict(policy=u'manual', ids=[queue_name + u'-2']))
+        worker.settings['partitions.ids'] = [queue_name + u'-2']
+        worker.configure_partitions()
         self.assertEqual(list(worker.partitioner), [queue_name + u'-2'])
 
     def test_work_no_job(self):
