@@ -267,10 +267,10 @@ class Worker(object):
 
     def stop(self):
         """Stop the worker loop. Used in an `atexit` hook."""
+        self.shutdown = True
         if self.zk_client is not None:
             self.partitioner.finish()
             self.zk_client.stop()
-        self.shutdown = True
 
 
 def run(settings):
