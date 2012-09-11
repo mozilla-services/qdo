@@ -207,7 +207,7 @@ class Worker(object):
         # get all status messages, starting with the newest ones
         status_messages = self.queuey_conn.messages(
             STATUS_QUEUE, limit=1000, order='descending')
-        if len(status_messages) >= 1000:
+        if len(status_messages) >= 1000:  # pragma: no cover
             # TODO deal with more than 1000 status messages / partitions
             raise RuntimeError(u'More than 1000 status messages detected!')
         for message in status_messages:
@@ -280,6 +280,6 @@ class Worker(object):
             self.zk_client.stop()
 
 
-def run(settings):
+def run(settings):  # pragma: no cover
     worker = Worker(settings)
     worker.work()
