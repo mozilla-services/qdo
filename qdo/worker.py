@@ -208,10 +208,7 @@ class Worker(object):
         return status
 
     def work(self):
-        """Work on jobs.
-
-        This is the main loop of the worker.
-        """
+        """Work on jobs."""
         if not self.job:
             return
         # Try Queuey heartbeat connection
