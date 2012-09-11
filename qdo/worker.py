@@ -104,7 +104,6 @@ class StaticPartitioner(object):
     def finish(self):
         self.acquired = False
         self.failed = True
-        self._set = ()
 
 
 class PartitionCache(dict):
@@ -265,6 +264,8 @@ class Worker(object):
                         waited += 1
                     else:
                         waited = 0
+            # give up the partitions and leave party
+            self.partitioner.finish()
 
     def wait(self, waited=1):
         get_logger().incr(u'worker.wait_for_jobs')
