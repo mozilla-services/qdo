@@ -28,11 +28,11 @@ An easy way to write a context manager is using the contextlib module::
     def job_context():
         try:
             # do some one-time setup per worker, like open DB connections
-            context = {u'counter': 0}
+            context = {'counter': 0}
             yield context
         finally:
             # tear things down
-            print(u'Messages processed: %s' % context[u'counter'])
+            print('Messages processed: %s' % context['counter'])
 
 The `job_context` function takes no arguments and yields some context object.
 Since there's only one process and no threads involved in the worker itself,
@@ -46,8 +46,8 @@ The `job` hook points to a Python callable and is used to process any
 message::
 
     def job(message, context):
-        context[u'counter'] += 1
-        print(u'%s: %s' % (message[u'message_id'], message[u'body']))
+        context['counter'] += 1
+        print('%s: %s' % (message['message_id'], message['body']))
 
 The callable takes two arguments. A message as returned by Queuey and the
 context as setup by the `job_context` hook. A Queuey message has some common

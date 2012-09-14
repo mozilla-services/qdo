@@ -23,16 +23,16 @@ you need at least one Python module, for example `hello.py`::
     def job_context():
         try:
             # do some one-time setup per worker, like open DB connections
-            context = {u'counter': 0}
+            context = {'counter': 0}
             yield context
         finally:
             # tear things down
-            print(u'Messages processed: %s' % context[u'counter'])
+            print('Messages processed: %s' % context['counter'])
 
 
     def job(message, context):
-        context[u'counter'] += 1
-        print(u'%s: %s' % (message[u'message_id'], message[u'body']))
+        context['counter'] += 1
+        print('%s: %s' % (message['message_id'], message['body']))
 
 And one config file named `hello.conf`:
 
