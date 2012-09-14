@@ -12,7 +12,7 @@ def get_logger():
 
     :rtype: :py:class:`metlog.client.MetlogClient`
     """
-    return get_client(u'qdo-worker')
+    return get_client('qdo-worker')
 
 
 def configure(settings, debug=False):
@@ -20,11 +20,11 @@ def configure(settings, debug=False):
     passed in :py:attr:`settings` or as a debug sender.
     """
     if debug:
-        debug_config = {u'sender': {
-            u'class': u'metlog.senders.dev.DebugCaptureSender'}}
-        get_client(u'qdo-worker', debug_config)
+        debug_config = {'sender': {
+            'class': 'metlog.senders.dev.DebugCaptureSender'}}
+        get_client('qdo-worker', debug_config)
     else:
-        logger = get_client(u'qdo-worker')
+        logger = get_client('qdo-worker')
         # don't reconfigure an already configured debug logger
         if not isinstance(logger.sender, DebugCaptureSender):
-            get_client(u'qdo-worker', settings)
+            get_client('qdo-worker', settings)

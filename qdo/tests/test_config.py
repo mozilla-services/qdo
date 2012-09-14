@@ -18,36 +18,36 @@ class TestConfig(unittest.TestCase):
     def test_defaults(self):
         from qdo import config
         settings = self._make_one()
-        qdo_section = settings.getsection(u'qdo-worker')
-        self.assertEqual(qdo_section[u'wait_interval'], 30)
-        self.assertEqual(qdo_section[u'name'], u'')
-        queuey_section = settings.getsection(u'queuey')
-        self.assertEqual(queuey_section[u'connection'],
-            u'http://127.0.0.1:5000/v1/queuey/')
-        zk_section = settings.getsection(u'zookeeper')
-        self.assertEqual(zk_section[u'connection'], config.ZOO_DEFAULT_CONN)
+        qdo_section = settings.getsection('qdo-worker')
+        self.assertEqual(qdo_section['wait_interval'], 30)
+        self.assertEqual(qdo_section['name'], '')
+        queuey_section = settings.getsection('queuey')
+        self.assertEqual(queuey_section['connection'],
+            'http://127.0.0.1:5000/v1/queuey/')
+        zk_section = settings.getsection('zookeeper')
+        self.assertEqual(zk_section['connection'], config.ZOO_DEFAULT_CONN)
 
     def test_configure(self):
         extra = {
-            u'qdo-worker.wait_interval': 1,
-            u'queuey.url': u'https://10.0.0.1:2345',
-            u'zookeeper.connection': u'10.0.0.2:3456/qdo',
+            'qdo-worker.wait_interval': 1,
+            'queuey.url': 'https://10.0.0.1:2345',
+            'zookeeper.connection': '10.0.0.2:3456/qdo',
         }
         settings = self._make_one(extra)
-        qdo_section = settings.getsection(u'qdo-worker')
-        self.assertEqual(qdo_section[u'wait_interval'], 1)
-        queuey_section = settings.getsection(u'queuey')
-        self.assertEqual(queuey_section[u'url'], u'https://10.0.0.1:2345')
-        zk_section = settings.getsection(u'zookeeper')
-        self.assertEqual(zk_section[u'connection'], u'10.0.0.2:3456/qdo')
+        qdo_section = settings.getsection('qdo-worker')
+        self.assertEqual(qdo_section['wait_interval'], 1)
+        queuey_section = settings.getsection('queuey')
+        self.assertEqual(queuey_section['url'], 'https://10.0.0.1:2345')
+        zk_section = settings.getsection('zookeeper')
+        self.assertEqual(zk_section['connection'], '10.0.0.2:3456/qdo')
 
     def test_manual_partition(self):
         extra = {
-            u'partitions.policy': u'manual',
-            u'partitions.ids': [u'a4bb2fb6dcda4b68aad743a4746d7f58-1'],
+            'partitions.policy': 'manual',
+            'partitions.ids': ['a4bb2fb6dcda4b68aad743a4746d7f58-1'],
         }
         settings = self._make_one(extra)
-        p_section = settings.getsection(u'partitions')
-        self.assertEqual(p_section[u'policy'], u'manual')
+        p_section = settings.getsection('partitions')
+        self.assertEqual(p_section['policy'], 'manual')
         self.assertEqual(
-            p_section[u'ids'], [u'a4bb2fb6dcda4b68aad743a4746d7f58-1'])
+            p_section['ids'], ['a4bb2fb6dcda4b68aad743a4746d7f58-1'])

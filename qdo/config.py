@@ -234,12 +234,12 @@ class SettingsDict(dict):
         for k, v in kwds.iteritems():
             self.setdefault(k, v)
 
-ERROR_QUEUE = u'qdo_error'
-STATUS_QUEUE = u'qdo_status'
+ERROR_QUEUE = 'qdo_error'
+STATUS_QUEUE = 'qdo_status'
 STATUS_PARTITIONS = 7
-ZOO_DEFAULT_NS = u'mozilla-qdo'
-ZOO_DEFAULT_ROOT = u'/' + ZOO_DEFAULT_NS
-ZOO_DEFAULT_HOST = u'127.0.0.1:2181'
+ZOO_DEFAULT_NS = 'mozilla-qdo'
+ZOO_DEFAULT_ROOT = '/' + ZOO_DEFAULT_NS
+ZOO_DEFAULT_HOST = '127.0.0.1:2181'
 ZOO_DEFAULT_CONN = ZOO_DEFAULT_HOST + ZOO_DEFAULT_ROOT
 
 
@@ -252,22 +252,22 @@ class QdoSettings(SettingsDict):
 
     def load_defaults(self):
         """Populate settings with default values"""
-        self[u'qdo-worker.name'] = u''
-        self[u'qdo-worker.wait_interval'] = 30
-        self[u'qdo-worker.ca_bundle'] = None
-        self[u'qdo-worker.job'] = None
-        self[u'qdo-worker.job_context'] = u'qdo.worker:dict_context'
-        self[u'qdo-worker.job_failure'] = u'qdo.worker:log_failure'
+        self['qdo-worker.name'] = ''
+        self['qdo-worker.wait_interval'] = 30
+        self['qdo-worker.ca_bundle'] = None
+        self['qdo-worker.job'] = None
+        self['qdo-worker.job_context'] = 'qdo.worker:dict_context'
+        self['qdo-worker.job_failure'] = 'qdo.worker:log_failure'
 
-        self[u'partitions.policy'] = u'manual'
-        self[u'partitions.ids'] = []
+        self['partitions.policy'] = 'manual'
+        self['partitions.ids'] = []
 
-        self[u'queuey.connection'] = u'http://127.0.0.1:5000/v1/queuey/'
-        self[u'queuey.app_key'] = None
+        self['queuey.connection'] = 'http://127.0.0.1:5000/v1/queuey/'
+        self['queuey.app_key'] = None
 
-        self[u'zookeeper.connection'] = ZOO_DEFAULT_CONN
-        self[u'zookeeper.party_wait'] = 10
+        self['zookeeper.connection'] = ZOO_DEFAULT_CONN
+        self['zookeeper.party_wait'] = 10
 
-        self[u'metlog.logger'] = u'qdo-worker'
-        self[u'metlog.sender'] = {}
-        self[u'metlog.sender'][u'class'] = u'metlog.senders.StdOutSender'
+        self['metlog.logger'] = 'qdo-worker'
+        self['metlog.sender'] = {}
+        self['metlog.sender']['class'] = 'metlog.senders.StdOutSender'

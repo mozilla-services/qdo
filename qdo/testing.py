@@ -19,48 +19,48 @@ processes = {}
 
 
 def example_job(message, context):
-    body = message[u'body']
-    if body == u'stop':
+    body = message['body']
+    if body == 'stop':
         raise KeyboardInterrupt
-    elif body == u'wait':
+    elif body == 'wait':
         time.sleep(0.01)
 
 
 def ensure_process(name, timeout=30, noisy=True):
-    srpc = processes[u'supervisor']
-    if srpc.getProcessInfo(name)[u'statename'] in (u'STOPPED', u'EXITED'):
+    srpc = processes['supervisor']
+    if srpc.getProcessInfo(name)['statename'] in ('STOPPED', 'EXITED'):
         if noisy:
-            print(u'Starting %s!\n' % name)
+            print('Starting %s!\n' % name)
         srpc.startProcess(name)
     # wait for startup to succeed
     for i in xrange(1, timeout):
-        state = srpc.getProcessInfo(name)[u'statename']
-        if state == u'RUNNING':
+        state = srpc.getProcessInfo(name)['statename']
+        if state == 'RUNNING':
             break
-        elif state != u'RUNNING':
+        elif state != 'RUNNING':
             if noisy:
-                print(u'Waiting on %s for %s seconds.' % (name, i * 0.1))
+                print('Waiting on %s for %s seconds.' % (name, i * 0.1))
             time.sleep(i * 0.1)
-    if srpc.getProcessInfo(name)[u'statename'] != u'RUNNING':
+    if srpc.getProcessInfo(name)['statename'] != 'RUNNING':
         for name in os.listdir(vardir):
-            if name == u'README.txt':
+            if name == 'README.txt':
                 continue
-            print(u"\n\nFILE: %s" % name)
+            print('\n\nFILE: %s' % name)
             with open(os.path.join(vardir, name)) as f:
                 print(f.read())
-        raise RuntimeError(u'%s not running' % name)
+        raise RuntimeError('%s not running' % name)
 
 
 def setup_supervisor():
-    processes[u'supervisor'] = xmlrpclib.ServerProxy(
-        u'http://127.0.0.1:4999').supervisor
+    processes['supervisor'] = xmlrpclib.ServerProxy(
+        'http://127.0.0.1:4999').supervisor
 
 
 def setup():
     """Shared one-time test setup, called from tests/__init__.py"""
     log.configure(None, debug=True)
     setup_supervisor()
-    ensure_process(u'queuey')
+    ensure_process('queuey')
 
 
 def teardown():

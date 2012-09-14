@@ -9,9 +9,9 @@ import sys
 import unittest
 
 HERE = os.path.dirname(__file__)
-DATA_DIR = os.path.join(HERE, u'data')
-NO_CONFIG = os.path.join(DATA_DIR, u'none')
-TEST_CONFIG = os.path.join(DATA_DIR, u'test.conf')
+DATA_DIR = os.path.join(HERE, 'data')
+NO_CONFIG = os.path.join(DATA_DIR, 'none')
+TEST_CONFIG = os.path.join(DATA_DIR, 'test.conf')
 
 
 class TestConfigParser(unittest.TestCase):
@@ -21,8 +21,8 @@ class TestConfigParser(unittest.TestCase):
         from qdo.runner import parse_config
         settings = QdoSettings()
         config = parse_config(TEST_CONFIG, settings)
-        self.assertEqual(config.sections(), [u'qdo-worker'])
-        self.assertEqual(settings[u'qdo-worker.wait_interval'], 10)
+        self.assertEqual(config.sections(), ['qdo-worker'])
+        self.assertEqual(settings['qdo-worker.wait_interval'], 10)
 
     def test_parse_config_nofile(self):
         from qdo.runner import parse_config
@@ -41,7 +41,7 @@ class TestArgsParser(unittest.TestCase):
 
     def test_parse_args_configfile(self):
         from qdo.runner import parse_args
-        namespace = parse_args([u'-c', TEST_CONFIG])
+        namespace = parse_args(['-c', TEST_CONFIG])
         self.assertEqual(namespace.configfile, TEST_CONFIG)
 
 
@@ -53,8 +53,8 @@ class TestRunner(unittest.TestCase):
         old_stdout = sys.stdout
         try:
             sys.stdout = mystdout = StringIO()
-            self.assertRaises(SystemExit, run, [u'-c', NO_CONFIG])
-            out = mystdout.getvalue().decode(u'utf-8')
-            self.assertTrue(u'Configuration file not found' in out, out)
+            self.assertRaises(SystemExit, run, ['-c', NO_CONFIG])
+            out = mystdout.getvalue().decode('utf-8')
+            self.assertTrue('Configuration file not found' in out, out)
         finally:
             sys.stdout = old_stdout

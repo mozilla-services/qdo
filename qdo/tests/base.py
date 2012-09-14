@@ -9,7 +9,7 @@ from ujson import decode as ujson_decode
 from unittest2 import TestCase
 
 # as specified in the queuey.ini
-TEST_APP_KEY = u'f25bfb8fe200475c8a0532a9cbe7651e'
+TEST_APP_KEY = 'f25bfb8fe200475c8a0532a9cbe7651e'
 
 
 class QueueyBase(object):
@@ -27,7 +27,7 @@ class QueueyBase(object):
 
     @classmethod
     def _make_queuey_conn(cls,
-            connection=u'http://127.0.0.1:5000/v1/queuey/'):
+            connection='http://127.0.0.1:5000/v1/queuey/'):
         return Client(cls.queuey_app_key, connection=connection)
 
     @classmethod
@@ -35,8 +35,8 @@ class QueueyBase(object):
         conn = cls._queuey_conn
         try:
             response = conn.get()
-            queues = ujson_decode(response.text)[u'queues']
-            names = [q[u'queue_name'] for q in queues]
+            queues = ujson_decode(response.text)['queues']
+            names = [q['queue_name'] for q in queues]
             for n in names:
                 conn.delete(n)
         except ConnectionError:

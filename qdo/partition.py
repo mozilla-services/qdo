@@ -28,15 +28,15 @@ class Partition(object):
     :type name: unicode
     """
 
-    def __init__(self, queuey_conn, name, msgid=None, worker_id=u''):
+    def __init__(self, queuey_conn, name, msgid=None, worker_id=''):
         self.queuey_conn = queuey_conn
         self.worker_id = worker_id
         if '-' in name:
             self.name = name
-            parts = name.split(u'-')
+            parts = name.split('-')
             self.queue_name, self.partition = parts[0], int(parts[1])
         else:
-            self.name = name + u'-1'
+            self.name = name + '-1'
             self.queue_name, self.partition = (name, 1)
         # map partition to one in 1 to max status partitions
         self.status_partition = ((self.partition - 1) % STATUS_PARTITIONS) + 1
@@ -48,22 +48,22 @@ class Partition(object):
     @property
     def _status_url(self):
         sp = unicode(self.status_partition)
-        return STATUS_QUEUE + u'/' + sp + u'%3A' + self.msgid
+        return STATUS_QUEUE + '/' + sp + '%3A' + self.msgid
 
     def _create_status_message(self):
-        return self._update_status_message(u'')
+        return self._update_status_message('')
 
     def _get_status_message(self):
         response = self.queuey_conn.get(self._status_url)
-        messages = decode(response.text)[u'messages']
+        messages = decode(response.text)['messages']
         if messages:
-            return decode(messages[0][u'body'])
+            return decode(messages[0]['body'])
         return None
 
     def _update_status_message(self, value):
         result = self.queuey_conn.put(self._status_url, data=encode(dict(
             partition=self.name, processed=value, last_worker=self.worker_id)),
-            headers={u'X-TTL': u'2592000'},  # thirty days
+            headers={'X-TTL': '2592000'},  # thirty days
         )
         return result
 
@@ -88,8 +88,8 @@ class Partition(object):
         """
         msg = self._get_status_message()
         if msg is None:
-            return u''
-        return msg[u'processed']
+            return ''
+        return msg['processed']
 
     @last_message.setter
     def last_message(self, value):

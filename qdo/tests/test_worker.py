@@ -20,7 +20,7 @@ from qdo.tests.base import BaseTestCase
 def _make_worker(app_key, extra=None, queue=True):
     from qdo.worker import Worker
     settings = QdoSettings()
-    settings[u'queuey.app_key'] = app_key
+    settings['queuey.app_key'] = app_key
     if extra is not None:
         settings.update(extra)
     worker = Worker(settings)
@@ -44,12 +44,12 @@ class TestWorker(BaseTestCase):
         worker, queue_name = self._make_one()
         worker.configure_partitions()
         partitions = worker.all_partitions()
-        self.assertTrue(ERROR_QUEUE + u'-1' in partitions)
-        self.assertTrue(STATUS_QUEUE + u'-1' in partitions)
-        self.assertEqual(list(worker.partitioner), [queue_name + u'-1'])
-        worker.settings['partitions.ids'] = [queue_name + u'-2']
+        self.assertTrue(ERROR_QUEUE + '-1' in partitions)
+        self.assertTrue(STATUS_QUEUE + '-1' in partitions)
+        self.assertEqual(list(worker.partitioner), [queue_name + '-1'])
+        worker.settings['partitions.ids'] = [queue_name + '-2']
         worker.configure_partitions()
-        self.assertEqual(list(worker.partitioner), [queue_name + u'-2'])
+        self.assertEqual(list(worker.partitioner), [queue_name + '-2'])
 
     def test_work_no_job(self):
         worker, queue_name = self._make_one()
@@ -71,7 +71,7 @@ class TestWorker(BaseTestCase):
             raise KeyboardInterrupt
 
         worker.job = job
-        self._post_message(worker, queue_name, u'Hello')
+        self._post_message(worker, queue_name, 'Hello')
         self.assertRaises(KeyboardInterrupt, worker.work)
 
     def test_work_context(self):
@@ -80,26 +80,26 @@ class TestWorker(BaseTestCase):
 
         @contextmanager
         def job_context(context=context):
-            context[u'counter'] = 0
-            context[u'done'] = False
+            context['counter'] = 0
+            context['done'] = False
             try:
                 yield context
             finally:
-                context[u'done'] = True
+                context['done'] = True
 
         def job(message, context):
-            context[u'counter'] += 1
-            if message[u'body'] == u'end':
+            context['counter'] += 1
+            if message['body'] == 'end':
                 raise KeyboardInterrupt
 
         worker.job = job
         worker.job_context = job_context
 
-        self._post_message(worker, queue_name, u'work')
-        self._post_message(worker, queue_name, u'end')
+        self._post_message(worker, queue_name, 'work')
+        self._post_message(worker, queue_name, 'end')
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual(context[u'counter'], 2)
-        self.assertEqual(context[u'done'], True)
+        self.assertEqual(context['counter'], 2)
+        self.assertEqual(context['done'], True)
 
     def test_work_multiple_messages(self):
         worker, queue_name = self._make_one()
@@ -109,14 +109,14 @@ class TestWorker(BaseTestCase):
             counter[0] += 1
             if counter[0] > 5:
                 raise ValueError
-            if message[u'body'] == u'end':
+            if message['body'] == 'end':
                 raise KeyboardInterrupt
 
         worker.job = job
         for i in range(4):
-            self._post_message(worker, queue_name, u'work')
+            self._post_message(worker, queue_name, 'work')
         time.sleep(0.02)
-        self._post_message(worker, queue_name, u'end')
+        self._post_message(worker, queue_name, 'end')
 
         self.assertRaises(KeyboardInterrupt, worker.work)
         self.assertEqual(counter[0], 5)
@@ -124,11 +124,11 @@ class TestWorker(BaseTestCase):
     def test_work_multiple_queues(self):
         worker, queue_name = self._make_one()
         queue2 = worker.queuey_conn.create_queue()
-        self._post_message(worker, queue_name, u'queue1-1')
-        self._post_message(worker, queue_name, u'queue1-2')
-        self._post_message(worker, queue2, u'queue2-1')
-        self._post_message(worker, queue2, u'queue2-2')
-        self._post_message(worker, queue2, u'queue2-3')
+        self._post_message(worker, queue_name, 'queue1-1')
+        self._post_message(worker, queue_name, 'queue1-2')
+        self._post_message(worker, queue2, 'queue2-1')
+        self._post_message(worker, queue2, 'queue2-2')
+        self._post_message(worker, queue2, 'queue2-3')
         counter = [0]
 
         def job(message, context, counter=counter):
@@ -147,9 +147,9 @@ class TestWorker(BaseTestCase):
         worker.queuey_conn.create_queue()
         worker.queuey_conn.create_queue()
         queue2 = worker.queuey_conn.create_queue()
-        self._post_message(worker, queue_name, u'queue1-1')
-        self._post_message(worker, queue_name, u'queue1-2')
-        self._post_message(worker, queue2, u'queue2-1')
+        self._post_message(worker, queue_name, 'queue1-1')
+        self._post_message(worker, queue_name, 'queue1-2')
+        self._post_message(worker, queue2, 'queue2-1')
         counter = [0]
 
         def job(message, context, counter=counter):
@@ -167,12 +167,12 @@ class TestWorker(BaseTestCase):
         worker, queue_name = self._make_one()
         queuey_conn = worker.queuey_conn
         queue2 = queuey_conn.create_queue(partitions=3)
-        self._post_message(worker, queue_name, [u'1', u'2'])
+        self._post_message(worker, queue_name, ['1', '2'])
         # post messages to fill multiple partitions
         response = self._post_message(worker, queue2,
             ['%s' % i for i in xrange(8)])
-        partitions = set([m[u'partition'] for m in
-            ujson.decode(response.text)[u'messages']])
+        partitions = set([m['partition'] for m in
+            ujson.decode(response.text)['messages']])
         # messages ended up in different partitions
         self.assertTrue(len(partitions) > 1, partitions)
         counter = [0]
@@ -194,36 +194,36 @@ class TestWorker(BaseTestCase):
 
         @contextmanager
         def job_context(context=context):
-            context[u'counter'] = 0
-            context[u'errors'] = []
+            context['counter'] = 0
+            context['errors'] = []
             yield context
 
         def job(message, context):
-            context[u'counter'] += 1
-            if context[u'counter'] == 1:
-                raise ValueError(u'job failed')
+            context['counter'] += 1
+            if context['counter'] == 1:
+                raise ValueError('job failed')
             else:
                 raise KeyboardInterrupt
 
         def job_failure(message, context, name, exc, queuey_conn):
-            context[u'errors'].append(exc)
+            context['errors'].append(exc)
 
         worker.job = job
         worker.job_context = job_context
         worker.job_failure = job_failure
-        self._post_message(worker, queue_name, u'Fail')
-        self._post_message(worker, queue_name, u'Finish')
+        self._post_message(worker, queue_name, 'Fail')
+        self._post_message(worker, queue_name, 'Finish')
         self.assertRaises(KeyboardInterrupt, worker.work)
-        errors = context[u'errors']
+        errors = context['errors']
         self.assertEqual(len(errors), 1)
         self.assertTrue(isinstance(errors[0], ValueError))
-        self.assertEqual(errors[0].args, (u'job failed', ))
+        self.assertEqual(errors[0].args, ('job failed', ))
 
     def test_job_failure_save_handler(self):
         worker, queue_name = self._make_one(extra={
-            u'qdo-worker.job_failure': u'qdo.worker:save_failed_message'})
+            'qdo-worker.job_failure': 'qdo.worker:save_failed_message'})
         queue2 = worker.queuey_conn.create_queue(partitions=10)
-        self._post_message(worker, queue_name, [u'-1', u'-2'])
+        self._post_message(worker, queue_name, ['-1', '-2'])
         self._post_message(worker, queue2,
             ['%s' % i for i in xrange(20)])
         counter = [0]
@@ -231,7 +231,7 @@ class TestWorker(BaseTestCase):
         def job(message, context, counter=counter):
             counter[0] += 1
             if counter[0] <= 20:
-                raise ValueError(u'job failed: %s' % counter[0])
+                raise ValueError('job failed: %s' % counter[0])
             else:
                 raise KeyboardInterrupt
 
@@ -243,14 +243,14 @@ class TestWorker(BaseTestCase):
         failed_messages = worker.queuey_conn.messages(
             ERROR_QUEUE, partition=partition_spec)
         self.assertEqual(len(failed_messages), 20)
-        error_partitions = [m[u'partition'] for m in failed_messages]
+        error_partitions = [m['partition'] for m in failed_messages]
         # multiple error partitions are used, 20 messages aren't enough to
         # guarantee all 7 partitions get randomly selected
         self.assertTrue(len(set(error_partitions)) > 3)
-        failures = [ujson.decode(m[u'body']) for m in failed_messages]
+        failures = [ujson.decode(m['body']) for m in failed_messages]
         # the first 20 of 22 failures get saved, two random ones aren't
         # processed
-        data = set([int(f[u'body']) for f in failures])
+        data = set([int(f['body']) for f in failures])
         possible = set(xrange(-2, 20))
         self.assertTrue(data.issubset(possible))
 
@@ -264,17 +264,17 @@ class TestWorker(BaseTestCase):
         lasts = []
 
         def job(message, context):
-            if message[u'body'] == u'stop':
+            if message['body'] == 'stop':
                 raise KeyboardInterrupt
-            context.append(message[u'message_id'])
+            context.append(message['message_id'])
 
         for i in range(3):
             queue = queuey_conn.create_queue()
             queues.append(queue)
             worker, _ = self._make_one(extra={
-                u'qdo-worker.name': u'worker%s' % i,
-                u'partitions.policy': u'manual',
-                u'partitions.ids': [queue + u'-1'],
+                'qdo-worker.name': 'worker%s' % i,
+                'partitions.policy': 'manual',
+                'partitions.ids': [queue + '-1'],
             })
 
             @contextmanager
@@ -288,11 +288,11 @@ class TestWorker(BaseTestCase):
             workers.append(worker)
 
             self._post_message(worker, queue,
-                [u'%s' % i for i in xrange(11)])
-            response = self._post_message(worker, queue, u'last')
-            last = ujson.decode(response.text)[u'messages'][0][u'key']
+                ['%s' % i for i in xrange(11)])
+            response = self._post_message(worker, queue, 'last')
+            last = ujson.decode(response.text)['messages'][0]['key']
             lasts.append(last)
-            self._post_message(worker, queue, u'stop')
+            self._post_message(worker, queue, 'stop')
 
             event = threading.Event()
             events.append(event)
@@ -325,10 +325,10 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
 
     def _make_one(self, extra=None, queue=True):
         extra = {} if not extra else extra
-        extra[u'qdo-worker.wait_interval'] = 0
-        extra[u'zookeeper.connection'] = self.hosts
-        extra[u'zookeeper.party_wait'] = 0.5
-        extra[u'partitions.policy'] = u'automatic'
+        extra['qdo-worker.wait_interval'] = 0
+        extra['zookeeper.connection'] = self.hosts
+        extra['zookeeper.party_wait'] = 0.5
+        extra['partitions.policy'] = 'automatic'
         return _make_worker(self.queuey_app_key, extra=extra, queue=queue)
 
     def _post_message(self, worker, queue_name, data):
@@ -345,9 +345,9 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
                 raise KeyboardInterrupt
 
         worker.job = job
-        self._post_message(worker, queue_name, [u'1', u'2'])
+        self._post_message(worker, queue_name, ['1', '2'])
         self.assertRaises(KeyboardInterrupt, worker.work)
-        self.assertEqual([queue_name + u'-1'], list(worker.partitioner))
+        self.assertEqual([queue_name + '-1'], list(worker.partitioner))
 
     def test_multiple_workers(self):
         queuey_conn = self._queuey_conn
@@ -357,7 +357,7 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
         workers = []
 
         def job(message, context):
-            if message[u'body'] == u'stop':
+            if message['body'] == 'stop':
                 raise KeyboardInterrupt
 
         for i in range(3):
@@ -368,15 +368,15 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
         time.sleep(0.5)
         for i in range(3):
             worker, _ = self._make_one(extra={
-                u'qdo-worker.name': u'worker%s' % i}, queue=False)
+                'qdo-worker.name': 'worker%s' % i}, queue=False)
 
             worker.job = job
             workers.append(worker)
 
             self._post_message(worker, queues[i],
-                [u'%s' % j for j in xrange(20)])
+                ['%s' % j for j in xrange(20)])
             self._post_message(worker, queues[i],
-                [u'stop' for j in xrange(20)])
+                ['stop' for j in xrange(20)])
 
             event = threading.Event()
             events.append(event)
