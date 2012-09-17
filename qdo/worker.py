@@ -34,6 +34,7 @@ def dict_context():
 
 
 def _log_raven():
+    """Log exceptions using metlog-raven if it's configured."""
     logger = get_logger()
     raven = getattr(logger, 'raven', None)
     if raven is not None:
@@ -70,6 +71,7 @@ def save_failed_message(message, context, queue, exc, queuey_conn):
 
 
 def resolve(worker, section, name):
+    # resolve a resource specification and set it onto the worker
     if section[name]:
         mod, func_name = section[name].split(':')
         result = __import__(mod, globals(), locals(), func_name)
@@ -84,6 +86,9 @@ class StopWorker(Exception):
 
 
 class StaticPartitioner(object):
+    """A partitioner using a static set list. Basic API compatibility
+    with the `kazoo.recipe.SetPartitioner` is preserved.
+    """
 
     failed = False
     release = False
@@ -186,13 +191,12 @@ class Worker(object):
         queuey_conn = self.queuey_conn
         all_partitions = self.all_partitions()
         partition_ids = section.get('ids')
+        partitioner_class = StaticPartitioner
         if not partition_ids:
             partition_ids = all_partitions
         if policy == 'automatic':
             self.setup_zookeeper()
             partitioner_class = self.zk.SetPartitioner
-        else:
-            partitioner_class = StaticPartitioner
 
         partition_ids = [p for p in partition_ids if not
             p.startswith((ERROR_QUEUE, STATUS_QUEUE))]
@@ -267,8 +271,10 @@ class Worker(object):
                             with timer('worker.job_failure_time'):
                                 self.job_failure(message, context,
                                     name, exc, self.queuey_conn)
+                        # record successful message processing
                         partition.last_message = message_id
                     if no_messages == len(partitions):
+                        # if none of the partitions had a message, wait
                         self.wait(waited)
                         waited += 1
                     else:
