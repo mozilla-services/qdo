@@ -39,7 +39,7 @@ name
 
 ca_bundle
     Path to a private certificate used for SSL connections, in addition to all
-    officially signed ones.
+    officially signed ones, as trusted by the `certifi` distribution.
 
 wait_interval
     Interval in seconds for which the worker pauses if it has no messages to
@@ -73,7 +73,8 @@ ids
 connection
     Which :term:`Queuey` instance(s) to connect to. Defaults to
     `http://127.0.0.1:5000/v1/queuey/`. Multiple instances can be specified
-    as a comma separated list: `https://127.0.0.1:5001/v1/queuey/,https://localhost:5002/v1/queuey/`.
+    as a comma separated list:
+    `https://127.0.0.1:5001/v1/queuey/,https://localhost:5002/v1/queuey/`.
 
     If multiple servers are specified, one will be selected as default and
     the others serve as transparent fallback options. The selection prefers a
