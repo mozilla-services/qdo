@@ -48,7 +48,6 @@ setup(
     install_requires=[
         'kazoo',
         'metlog-py',
-        'metlog-raven',
         'queuey-py',
         'requests',
         'ujson',
