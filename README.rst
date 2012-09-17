@@ -14,7 +14,7 @@ qdo
 This is a Python implementation of a worker library used for processing
 queued messages from a Mozilla Services message queue. The message queue is
 called `Queuey <http://queuey.readthedocs.org/>`_ and is implemented as a
-:term:`Pyramid` based web service on top of :term:`Cassandra`.
+`Pyramid` based web service on top of `Cassandra`.
 
 Documentation
 =============
