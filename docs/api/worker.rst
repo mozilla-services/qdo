@@ -15,6 +15,12 @@ Functions
 .. autofunction:: save_failed_message
 
 
+Exceptions
+~~~~~~~~~~
+
+.. autoexception:: StopWorker
+
+
 Classes
 ~~~~~~~
 

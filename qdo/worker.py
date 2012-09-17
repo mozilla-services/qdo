@@ -77,6 +77,12 @@ def resolve(worker, section, name):
         setattr(worker, name, func)
 
 
+class StopWorker(Exception):
+    """An exception which causes the worker loop to shut down cleanly.
+    Especially useful in writing tests.
+    """
+
+
 class StaticPartitioner(object):
 
     failed = False
@@ -254,6 +260,9 @@ class Worker(object):
                         try:
                             with timer('worker.job_time'):
                                 self.job(message, context)
+                        except StopWorker:
+                            self.shutdown = True
+                            break
                         except Exception as exc:
                             with timer('worker.job_failure_time'):
                                 self.job_failure(message, context,

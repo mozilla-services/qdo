@@ -8,9 +8,8 @@ import os.path
 import time
 import xmlrpclib
 
-import supervisor
-
 from qdo import log
+from qdo.worker import StopWorker
 
 here = os.path.dirname(__file__)
 maindir = os.path.dirname(here)
@@ -21,7 +20,7 @@ processes = {}
 def example_job(message, context):
     body = message['body']
     if body == 'stop':
-        raise KeyboardInterrupt
+        raise StopWorker
     elif body == 'wait':
         time.sleep(0.01)
 

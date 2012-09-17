@@ -14,6 +14,7 @@ from qdo.config import ERROR_QUEUE
 from qdo.config import QdoSettings
 from qdo.config import STATUS_PARTITIONS
 from qdo.config import STATUS_QUEUE
+from qdo.worker import StopWorker
 from qdo.tests.base import BaseTestCase
 
 
@@ -68,11 +69,12 @@ class TestWorker(BaseTestCase):
         worker, queue_name = self._make_one()
 
         def job(message, context):
-            raise KeyboardInterrupt
+            raise StopWorker
 
         worker.job = job
         self._post_message(worker, queue_name, 'Hello')
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        worker.work()
+        self.assertTrue(worker.shutdown, True)
 
     def test_work_context(self):
         worker, queue_name = self._make_one()
@@ -90,14 +92,14 @@ class TestWorker(BaseTestCase):
         def job(message, context):
             context['counter'] += 1
             if message['body'] == 'end':
-                raise KeyboardInterrupt
+                raise StopWorker
 
         worker.job = job
         worker.job_context = job_context
 
         self._post_message(worker, queue_name, 'work')
         self._post_message(worker, queue_name, 'end')
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        worker.work()
         self.assertEqual(context['counter'], 2)
         self.assertEqual(context['done'], True)
 
@@ -110,7 +112,7 @@ class TestWorker(BaseTestCase):
             if counter[0] > 5:
                 raise ValueError
             if message['body'] == 'end':
-                raise KeyboardInterrupt
+                raise StopWorker
 
         worker.job = job
         for i in range(4):
@@ -118,7 +120,7 @@ class TestWorker(BaseTestCase):
         time.sleep(0.02)
         self._post_message(worker, queue_name, 'end')
 
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        worker.work()
         self.assertEqual(counter[0], 5)
 
     def test_work_multiple_queues(self):
@@ -134,12 +136,12 @@ class TestWorker(BaseTestCase):
         def job(message, context, counter=counter):
             counter[0] += 1
             if counter[0] == 5:
-                raise KeyboardInterrupt
+                raise StopWorker
             elif counter[0] > 5:
                 raise ValueError
 
         worker.job = job
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        worker.work()
         self.assertEqual(counter[0], 5)
 
     def test_work_multiple_empty_queues(self):
@@ -155,12 +157,12 @@ class TestWorker(BaseTestCase):
         def job(message, context, counter=counter):
             counter[0] += 1
             if counter[0] == 3:
-                raise KeyboardInterrupt
+                raise StopWorker
             elif counter[0] > 3:
                 raise ValueError
 
         worker.job = job
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        worker.work()
         self.assertEqual(counter[0], 3)
 
     def test_work_multiple_queues_and_partitions(self):
@@ -180,12 +182,12 @@ class TestWorker(BaseTestCase):
         def job(message, context, counter=counter):
             counter[0] += 1
             if counter[0] == 10:
-                raise KeyboardInterrupt
+                raise StopWorker
             elif counter[0] > 10:
                 raise ValueError
 
         worker.job = job
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        worker.work()
         self.assertEqual(counter[0], 10)
 
     def test_job_failure_handler(self):
@@ -203,7 +205,7 @@ class TestWorker(BaseTestCase):
             if context['counter'] == 1:
                 raise ValueError('job failed')
             else:
-                raise KeyboardInterrupt
+                raise StopWorker
 
         def job_failure(message, context, name, exc, queuey_conn):
             context['errors'].append(exc)
@@ -213,7 +215,7 @@ class TestWorker(BaseTestCase):
         worker.job_failure = job_failure
         self._post_message(worker, queue_name, 'Fail')
         self._post_message(worker, queue_name, 'Finish')
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        worker.work()
         errors = context['errors']
         self.assertEqual(len(errors), 1)
         self.assertTrue(isinstance(errors[0], ValueError))
@@ -233,10 +235,10 @@ class TestWorker(BaseTestCase):
             if counter[0] <= 20:
                 raise ValueError('job failed: %s' % counter[0])
             else:
-                raise KeyboardInterrupt
+                raise StopWorker
 
         worker.job = job
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        worker.work()
 
         partition_spec = ','.join(
             [unicode(i + 1) for i in range(STATUS_PARTITIONS)])
@@ -265,7 +267,7 @@ class TestWorker(BaseTestCase):
 
         def job(message, context):
             if message['body'] == 'stop':
-                raise KeyboardInterrupt
+                raise StopWorker
             context.append(message['message_id'])
 
         for i in range(3):
@@ -298,10 +300,7 @@ class TestWorker(BaseTestCase):
             events.append(event)
 
             def run(event):
-                try:
-                    worker.work()
-                except KeyboardInterrupt:
-                    pass
+                worker.work()
                 event.set()
 
             thread = threading.Thread(target=run, args=(event, ))
@@ -342,11 +341,11 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
         def job(message, context):
             counter[0] += 1
             if counter[0] > 1:
-                raise KeyboardInterrupt
+                raise StopWorker
 
         worker.job = job
         self._post_message(worker, queue_name, ['1', '2'])
-        self.assertRaises(KeyboardInterrupt, worker.work)
+        worker.work()
         self.assertEqual([queue_name + '-1'], list(worker.partitioner))
 
     def test_multiple_workers(self):
@@ -358,7 +357,7 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
 
         def job(message, context):
             if message['body'] == 'stop':
-                raise KeyboardInterrupt
+                raise StopWorker
 
         for i in range(3):
             queue = queuey_conn.create_queue(partitions=9)
@@ -382,10 +381,7 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
             events.append(event)
 
             def run(event):
-                try:
-                    worker.work()
-                except KeyboardInterrupt:
-                    pass
+                worker.work()
                 event.set()
 
             thread = threading.Thread(target=run, args=(event, ))
@@ -403,5 +399,4 @@ class TestKazooWorker(BaseTestCase, KazooTestHarness):
             self.assertTrue(len(partitions) > 3)
             all_partitions.extend(partitions)
 
-        self.assertEqual(len(all_partitions), 27)
         self.assertEqual(len(set(all_partitions)), 27)
